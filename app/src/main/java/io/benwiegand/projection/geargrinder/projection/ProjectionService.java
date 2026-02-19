@@ -12,23 +12,25 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Surface;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import io.benwiegand.projection.geargrinder.AccessibilityInputService;
 import io.benwiegand.projection.geargrinder.PrivdService;
 import io.benwiegand.projection.geargrinder.ProjectionActivity;
+import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.channel.InputChannel;
 import io.benwiegand.projection.geargrinder.coordinate.CoordinateTranslator;
 import io.benwiegand.projection.geargrinder.coordinate.InputEventConverter;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftServiceConnection;
+import io.benwiegand.projection.geargrinder.message.MessageBroker;
+import io.benwiegand.projection.geargrinder.privileged.PrivdIPCConnection;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.VideoPreset;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.InputChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.event.TouchEvent;
 import io.benwiegand.projection.libprivd.data.ActivityLaunchParams;
 import io.benwiegand.projection.libprivd.data.InjectMotionEventParams;
 
-public class ProjectionService implements InputEventConverter.ConvertedInputEventListener {
+public class ProjectionService implements InputEventConverter.ConvertedInputEventListener, IPCConnectionListener {
     private static final String TAG = ProjectionService.class.getSimpleName();
 
     private final VirtualDisplay virtualDisplay;
@@ -39,16 +41,19 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private AccessibilityInputService.ServiceBinder accessibilityInputServiceBinder = null;
     private ProjectionActivity.ActivityBinder projectionActivityBinder = null;
     private PrivdService.ServiceBinder privdServiceBinder = null;
+    private PrivdIPCConnection privd = null;
 
     private final Context context;
+    private final MessageBroker mb;
 
     private final CoordinateTranslator<TouchEvent.PointerLocation> projectionTouchCoordinateTranslator = CoordinateTranslator.createTouchEvent(
             x -> x + videoPreset.marginHorizontal() / 2,
             y -> y + videoPreset.marginVertical() / 2
     );
 
-    public ProjectionService(Context context) {
+    public ProjectionService(Context context, MessageBroker mb) {
         this.context = context;
+        this.mb = mb;
         DisplayManager dm = context.getSystemService(DisplayManager.class);
         virtualDisplay = dm.createVirtualDisplay(
                 "Geargrinder projection",
@@ -94,27 +99,36 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
     @Override
     public void onMotionEvent(InjectMotionEventParams params) {
-        getPrivd()
-                .map(privd -> privd.injectMotionEvent(params))
-                .ifPresent(sec -> sec
-                        .doOnResult(r -> {
-                            if (r) return;
-                            Log.w(TAG, "motion event result is false");
-                        })
-                        .doOnError(t -> Log.e(TAG, "failed to inject motion event", t))
-                        .callMeWhenDone());
+        privd.injectMotionEvent(params)
+                .doOnResult(r -> {
+                    if (r) return;
+                    Log.w(TAG, "motion event result is false");
+                })
+                .doOnError(t -> Log.e(TAG, "failed to inject motion event", t))
+                .callMeWhenDone();
     }
 
     private void onProjectionActivityConnected(ProjectionActivity.ActivityBinder binder) {
         binder.setMargins(videoPreset.marginHorizontal(), videoPreset.marginVertical());
     }
 
-    private void onPrivdConnected(PrivdService.ServiceBinder privd) {
+    @Override
+    public void onPrivdConnected(PrivdIPCConnection privd) {
+        this.privd = privd;
+
         Log.d(TAG, "launching projection activity");
         privd.launchActivity(new ActivityLaunchParams(
                 new ComponentName(context, ProjectionActivity.class),
                 virtualDisplay.getDisplay().getDisplayId()
         ));
+    }
+
+    @Override
+    public void onPrivdDisconnected() {
+        if (!mb.isAlive()) return;
+
+        Log.wtf(TAG, "privd connection lost, bailing");
+        mb.closeConnection();
     }
 
 
@@ -124,10 +138,6 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
     private Optional<ProjectionActivity.ActivityBinder> getProjectionBinder() {
         return Optional.ofNullable(projectionActivityBinder);
-    }
-
-    private Optional<PrivdService.ServiceBinder> getPrivd() {
-        return Optional.ofNullable(privdServiceBinder);
     }
 
     private final MakeshiftServiceConnection serviceConnection = new MakeshiftServiceConnection() {
@@ -142,13 +152,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
                 }
                 case PrivdService.ServiceBinder binder -> {
                     privdServiceBinder = binder;
-                    try {
-                        privdServiceBinder.addDaemonListener(connection -> onPrivdConnected(binder));
-                        privdServiceBinder.launchDaemon();
-                    } catch (IOException e) {
-                        // TODO
-                        Log.e(TAG, "failed to launch privd", e);
-                    }
+                    privdServiceBinder.addDaemonListener(ProjectionService.this);
                 }
                 default -> Log.wtf(TAG, "unhandled binder type", new RuntimeException());
             }

@@ -21,8 +21,8 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
-import io.benwiegand.projection.geargrinder.PrivdService;
 import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.privileged.PrivdIPCConnection;
 import io.benwiegand.projection.libprivd.data.ActivityLaunchParams;
 import io.benwiegand.projection.libprivd.data.InjectMotionEventParams;
 
@@ -32,7 +32,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private static final long SPLASH_SHOW_DURATION = 3000;
     private static final long SPLASH_ANIMATION_DURATION = 300;
 
-    private final PrivdService.ServiceBinder privd;
+    private final PrivdIPCConnection privd;
     private final VirtualActivityListener listener;
     private final VirtualDisplay virtualDisplay;
     private final int density;
@@ -49,7 +49,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public VirtualActivity(PrivdService.ServiceBinder privd, ComponentName componentName, ViewGroup parent, VirtualActivityListener listener) throws IOException, PackageManager.NameNotFoundException {
+    public VirtualActivity(PrivdIPCConnection privd, ComponentName componentName, ViewGroup parent, VirtualActivityListener listener) throws IOException, PackageManager.NameNotFoundException {
         this.privd = privd;
         this.listener = listener;
         density = parent.getResources().getDisplayMetrics().densityDpi;

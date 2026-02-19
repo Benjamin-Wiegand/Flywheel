@@ -19,14 +19,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBind;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBindCallback;
+import io.benwiegand.projection.geargrinder.privileged.PrivdIPCConnection;
 import io.benwiegand.projection.geargrinder.projection.VirtualActivity;
 import io.benwiegand.projection.geargrinder.util.UiUtil;
 
-public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, VirtualActivity.VirtualActivityListener {
+public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, VirtualActivity.VirtualActivityListener, IPCConnectionListener {
     private static final String TAG = ProjectionActivity.class.getSimpleName();
 
     private final ActivityBinder binder = new ActivityBinder();
@@ -34,7 +35,8 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
     private final List<VirtualActivity> virtualActivities = new ArrayList<>();
 
-    private PrivdService.ServiceBinder privdServiceBinder = null;   // use getPrivd()
+    private PrivdService.ServiceBinder privdServiceBinder = null;
+    private PrivdIPCConnection privd = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -96,21 +98,19 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
 
     private void launchActivity(ComponentName componentName) {
-        getPrivd().ifPresent(privd -> {
-            ViewGroup splitScreenLayout = findViewById(R.id.split_screen_layout);
-            try {
-                Log.i(TAG, "launching virtual activity: " + componentName);
+        ViewGroup splitScreenLayout = findViewById(R.id.split_screen_layout);
+        try {
+            Log.i(TAG, "launching virtual activity: " + componentName);
 
-                VirtualActivity virtualActivity = new VirtualActivity(privd, componentName, splitScreenLayout, this);
-                View view = virtualActivity.getRootView();
+            VirtualActivity virtualActivity = new VirtualActivity(privd, componentName, splitScreenLayout, this);
+            View view = virtualActivity.getRootView();
 
-                virtualActivities.add(virtualActivity);
+            virtualActivities.add(virtualActivity);
 
-                splitScreenLayout.addView(view, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1));
-            } catch (IOException | PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "failed to launch virtual activity", e);
-            }
-        });
+            splitScreenLayout.addView(view, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+        } catch (IOException | PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "failed to launch virtual activity", e);
+        }
     }
 
     private void launchActivity(String component) {
@@ -137,12 +137,20 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     }
 
     @Override
-    public IBinder onMakeshiftBind(Intent intent) {
-        return binder;
+    public void onPrivdConnected(PrivdIPCConnection connection) {
+        privd = connection;
     }
 
-    private Optional<PrivdService.ServiceBinder> getPrivd() {
-        return Optional.ofNullable(privdServiceBinder);
+    @Override
+    public void onPrivdDisconnected() {
+        if (isFinishing() || isDestroyed()) return;
+        Log.wtf(TAG, "privd connection lost, finishing");
+        finish();
+    }
+
+    @Override
+    public IBinder onMakeshiftBind(Intent intent) {
+        return binder;
     }
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
@@ -150,12 +158,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.i(TAG, "connected " + name.getShortClassName());
             privdServiceBinder = (PrivdService.ServiceBinder) service;
-            try {
-                privdServiceBinder.launchDaemon();
-            } catch (IOException e) {
-                // TODO
-                Log.e(TAG, "failed to launch privd", e);
-            }
+            privdServiceBinder.addDaemonListener(ProjectionActivity.this);
         }
 
         @Override

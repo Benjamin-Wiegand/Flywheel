@@ -59,7 +59,7 @@ public class ControlChannel implements MessageListener {
         this.mb = mb;
         this.tlsService = tlsService;
         this.controlListener = controlListener;
-        projectionService = new ProjectionService(context);
+        projectionService = new ProjectionService(context, mb);
 
         unencryptedParams = new MessageBroker.MessageSendParameters(CHANNEL_CONTROL, false, false);
         encryptedParams = new MessageBroker.MessageSendParameters(CHANNEL_CONTROL, true, false);

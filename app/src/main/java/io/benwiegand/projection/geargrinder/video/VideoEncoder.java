@@ -19,7 +19,7 @@ public class VideoEncoder {
     /**
      * minimum number of duplicate frames to send after video output stops changing
      */
-    private static final int MIN_DUPLICATE_FRAMES = 10;
+    private static final int MIN_DUPLICATE_FRAMES = 60;
 
     private static final boolean LOG_FRAME_SIZE_DEBUG = true;
 

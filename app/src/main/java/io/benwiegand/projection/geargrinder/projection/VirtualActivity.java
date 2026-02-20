@@ -33,6 +33,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private static final long SPLASH_ANIMATION_DURATION = 300;
 
     private final PrivdIPCConnection privd;
+    private final ComponentName componentName;
     private final VirtualActivityListener listener;
     private final VirtualDisplay virtualDisplay;
     private final int density;
@@ -51,6 +52,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     @SuppressLint("ClickableViewAccessibility")
     public VirtualActivity(PrivdIPCConnection privd, ComponentName componentName, ViewGroup parent, VirtualActivityListener listener) throws IOException, PackageManager.NameNotFoundException {
         this.privd = privd;
+        this.componentName = componentName;
         this.listener = listener;
         density = parent.getResources().getDisplayMetrics().densityDpi;
         Context context = parent.getContext();
@@ -103,6 +105,10 @@ public class VirtualActivity implements SurfaceHolder.Callback {
 
     public void destroy() {
         virtualDisplay.release();
+    }
+
+    public ComponentName getComponentName() {
+        return componentName;
     }
 
     private void showSplash(boolean animateIn) {

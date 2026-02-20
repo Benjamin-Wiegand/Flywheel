@@ -8,8 +8,10 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -17,23 +19,26 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBind;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.privileged.PrivdIPCConnection;
 import io.benwiegand.projection.geargrinder.projection.VirtualActivity;
+import io.benwiegand.projection.geargrinder.ui.AppDock;
 import io.benwiegand.projection.geargrinder.util.UiUtil;
 
-public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, VirtualActivity.VirtualActivityListener, IPCConnectionListener {
+public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, VirtualActivity.VirtualActivityListener, IPCConnectionListener, AppDock.AppDockListener {
     private static final String TAG = ProjectionActivity.class.getSimpleName();
 
     private final ActivityBinder binder = new ActivityBinder();
     private MakeshiftBind makeshiftBind;
 
-    private final List<VirtualActivity> virtualActivities = new ArrayList<>();
+    private final Map<ComponentName, VirtualActivity> virtualActivities = new HashMap<>();
+
+    private AppDock appDock;
 
     private PrivdService.ServiceBinder privdServiceBinder = null;
     private PrivdIPCConnection privd = null;
@@ -44,31 +49,30 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_projection);
 
-        findViewById(R.id.map_button).setOnClickListener(v ->
-                launchActivity("net.osmand.plus/.activities.MapActivity"));
 
-        findViewById(R.id.music_button).setOnClickListener(v ->
-                launchActivity("org.videolan.vlc/.gui.MainActivity"));
-
-        findViewById(R.id.app_picker_button).setOnClickListener(v ->
-                UiUtil.createActivityPickerDialog(this, R.string.launch_app, this::launchActivity).show());
-
-        findViewById(R.id.test_button).setOnClickListener(v -> {
-
+        findViewById(R.id.edit_layout_button).setOnClickListener(v -> {
             // temporarily show splash
-//            for (VirtualActivity virtualActivity : virtualActivities)
-//                virtualActivity.showSplash();
+            for (VirtualActivity virtualActivity : virtualActivities.values())
+                virtualActivity.showSplash();
+        });
+
+        findViewById(R.id.edit_layout_button).setOnLongClickListener(v -> {
+            if (virtualActivities.size() < 2) return false;
 
             // test swap
-            if (virtualActivities.size() >= 2) {
-                LinearLayout ll = findViewById(R.id.split_screen_layout);
-                View view = ll.getChildAt(0);
-                ll.removeView(view);
-                ll.addView(view);
-            }
-
-
+            LinearLayout ll = findViewById(R.id.split_screen_layout);
+            View view = ll.getChildAt(0);
+            ll.removeView(view);
+            ll.addView(view);
+            return true;
         });
+
+        appDock = new AppDock(findViewById(R.id.app_dock), this);
+        appDock.addApp(ComponentName.unflattenFromString("org.videolan.vlc/.gui.MainActivity"));
+//        appDock.addApp(ComponentName.unflattenFromString("org.videolan.vlc/.StartActivity"));
+        appDock.addApp(ComponentName.unflattenFromString("net.osmand.plus/.activities.MapActivity"));
+
+        findViewById(R.id.root).getViewTreeObserver().addOnGlobalLayoutListener(this::onGlobalLayout);
 
         makeshiftBind = new MakeshiftBind(this, new ComponentName(this, ProjectionActivity.class), this);
         bindService(new Intent(this, PrivdService.class), serviceConnection, BIND_AUTO_CREATE | BIND_IMPORTANT);
@@ -81,41 +85,94 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
         unbindService(serviceConnection);
 
-        for (VirtualActivity virtualActivity : virtualActivities)
+        for (VirtualActivity virtualActivity : virtualActivities.values())
             virtualActivity.destroy();
+        virtualActivities.clear();
 
         makeshiftBind.destroy();
+    }
+
+    public void onGlobalLayout() {
+        LinearLayout splitScreenLayout = findViewById(R.id.split_screen_layout);
+        splitScreenLayout.setOrientation(splitScreenLayout.getWidth() < splitScreenLayout.getHeight() ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
     }
 
     private void closeActivity(VirtualActivity virtualActivity) {
         runOnUiThread(() -> {
             ViewGroup splitScreenLayout = findViewById(R.id.split_screen_layout);
-            virtualActivities.remove(virtualActivity);
+            virtualActivities.remove(virtualActivity.getComponentName());
             splitScreenLayout.removeView(virtualActivity.getRootView());
             virtualActivity.destroy();
         });
     }
 
+    private void swapActivities(VirtualActivity a, VirtualActivity b) {
+        ViewGroup splitScreenLayout = findViewById(R.id.split_screen_layout);
+        int aIndex = splitScreenLayout.indexOfChild(a.getRootView());
+        int bIndex = splitScreenLayout.indexOfChild(b.getRootView());
+
+        splitScreenLayout.removeView(a.getRootView());
+        splitScreenLayout.removeView(b.getRootView());
+
+        if (bIndex > aIndex) {
+            splitScreenLayout.addView(b.getRootView(), aIndex);
+            splitScreenLayout.addView(a.getRootView(), bIndex);
+        } else {
+            splitScreenLayout.addView(a.getRootView(), bIndex);
+            splitScreenLayout.addView(b.getRootView(), aIndex);
+        }
+    }
+
 
     private void launchActivity(ComponentName componentName) {
+        if (virtualActivities.containsKey(componentName)) {
+            Log.d(TAG, "closing existing instance for relaunch");
+            closeActivity(virtualActivities.get(componentName));
+        }
+
         ViewGroup splitScreenLayout = findViewById(R.id.split_screen_layout);
         try {
             Log.i(TAG, "launching virtual activity: " + componentName);
 
             VirtualActivity virtualActivity = new VirtualActivity(privd, componentName, splitScreenLayout, this);
-            View view = virtualActivity.getRootView();
+            virtualActivities.put(componentName, virtualActivity);
 
-            virtualActivities.add(virtualActivity);
+            View rootView = virtualActivity.getRootView();
+            View splashView = rootView.findViewById(R.id.virtual_activity_splash);
 
-            splitScreenLayout.addView(view, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+            splashView.setOnLongClickListener(v -> rootView.startDragAndDrop(null, new View.DragShadowBuilder(rootView), virtualActivity, 0));
+
+            rootView.setOnDragListener((v, e) -> {
+                if (e.getLocalState() instanceof VirtualActivity dragTarget)
+                    return onVirtualActivityDragEvent(dragTarget, virtualActivity, e);
+                return false;
+            });
+
+            splitScreenLayout.addView(rootView, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 1));
         } catch (IOException | PackageManager.NameNotFoundException e) {
             Log.e(TAG, "failed to launch virtual activity", e);
         }
     }
 
-    private void launchActivity(String component) {
-        // TODO: remove this
-        launchActivity(ComponentName.unflattenFromString(component));
+    public boolean onVirtualActivityDragEvent(VirtualActivity dragTarget, VirtualActivity dropTarget, DragEvent event) {
+        return switch (event.getAction()) {
+            case DragEvent.ACTION_DRAG_ENTERED -> {
+                ImageView iconView = dropTarget.getRootView().findViewById(R.id.virtual_activity_icon);
+                iconView.setVisibility(View.INVISIBLE);
+                yield true;
+            }
+            case DragEvent.ACTION_DRAG_EXITED -> {
+                ImageView iconView = dropTarget.getRootView().findViewById(R.id.virtual_activity_icon);
+                iconView.setVisibility(View.VISIBLE);
+                yield true;
+            }
+            case DragEvent.ACTION_DROP -> {
+                if (dragTarget == dropTarget) yield false;
+                swapActivities(dragTarget, dropTarget);
+                yield true;
+            }
+            default -> true;
+        };
     }
 
     @Override
@@ -134,6 +191,19 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     @Override
     public void onVirtualActivityCloseButton(VirtualActivity virtualActivity) {
         closeActivity(virtualActivity);
+    }
+
+    @Override
+    public void onAppSelected(ComponentName componentName) {
+        launchActivity(componentName);
+    }
+
+    @Override
+    public void onAppDrawerSelected() {
+        UiUtil.createActivityPickerDialog(this, R.string.launch_app, componentName -> {
+            appDock.addApp(componentName);
+            launchActivity(componentName);
+        }).show();
     }
 
     @Override

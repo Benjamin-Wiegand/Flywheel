@@ -18,6 +18,7 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:background="?attr/colorBackgroundFloating"
+        android:clickable="true"
         >
 
         <ImageButton
@@ -40,8 +41,8 @@
 
             <ImageView
                 android:id="@+id/virtual_activity_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:src="@mipmap/ic_launcher"
                 tools:src="@mipmap/ic_launcher"
                 android:importantForAccessibility="no"

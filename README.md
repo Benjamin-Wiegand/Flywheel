@@ -4,6 +4,8 @@
 
 An Android Auto alternative for de-googled phones. Full protocol-level re-implementation from scratch.
 
+![picture of it running](https://ben.wiegand.pw/img/geargrinder-dev-notice-thumb.webp)
+
 ## warnings
 
 This is experimental software:

@@ -2,7 +2,7 @@
 > [!caution]
 > This is experimental software in active development. DO NOT USE WHILE DRIVING.
 
-An Android Auto alternative for de-googled phones.
+An Android Auto alternative for de-googled phones. Full protocol-level re-implementation from scratch.
 
 ## warnings
 
@@ -21,7 +21,7 @@ Still in development.
 > [!warning]
 > I have no idea how your car will react to communications from this app. Be prepared for unforeseen consequences.
 
-Only tested with emulators so far. Looking in to testing on OEM hardware soon (hopefully).
+Only working emulators and potentially some knockoff/uncertified headunits so far. Certified OEM headunits won't work until authentication is properly implemented and will likely require cryptographic keys to be provided.
 
 If you accept the risks and want to help by testing on your hardware, I would appreciate if you open an issue with the results (regardless of success).
 
@@ -35,13 +35,13 @@ Tested and working on these emulators:
 
 Launching the projection currently requires root for ease of development. This will change as the project matures.
 
-You should be able to use audio capture without root.
+You should be able to use audio capture/streaming without root.
 
 #### video
 
-Geargrinder uses the MediaCodec library for video and is subject to device-specific issues. Please report them if you encounter any.
+Geargrinder uses the MediaCodec library for video encoding. Please report any device-specific issues.
 
-Tested on:
+Tested and working on a select few devices from these platforms:
 - Qualcomm
 - Mediatek
 - Exynos
@@ -56,11 +56,21 @@ Currently, your phone must natively support the audio sample rate for your headu
 
 ### working
 - USB communication
+- Protocol communication
+    - Framing and multi-frame messages
+    - TLS encryption (auth is TODO)
+    - Service discovery (mostly)
 - Video
+    - H.264 at 480p, 720p, and 1080p, 30 and 60 fps (requires your phone to support the given mode)
 - Audio
-- Touch Input
-- Multitouch
+    - raw PCM audio (requires device support for sample rate and bit depth)
+- User input
+    - touch screen input (with multitouch)
+    - phone keyboard input
 - Basic UI
+    - open apps on the display
+    - split screen
+    - bar with quick-launch app icons and time
 
 
 ## thanks

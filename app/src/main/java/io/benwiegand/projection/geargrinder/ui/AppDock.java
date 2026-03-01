@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import java.util.HashMap;
 
 import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.callback.AppLauncherListener;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 
 public class AppDock {
@@ -25,8 +26,7 @@ public class AppDock {
 
     private final HashMap<ComponentName, View> dockItems = new HashMap<>();
 
-    public interface AppDockListener {
-        void onAppSelected(AppRecord app);
+    public interface AppDockListener extends AppLauncherListener {
         void onAppDrawerSelected();
     }
 

@@ -12,11 +12,15 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Pair;
 
+import androidx.annotation.StringRes;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import io.benwiegand.projection.geargrinder.R;
 
 public enum AppCategory {
     /**
@@ -38,6 +42,16 @@ public enum AppCategory {
      * apps which advertise AA/Automotive support
      */
     CAR_APP;
+    
+    @StringRes
+    public int getLabel() {
+        return switch (this) {
+            case FOCUSED -> R.string.category_focused_apps;
+            case NAVIGATION -> R.string.category_navigation;
+            case MEDIA -> R.string.category_media;
+            case CAR_APP -> R.string.category_car_apps;
+        };
+    }
 
     public static Set<AppCategory> getCategoriesForPackage(PackageManager pm, PackageInfo pkg, Set<CarFeature> carFeatures) {
         Set<AppCategory> categories = new HashSet<>();

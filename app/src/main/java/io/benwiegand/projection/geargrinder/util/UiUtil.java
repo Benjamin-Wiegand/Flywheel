@@ -5,12 +5,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +42,10 @@ public class UiUtil {
     public static int getDisplayId(Context context) {
         WindowManager wm = context.getSystemService(WindowManager.class);
         return wm.getDefaultDisplay().getDisplayId();   // actually the current display, not default
+    }
+
+    public static float dpToPx(Context context, float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
     }
 
     public static AlertDialog createActivityPickerDialog(Context context, @StringRes int title, Consumer<ComponentName> onResult) {

@@ -27,5 +27,10 @@
     <string name="experimental_app_warning">EXPERIMENTAL. DO NOT USE WHILE DRIVING.</string>
     <string name="keyguard_modal_title">Phone locked</string>
     <string name="keyguard_modal_instructions">For security, please unlock your device to continue.</string>
+    <string name="category_focused_apps">Recommended</string>
+    <string name="category_navigation">Navigation</string>
+    <string name="category_media">Media</string>
+    <string name="category_car_apps">Car Apps</string>
+    <string name="category_all_apps">All Apps</string>
 
 </resources>

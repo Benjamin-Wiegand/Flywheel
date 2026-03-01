@@ -55,6 +55,14 @@
                 android:orientation="horizontal"
                 />
 
+            <include
+                android:id="@+id/app_drawer"
+                layout="@layout/layout_app_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                />
+
         </FrameLayout>
 
         <LinearLayout

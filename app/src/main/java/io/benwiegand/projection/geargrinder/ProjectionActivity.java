@@ -32,8 +32,8 @@ import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.VirtualActivity;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
 import io.benwiegand.projection.geargrinder.ui.AppDock;
+import io.benwiegand.projection.geargrinder.ui.AppDrawer;
 import io.benwiegand.projection.geargrinder.ui.ProjectionModal;
-import io.benwiegand.projection.geargrinder.util.UiUtil;
 import io.benwiegand.projection.libprivd.IPrivd;
 
 public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, VirtualActivity.VirtualActivityListener, IPCConnectionListener, AppDock.AppDockListener, GeargrinderServiceConnector.ConnectionListener {
@@ -50,6 +50,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private final Map<ComponentName, VirtualActivity> virtualActivities = new HashMap<>();
 
     private AppDock appDock;
+    private AppDrawer appDrawer;
 
     private GeargrinderServiceConnector connector;
     private IPrivd privd = null;
@@ -77,11 +78,6 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
             ll.addView(view);
             return true;
         });
-
-        appDock = new AppDock(findViewById(R.id.app_dock), this);
-
-        findViewById(R.id.root).getViewTreeObserver().addOnGlobalLayoutListener(this::onGlobalLayout);
-
 
         // screen lock
         // only do this on init so the device can be re-locked (like AA)
@@ -116,6 +112,14 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
         }
 
+        // components
+        appDock = new AppDock(findViewById(R.id.app_dock), this);
+        appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
+
+        // layout updates
+        findViewById(R.id.root).getViewTreeObserver().addOnGlobalLayoutListener(this::onGlobalLayout);
+
+        // binds
         connector = new GeargrinderServiceConnector(TAG, this, this);
         connector.bindPrivdService(BIND_AUTO_CREATE | BIND_IMPORTANT);
         connector.bindPackageService(BIND_AUTO_CREATE | BIND_IMPORTANT);
@@ -225,20 +229,13 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
     @Override
     public void onAppSelected(AppRecord app) {
+        appDrawer.close();
         launchActivity(app);
     }
 
     @Override
     public void onAppDrawerSelected() {
-        UiUtil.createActivityPickerDialog(this, R.string.launch_app, componentName -> {
-            // TODO: proper app drawer
-            connector.getPackageBinder()
-                    .map(binder -> binder.getApp(componentName.getPackageName()))
-                    .ifPresent(app -> {
-                        appDock.addApp(app);
-                        launchActivity(app);
-                    });
-        }).show();
+        appDrawer.toggle();
     }
 
     @Override
@@ -248,6 +245,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
     @Override
     public void onPackageServiceConnected(PackageService.ServiceBinder binder) {
+        appDrawer.setPackageBinder(binder);
         binder.registerListener(b -> b.getAppsFor(AppCategory.FOCUSED)
                 .forEach(appDock::addApp));
     }

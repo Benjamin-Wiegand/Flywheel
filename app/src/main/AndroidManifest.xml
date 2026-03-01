@@ -22,7 +22,7 @@
         android:theme="@style/Theme.Geargrinder">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".DebugActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             >

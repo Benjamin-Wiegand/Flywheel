@@ -16,8 +16,8 @@ import io.benwiegand.projection.geargrinder.proto.data.readable.av.VideoChannelM
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.VideoPreset;
 import io.benwiegand.projection.geargrinder.proto.data.writable.av.AVSetupRequest;
 import io.benwiegand.projection.geargrinder.proto.data.writable.av.AVStartIndication;
-import io.benwiegand.projection.geargrinder.video.FrameRateCounter;
-import io.benwiegand.projection.geargrinder.video.VideoEncoder;
+import io.benwiegand.projection.geargrinder.projection.video.FrameRateCounter;
+import io.benwiegand.projection.geargrinder.projection.video.VideoEncoder;
 
 public class VideoChannel extends AVChannel<VideoPreset> {
     private static final String TAG = VideoChannel.class.getSimpleName();

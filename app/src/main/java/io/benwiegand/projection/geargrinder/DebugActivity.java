@@ -25,8 +25,8 @@ import java.io.IOException;
 import io.benwiegand.projection.geargrinder.logs.LogUiAdapter;
 import io.benwiegand.projection.geargrinder.logs.LogcatReader;
 
-public class MainActivity extends AppCompatActivity {
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class DebugActivity extends AppCompatActivity {
+    private static final String TAG = DebugActivity.class.getSimpleName();
 
     private LogcatReader logcatReader;
 
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_debug);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);

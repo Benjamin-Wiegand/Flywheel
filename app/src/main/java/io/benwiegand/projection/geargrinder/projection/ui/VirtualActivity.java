@@ -1,4 +1,4 @@
-package io.benwiegand.projection.geargrinder.projection;
+package io.benwiegand.projection.geargrinder.projection.ui;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;

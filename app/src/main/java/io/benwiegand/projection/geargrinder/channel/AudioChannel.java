@@ -9,7 +9,7 @@ import android.util.Log;
 
 import java.util.Arrays;
 
-import io.benwiegand.projection.geargrinder.audio.AudioCapture;
+import io.benwiegand.projection.geargrinder.projection.audio.AudioCapture;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.AudioChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.AudioPreset;

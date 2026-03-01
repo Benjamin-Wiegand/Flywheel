@@ -1,4 +1,4 @@
-package io.benwiegand.projection.geargrinder.coordinate;
+package io.benwiegand.projection.geargrinder.projection.input;
 
 import android.view.MotionEvent;
 

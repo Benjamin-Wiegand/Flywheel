@@ -16,7 +16,7 @@ import android.view.accessibility.AccessibilityEvent;
 import java.util.concurrent.CountDownLatch;
 
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBind;
-import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBindCallback;
+import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.event.TouchEvent;
 
 @SuppressLint("AccessibilityPolicy")

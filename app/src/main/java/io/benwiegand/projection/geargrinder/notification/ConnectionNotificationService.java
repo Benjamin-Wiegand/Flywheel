@@ -1,4 +1,4 @@
-package io.benwiegand.projection.geargrinder;
+package io.benwiegand.projection.geargrinder.notification;
 
 import static android.app.Service.STOP_FOREGROUND_DETACH;
 import static android.app.Service.STOP_FOREGROUND_REMOVE;
@@ -14,6 +14,9 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
+
+import io.benwiegand.projection.geargrinder.DebugActivity;
+import io.benwiegand.projection.geargrinder.R;
 
 public class ConnectionNotificationService {
     private static final String TAG = ConnectionNotificationService.class.getSimpleName();
@@ -93,7 +96,7 @@ public class ConnectionNotificationService {
         initErrorNotificationChannel();
 
         // TODO: error activity
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, DebugActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
@@ -111,7 +114,7 @@ public class ConnectionNotificationService {
     private void updateForegroundNotification() {
         initForegroundNotificationChannel();
 
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, DebugActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new Notification.Builder(context, FOREGROUND_NOTIFICATION_CHANNEL)

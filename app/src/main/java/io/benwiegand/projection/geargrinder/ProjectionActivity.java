@@ -26,14 +26,14 @@ import java.util.Map;
 
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBind;
-import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBindCallback;
+import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.pm.AppCategory;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
-import io.benwiegand.projection.geargrinder.projection.VirtualActivity;
+import io.benwiegand.projection.geargrinder.projection.ui.VirtualActivity;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
-import io.benwiegand.projection.geargrinder.ui.AppDock;
-import io.benwiegand.projection.geargrinder.ui.AppDrawer;
-import io.benwiegand.projection.geargrinder.ui.ProjectionModal;
+import io.benwiegand.projection.geargrinder.projection.ui.AppDock;
+import io.benwiegand.projection.geargrinder.projection.ui.AppDrawer;
+import io.benwiegand.projection.geargrinder.projection.ui.ProjectionModal;
 import io.benwiegand.projection.libprivd.IPrivd;
 
 public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, VirtualActivity.VirtualActivityListener, IPCConnectionListener, AppDock.AppDockListener, GeargrinderServiceConnector.ConnectionListener {

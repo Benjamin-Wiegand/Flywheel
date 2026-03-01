@@ -16,7 +16,7 @@ import java.util.Arrays;
 import javax.net.ssl.SSLException;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
-import io.benwiegand.projection.geargrinder.audio.AudioRecordCapture;
+import io.benwiegand.projection.geargrinder.projection.audio.AudioRecordCapture;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.callback.MessageListener;

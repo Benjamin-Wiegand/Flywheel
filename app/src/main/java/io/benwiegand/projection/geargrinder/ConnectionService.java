@@ -32,6 +32,7 @@ import io.benwiegand.projection.geargrinder.crypto.KeystoreManager;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
 import io.benwiegand.projection.geargrinder.message.AAFrame;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
+import io.benwiegand.projection.geargrinder.notification.ConnectionNotificationService;
 import io.benwiegand.projection.geargrinder.protocol.AAConstants;
 import io.benwiegand.projection.geargrinder.callback.ControlListener;
 import io.benwiegand.projection.geargrinder.channel.ControlChannel;

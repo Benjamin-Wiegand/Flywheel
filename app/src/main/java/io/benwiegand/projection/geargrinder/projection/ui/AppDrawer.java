@@ -1,4 +1,4 @@
-package io.benwiegand.projection.geargrinder.ui;
+package io.benwiegand.projection.geargrinder.projection.ui;
 
 import static io.benwiegand.projection.geargrinder.util.UiUtil.dpToPx;
 

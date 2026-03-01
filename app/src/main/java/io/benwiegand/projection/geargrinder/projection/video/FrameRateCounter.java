@@ -1,4 +1,4 @@
-package io.benwiegand.projection.geargrinder.video;
+package io.benwiegand.projection.geargrinder.projection.video;
 
 import android.os.SystemClock;
 

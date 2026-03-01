@@ -1,4 +1,4 @@
-package io.benwiegand.projection.geargrinder.audio;
+package io.benwiegand.projection.geargrinder.projection.audio;
 
 public interface AudioCapture {
 

@@ -14,6 +14,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
+
 // TODO: LocalBroadcastManager is deprecated
 /**
  * a recreation of the binder api for services that don't support the binder api.

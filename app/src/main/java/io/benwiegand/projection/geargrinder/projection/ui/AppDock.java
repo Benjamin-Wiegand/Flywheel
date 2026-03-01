@@ -1,4 +1,4 @@
-package io.benwiegand.projection.geargrinder.ui;
+package io.benwiegand.projection.geargrinder.projection.ui;
 
 import static io.benwiegand.projection.geargrinder.util.UiUtil.getViewBoundsInDisplay;
 
@@ -17,7 +17,6 @@ import java.util.HashMap;
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.callback.AppLauncherListener;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
-import io.benwiegand.projection.geargrinder.projection.VirtualActivity;
 
 public class AppDock {
     private static final String TAG = AppDock.class.getSimpleName();

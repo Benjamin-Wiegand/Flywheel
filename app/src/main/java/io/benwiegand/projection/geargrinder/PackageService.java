@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.icu.text.Collator;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
@@ -24,17 +23,19 @@ import java.util.function.Consumer;
 import io.benwiegand.projection.geargrinder.data.EnumCategoryLookup;
 import io.benwiegand.projection.geargrinder.pm.AppCategory;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
+import io.benwiegand.projection.geargrinder.thread.ResourceLoaderThread;
 
 public class PackageService extends Service {
     private static final String TAG = PackageService.class.getSimpleName();
 
+    private static final long UPDATE_THREAD_KEEPALIVE_TIMEOUT = -1;
+
     private static final float PACKAGE_NAME_LOOKUP_LOAD_FACTOR = 0.75f; // default load factor
 
-    // TODO: handler might not be the best for this
-    private final HandlerThread updateHandlerThread = new HandlerThread("geargrinder-pkg-scan");
-    private final Handler updateHandler;
     private final Handler callbackHandler = new Handler(Looper.getMainLooper());
     private final ServiceBinder binder = new ServiceBinder();
+
+    private final ResourceLoaderThread updateThread = new ResourceLoaderThread(callbackHandler, UPDATE_THREAD_KEEPALIVE_TIMEOUT);
 
     private final Object appListUpdateLock = new Object();
     private List<AppRecord> allApps = List.of();
@@ -49,11 +50,6 @@ public class PackageService extends Service {
         void onPackageListUpdated(ServiceBinder binder);
     }
 
-    public PackageService() {
-        updateHandlerThread.start();
-        updateHandler = new Handler(updateHandlerThread.getLooper());
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -65,7 +61,7 @@ public class PackageService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-        updateHandlerThread.quit();
+        updateThread.destroy();
     }
 
     @Nullable
@@ -75,7 +71,7 @@ public class PackageService extends Service {
     }
 
     private void callListeners(Consumer<PackageServiceListener> consumer) {
-        callbackHandler.post(() -> {
+        Runnable r = () -> {
             synchronized (listeners) {
                 for (PackageServiceListener listener : listeners) {
                     try {
@@ -85,59 +81,62 @@ public class PackageService extends Service {
                     }
                 }
             }
-        });
+        };
+
+        if (callbackHandler.getLooper() == Looper.myLooper()) r.run();
+        else callbackHandler.post(r);
     }
 
     private void rebuildAppList() {
-        updateHandler.post(() -> {
-            Log.i(TAG, "building app list");
+        updateThread.execute(
+                () -> {
+                    Log.i(TAG, "building app list");
 
-            try {
-                PackageManager pm = getPackageManager();
-                List<PackageInfo> packages = pm.getInstalledPackages(PackageManager.MATCH_ALL);
+                    PackageManager pm = getPackageManager();
+                    List<PackageInfo> packages = pm.getInstalledPackages(PackageManager.MATCH_ALL);
 
-                List<AppRecord> newApps = new ArrayList<>(packages.size());
-                EnumCategoryLookup<AppCategory, AppRecord> newCategoryLookup = new EnumCategoryLookup<>(AppCategory.class);
-                Map<String, AppRecord> newPackageNameLookup = new HashMap<>(packages.size(), PACKAGE_NAME_LOOKUP_LOAD_FACTOR);
+                    List<AppRecord> newApps = new ArrayList<>(packages.size());
+                    EnumCategoryLookup<AppCategory, AppRecord> newCategoryLookup = new EnumCategoryLookup<>(AppCategory.class);
+                    Map<String, AppRecord> newPackageNameLookup = new HashMap<>(packages.size(), PACKAGE_NAME_LOOKUP_LOAD_FACTOR);
 
-                Collator collator = Collator.getInstance();
-                packages.stream()
-                        .map(pkg -> AppRecord.createForPackage(pm, pkg.packageName))
-                        .filter(Objects::nonNull)
-                        .sorted((a, b) -> collator.compare(a.label(pm), b.label(pm)))
-                        .forEachOrdered(app -> {
-                            newApps.add(app);
-                            newPackageNameLookup.put(app.packageName(), app);
-                            for (AppCategory category : app.categories())
-                                newCategoryLookup.add(category, app);
-                        });
+                    Collator collator = Collator.getInstance();
+                    packages.stream()
+                            .map(pkg -> AppRecord.createForPackage(pm, pkg.packageName))
+                            .filter(Objects::nonNull)
+                            .sorted((a, b) -> collator.compare(a.label(pm), b.label(pm)))
+                            .forEachOrdered(app -> {
+                                newApps.add(app);
+                                newPackageNameLookup.put(app.packageName(), app);
+                                for (AppCategory category : app.categories())
+                                    newCategoryLookup.add(category, app);
+                            });
 
-                synchronized (appListUpdateLock) {
-                    newCategoryLookup.makeImmutable();
+                    synchronized (appListUpdateLock) {
+                        newCategoryLookup.makeImmutable();
 
-                    allApps = List.copyOf(newApps);
-                    categoryLookup = newCategoryLookup;
-                    packageNameLookup = Map.copyOf(newPackageNameLookup);
+                        allApps = List.copyOf(newApps);
+                        categoryLookup = newCategoryLookup;
+                        packageNameLookup = Map.copyOf(newPackageNameLookup);
 
-                    Log.i(TAG, "app list update completed");
-                    Log.d(TAG, "total apps: " + allApps.size());
-                    for (AppCategory category : AppCategory.values()) {
-                        Log.d(TAG, " - " + category + " apps: " + categoryLookup.size(category));
-                        for (AppRecord app : categoryLookup.get(category)) {
-                            Log.d(TAG, "    - " + app.label(pm) + " (" + app + ")");
+                        Log.i(TAG, "app list update completed");
+                        Log.d(TAG, "total apps: " + allApps.size());
+                        for (AppCategory category : AppCategory.values()) {
+                            Log.d(TAG, " - " + category + " apps: " + categoryLookup.size(category));
+                            for (AppRecord app : categoryLookup.get(category)) {
+                                Log.d(TAG, "    - " + app.label(pm) + " (" + app + ")");
+                            }
                         }
+
+                        appListReady = true;
                     }
 
-                    appListReady = true;
-                    callListeners(l -> l.onPackageListUpdated(binder));
-                }
-
-
-            } catch (Throwable t) {
-                Log.wtf(TAG, "failed to update app list", t);
-                throw t;
-            }
-        });
+                    return null;
+                },
+                r -> callListeners(l -> l.onPackageListUpdated(binder)),
+                t -> {
+                    Log.wtf(TAG, "failed to update app list", t);
+                    assert false;
+                });
     }
 
     public class ServiceBinder extends Binder {

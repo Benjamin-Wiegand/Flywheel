@@ -43,6 +43,11 @@ public class ResourceLoaderThread {
 
     private boolean dead = false;
 
+    /**
+     * constructs a new resource loader thread
+     * @param callbackExecutor executor to execute callbacks with
+     * @param keepaliveTimeout if non-zero and positive, this is the number of milliseconds to stay alive while doing nothing. if 0, will wait indefinitely. if negative, will exit immediately when there is no more work.
+     */
     public ResourceLoaderThread(Executor callbackExecutor, long keepaliveTimeout) {
         this.callbackExecutor = callbackExecutor;
         this.keepaliveTimeout = keepaliveTimeout;
@@ -84,6 +89,8 @@ public class ResourceLoaderThread {
 
     private boolean waitForNextLocked() {
         if (!requestQueue.isEmpty()) return true;
+        if (keepaliveTimeout < 0) return false;
+
         try {
             lock.wait(keepaliveTimeout);
         } catch (InterruptedException e) {

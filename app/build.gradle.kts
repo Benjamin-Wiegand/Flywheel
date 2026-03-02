@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.bouncycastle)
     implementation(libs.localbroadcastmanager)
+    implementation(libs.preference)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

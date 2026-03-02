@@ -22,7 +22,7 @@
         android:theme="@style/Theme.Geargrinder">
 
         <activity
-            android:name=".DebugActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             >
@@ -32,6 +32,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/settings_title"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            />
+
+        <activity
+            android:name=".DebugActivity"
+            android:label="@string/debug_title"
+            android:exported="true"
+            android:launchMode="singleInstance"
+            />
 
         <activity
             android:name=".ConnectionRequestActivity"

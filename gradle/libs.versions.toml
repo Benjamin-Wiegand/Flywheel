@@ -7,6 +7,7 @@ appcompat = "1.7.1"
 material = "1.13.0"
 bouncycastle = "1.45"
 localbroadcastmanager = "1.1.0"
+preference = "1.2.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -16,6 +17,7 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 bouncycastle = { group = "org.bouncycastle", name = "bcprov-jdk16", version.ref = "bouncycastle" }
 localbroadcastmanager = { group = "androidx.localbroadcastmanager", name = "localbroadcastmanager", version.ref = "localbroadcastmanager" }
+preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

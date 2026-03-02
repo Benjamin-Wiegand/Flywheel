@@ -32,5 +32,10 @@
     <string name="category_media">Media</string>
     <string name="category_car_apps">Car Apps</string>
     <string name="category_all_apps">All Apps</string>
+    <string name="debug_button">Debug</string>
+    <string name="settings_button">Settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="debug_title">Debug</string>
+    <string name="connect_your_car_over_usb">Connect your car over USB to start Geargrinder.</string>
 
 </resources>

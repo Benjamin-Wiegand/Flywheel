@@ -18,6 +18,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        aidl = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -41,6 +45,8 @@ dependencies {
     implementation(libs.bouncycastle)
     implementation(libs.localbroadcastmanager)
     implementation(libs.preference)
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

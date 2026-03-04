@@ -2,6 +2,35 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <PreferenceCategory
+        app:title="operations"
+        app:iconSpaceReserved="false"
+        >
+
+        <!-- TODO: set to no_root by default when that's implemented -->
+        <ListPreference
+            app:key="@string/key_privilege_mode"
+            app:iconSpaceReserved="false"
+            app:title="@string/privilege_mode_pref_name"
+            app:entries="@array/privilege_mode_entries"
+            app:entryValues="@array/privilege_mode_values"
+            app:defaultValue="@string/privilege_mode_root"
+            app:useSimpleSummaryProvider="true"
+            />
+
+        <!-- TODO: implement -->
+        <ListPreference
+            app:key="@string/key_operational_mode"
+            app:iconSpaceReserved="false"
+            app:title="@string/operational_mode_pref_name"
+            app:entries="@array/operational_mode_entries"
+            app:entryValues="@array/operational_mode_values"
+            app:defaultValue="@string/operational_mode_screen_mirroring"
+            app:useSimpleSummaryProvider="true"
+            app:isPreferenceVisible="false"
+            />
+
+    </PreferenceCategory>
 
 
 </PreferenceScreen>

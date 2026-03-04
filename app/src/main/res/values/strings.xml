@@ -37,5 +37,11 @@
     <string name="settings_title">Settings</string>
     <string name="debug_title">Debug</string>
     <string name="connect_your_car_over_usb">Connect your car over USB to start Geargrinder.</string>
+    <string name="privilege_mode_pref_name">Privilege mode</string>
+    <string name="operational_mode_pref_name">Operational mode</string>
+    <string name="shizuku_permission_request">Shizuku permission</string>
+    <string name="shizuku_permission_rationale">Shizuku is used to access system APIs for a better user experience. Things like creating trusted virtual displays, injecting input events into said displays, etc.</string>
+    <string name="shizuku_not_running">Unable to connect to Shizuku, is Shizuku running?</string>
+    <string name="shizuku_too_old">Please update Shizuku.</string>
 
 </resources>

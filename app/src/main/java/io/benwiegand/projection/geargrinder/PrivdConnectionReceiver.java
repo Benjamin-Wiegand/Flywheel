@@ -15,7 +15,8 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.Arrays;
 
-import io.benwiegand.projection.geargrinder.privileged.RootPrivdLauncher;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
+import io.benwiegand.projection.geargrinder.privileged.PrivdLauncher;
 
 public class PrivdConnectionReceiver extends BroadcastReceiver {
     private static final String TAG = PrivdConnectionReceiver.class.getSimpleName();
@@ -31,8 +32,12 @@ public class PrivdConnectionReceiver extends BroadcastReceiver {
         if (suppliedToken == null) return;
         if (suppliedToken.length != TOKEN_LENGTH) return;
 
+        SettingsManager settings = new SettingsManager(context);
+        PrivdLauncher launcher = PrivdLauncher.createForPrivilegeMode(settings.getPrivilegeMode(), context);
+        if (launcher == null) return;
+
         try {
-            byte[] token = RootPrivdLauncher.readToken(context);
+            byte[] token = launcher.readToken();
             if (token == null) return;
             if (!Arrays.equals(token, suppliedToken)) return;
         } catch (IOException e) {

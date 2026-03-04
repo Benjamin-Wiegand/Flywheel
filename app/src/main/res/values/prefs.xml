@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="privilege_mode_entries">
+<!--        <item>no root</item>-->
+        <item>Shizuku</item>
+        <item>root</item>
+    </string-array>
+
+    <string-array name="operational_mode_entries">
+        <item>audio only</item>
+        <item>screen mirroring</item>
+        <item>Geargrinder UI</item>
+    </string-array>
+
+    <string-array translatable="false" name="privilege_mode_values">
+<!--        <item>@string/privilege_mode_no_root</item>-->
+        <item>@string/privilege_mode_shizuku</item>
+        <item>@string/privilege_mode_root</item>
+    </string-array>
+
+    <string-array translatable="false" name="operational_mode_values">
+        <item>@string/operational_mode_audio_only</item>
+        <item>@string/operational_mode_screen_mirroring</item>
+        <item>@string/operational_mode_geargrinder_projection</item>
+    </string-array>
+
+    <string translatable="false" name="operational_mode_audio_only">audio_only</string>
+    <string translatable="false" name="operational_mode_screen_mirroring">screen_mirroring</string>
+    <string translatable="false" name="operational_mode_geargrinder_projection">geargrinder_projection</string>
+
+    <string translatable="false" name="privilege_mode_no_root">no_root</string>
+    <string translatable="false" name="privilege_mode_shizuku">shizuku</string>
+    <string translatable="false" name="privilege_mode_root">root</string>
+
+    <string translatable="false" name="key_privilege_mode">privilege_mode</string>
+    <string translatable="false" name="key_operational_mode">operational_mode</string>
+</resources>

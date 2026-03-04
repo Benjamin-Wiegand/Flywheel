@@ -1,8 +1,10 @@
 package io.benwiegand.projection.geargrinder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.media.projection.MediaProjectionConfig;
@@ -17,10 +19,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import rikka.shizuku.Shizuku;
+
 public class ConnectionRequestActivity extends AppCompatActivity {
     private static final String TAG = ConnectionRequestActivity.class.getSimpleName();
 
     public static final String INTENT_ACTION_REQUEST_MEDIA_PROJECTION = "io.benwiegand.projection.geargrinder.REQUEST_MEDIA_PROJECTION";
+    public static final String INTENT_ACTION_REQUEST_SHIZUKU = "io.benwiegand.projection.geargrinder.REQUEST_SHIZUKU";
 
     private static final String INTENT_ACTION_USB_PERMISSION_RESULT = "io.benwiegand.projection.geargrinder.USB_PERMISSION";
 
@@ -29,7 +34,16 @@ public class ConnectionRequestActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(new View(this));
+
+        Shizuku.addRequestPermissionResultListener(this::onShizukuPermissionResult);
+
         onIntent(getIntent());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Shizuku.removeRequestPermissionResultListener(this::onShizukuPermissionResult);
     }
 
     @Override
@@ -86,6 +100,45 @@ public class ConnectionRequestActivity extends AppCompatActivity {
                 requestMediaProjection();
                 return; // not done yet
             }
+            case INTENT_ACTION_REQUEST_SHIZUKU -> {
+                if (Shizuku.isPreV11()) {
+                    Log.e(TAG, "shizuku app too old");
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.shizuku_permission_request)
+                            .setMessage(R.string.shizuku_too_old)
+                            .setPositiveButton(R.string.close_button, (d, i) -> finish())
+                            .setCancelable(false)
+                            .show();
+                    return;
+                }
+
+                if (Shizuku.getBinder() == null) {
+                    Log.e(TAG, "shizuku binder is null. is shizuku running?");
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.shizuku_permission_request)
+                            .setMessage(R.string.shizuku_not_running)
+                            .setPositiveButton(R.string.close_button, (d, i) -> finish())
+                            .setCancelable(false)
+                            .show();
+                    return;
+                }
+
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "shizuku already granted: uid = " + Shizuku.getUid());
+                    finish();
+                } else if (Shizuku.shouldShowRequestPermissionRationale()) {
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.shizuku_permission_request)
+                            .setMessage(R.string.shizuku_permission_rationale)
+                            .setPositiveButton(R.string.grant_permission_button, (d, i) ->
+                                    Shizuku.requestPermission(69))
+                            .setNegativeButton(R.string.not_now_button, (d, i) -> finish())
+                            .setCancelable(false)
+                            .show();
+                } else {
+                    Shizuku.requestPermission(69);
+                }
+            }
         }
 
         finish();
@@ -106,6 +159,19 @@ public class ConnectionRequestActivity extends AppCompatActivity {
                 finish();
             }
     );
+
+    private void onShizukuPermissionResult(int requestCode, int result) {
+        if (result != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "shizuku permission denied");
+            finish();
+            return;
+        }
+
+        Log.i(TAG, "shizuku granted: uid = " + Shizuku.getUid());
+
+        finish();
+    }
+
 
     private void connectToUsbHeadunit() {
         Log.i(TAG, "starting connection service");

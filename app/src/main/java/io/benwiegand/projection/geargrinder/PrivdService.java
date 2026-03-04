@@ -22,7 +22,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
-import io.benwiegand.projection.geargrinder.privileged.RootPrivdLauncher;
+import io.benwiegand.projection.geargrinder.settings.PrivilegeMode;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
+import io.benwiegand.projection.geargrinder.privileged.PrivdLauncher;
+import io.benwiegand.projection.geargrinder.privileged.ShizukuPrivdLauncher;
 import io.benwiegand.projection.libprivd.IPrivd;
 
 public class PrivdService extends Service {
@@ -35,7 +38,7 @@ public class PrivdService extends Service {
 
     private final List<IPCConnectionListener> ipcConnectionListeners = new LinkedList<>();
 
-    private RootPrivdLauncher privdLauncher;
+    private PrivdLauncher privdLauncher = null;
     private IPrivd privd = null;
     private boolean launchInProgress = false;
 
@@ -43,7 +46,6 @@ public class PrivdService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate");
-        privdLauncher = new RootPrivdLauncher(this);
 
         tryLaunchPrivd();
     }
@@ -54,7 +56,8 @@ public class PrivdService extends Service {
         Log.d(TAG, "onDestroy");
         synchronized (lock) {
             privd = null;
-            privdLauncher.destroy();
+            if (privdLauncher != null)
+                privdLauncher.destroy();
         }
     }
 
@@ -115,7 +118,38 @@ public class PrivdService extends Service {
         if (launchInProgress) return;
 
         try {
-            privdLauncher.launchRoot();
+            if (privdLauncher == null) {
+                SettingsManager settings = new SettingsManager(this);
+
+                PrivilegeMode privilegeMode = settings.getPrivilegeMode();
+                Log.d(TAG, "getting launcher for privilege mode: " + privilegeMode);
+                privdLauncher = PrivdLauncher.createForPrivilegeMode(privilegeMode, this);
+                if (privdLauncher == null)
+                    throw new IllegalStateException("privd not needed for current privilege mode");
+            }
+
+            if (privdLauncher instanceof ShizukuPrivdLauncher shizukuPrivdLauncher) shizukuPrivdLauncher
+                    .checkShizukuPermission()
+                    .filter(r -> r)
+                    .ifPresentOrElse(
+                            r -> Log.i(TAG, "shizuku connected and permission granted"),
+                            () -> {
+                                Log.e(TAG, "shizuku not connected or permission denied");
+                                startActivity(new Intent(this, ConnectionRequestActivity.class)
+                                        .setAction(ConnectionRequestActivity.INTENT_ACTION_REQUEST_SHIZUKU)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                            }
+                    );
+
+            privdLauncher.setErrorListener(t -> {
+                synchronized (lock) {
+                    if (isPrivdConnected() || !launchInProgress) return;
+                    launchInProgress = false;
+                    onPrivdLaunchFailure(t);
+                }
+            });
+
+            privdLauncher.launch();
             handler.postDelayed(() -> {
                 synchronized (lock) {
                     if (isPrivdConnected() || !launchInProgress) return;

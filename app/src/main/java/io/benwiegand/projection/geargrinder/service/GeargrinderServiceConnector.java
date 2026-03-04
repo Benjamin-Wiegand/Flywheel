@@ -12,10 +12,13 @@ import java.util.Optional;
 
 import io.benwiegand.projection.geargrinder.AccessibilityInputService;
 import io.benwiegand.projection.geargrinder.ConnectionService;
+import io.benwiegand.projection.geargrinder.IShizukuUserService;
 import io.benwiegand.projection.geargrinder.PackageService;
 import io.benwiegand.projection.geargrinder.PrivdService;
 import io.benwiegand.projection.geargrinder.ProjectionActivity;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftServiceConnection;
+import io.benwiegand.projection.geargrinder.privileged.ShizukuUserService;
+import rikka.shizuku.Shizuku;
 
 public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
     private static final String PACKAGE_NAME = "io.benwiegand.projection.geargrinder";
@@ -25,11 +28,20 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
     private static final ComponentName PRIVD_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, PrivdService.class.getName());
     private static final ComponentName PACKAGE_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, PackageService.class.getName());
     private static final ComponentName CONNECTION_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, ConnectionService.class.getName());
+    private static final ComponentName SHIZUKU_USER_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, ShizukuUserService.class.getName());
+
+    private static final Shizuku.UserServiceArgs SHIZUKU_ARGS = new Shizuku.UserServiceArgs(SHIZUKU_USER_SERVICE_COMPONENT)
+            .tag("geargrinder-shizuku-service")
+            .processNameSuffix("shizuku-service")
+            .daemon(false);
 
     private final Map<ComponentName, IBinder> binderMap = new HashMap<>();
     private final String tag;
     private final Context context;
     private final ConnectionListener listener;
+
+    private boolean shizukuBound = false;
+    private boolean contextBound = false;
 
     public interface ConnectionListener {
         default void onAccessibilityServiceConnected(AccessibilityInputService.ServiceBinder binder) {}
@@ -37,6 +49,7 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
         default void onPrivdServiceConnected(PrivdService.ServiceBinder binder) {}
         default void onPackageServiceConnected(PackageService.ServiceBinder binder) {}
         default void onConnectionServiceConnected(ConnectionService.ServiceBinder binder) {}
+        default void onShizukuUserServiceConnected(IShizukuUserService service) {}
     }
 
     public GeargrinderServiceConnector(String tag, Context context, ConnectionListener listener) {
@@ -48,7 +61,9 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
     @Override
     public void destroy() {
         super.destroy();
-        context.unbindService(this);
+        if (contextBound) context.unbindService(this);
+        if (shizukuBound && Shizuku.getBinder() != null)
+            Shizuku.unbindUserService(SHIZUKU_ARGS, this, true);
     }
 
     private void makeshiftBind(ComponentName component) {
@@ -57,6 +72,7 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
 
     private void realBind(ComponentName component, int flags) {
         context.bindService(new Intent().setComponent(component), this, flags);
+        contextBound = true;
     }
 
     private Optional<IBinder> getBinder(ComponentName componentName) {
@@ -109,6 +125,16 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
                 .map(b -> (ConnectionService.ServiceBinder) b);
     }
 
+    public void bindShizukuUserService() {
+        Shizuku.bindUserService(SHIZUKU_ARGS, this);
+        shizukuBound = true;
+    }
+
+    public Optional<IShizukuUserService> getShizukuUserService() {
+        return getBinder(SHIZUKU_USER_SERVICE_COMPONENT)
+                .map(IShizukuUserService.Stub::asInterface);
+    }
+
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -124,6 +150,8 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
             listener.onPackageServiceConnected((PackageService.ServiceBinder) service);
         } else if (name.equals(CONNECTION_SERVICE_COMPONENT)) {
             listener.onConnectionServiceConnected((ConnectionService.ServiceBinder) service);
+        } else if (name.equals(SHIZUKU_USER_SERVICE_COMPONENT)) {
+            listener.onShizukuUserServiceConnected(IShizukuUserService.Stub.asInterface(service));
         } else {
             Log.wtf(tag, "unhandled component: " + name);
             assert false;

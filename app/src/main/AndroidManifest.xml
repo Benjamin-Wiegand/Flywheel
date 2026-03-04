@@ -109,12 +109,21 @@
         <receiver
             android:name=".PrivdConnectionReceiver"
             android:exported="true"
-            tools:ignore="ExportedReceiver"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"
             >
             <intent-filter>
                 <action android:name="io.benwiegand.projection.geargrinder.BIND_PRIVD" />
             </intent-filter>
         </receiver>
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"
+            />
 
     </application>
 

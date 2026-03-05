@@ -118,7 +118,7 @@ public class ConnectionNotificationService {
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new Notification.Builder(context, FOREGROUND_NOTIFICATION_CHANNEL)
-                .setSmallIcon(android.R.drawable.ic_dialog_map)
+                .setSmallIcon(R.drawable.car)
                 .setOngoing(true)
                 .setContentIntent(pendingIntent)
                 .setContentTitle(context.getString(connectionStatusText))

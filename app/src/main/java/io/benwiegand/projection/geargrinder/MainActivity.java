@@ -1,7 +1,12 @@
 package io.benwiegand.projection.geargrinder;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -17,6 +22,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -28,6 +34,22 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "requesting notification permission");
+            if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.post_notifications_permission_request)
+                        .setMessage(R.string.post_notifications_permission_rationale)
+                        .setPositiveButton(R.string.grant_permission_button, (d, i) ->
+                                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 69))
+                        .setNegativeButton(R.string.not_now_button, null)
+                        .setCancelable(false)
+                        .show();
+            } else {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 69);
+            }
+        }
     }
 
     @Override

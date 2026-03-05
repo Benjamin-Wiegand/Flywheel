@@ -108,6 +108,9 @@ public class DebugActivity extends AppCompatActivity {
 
         });
 
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         RecyclerView logRecyclerView = findViewById(R.id.log_recycler);
         LogUiAdapter logUiAdapter = new LogUiAdapter();
 
@@ -132,4 +135,9 @@ public class DebugActivity extends AppCompatActivity {
         logcatReader.destroy();
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
 }

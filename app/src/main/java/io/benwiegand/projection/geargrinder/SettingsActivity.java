@@ -22,10 +22,19 @@ public class SettingsActivity extends AppCompatActivity {
             return insets;
         });
 
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.root, new SettingsFragment())
                 .commit();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {

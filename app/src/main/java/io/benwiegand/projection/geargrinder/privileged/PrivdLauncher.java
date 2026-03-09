@@ -126,7 +126,7 @@ public abstract class PrivdLauncher {
         fi
         
         echo "preparing"
-        rm -vf "$EXEC_JAR_PATH"
+        rm -f "$EXEC_JAR_PATH"
         cp -v "$INIT_JAR_PATH" "$EXEC_JAR_PATH"
         chown -v "`id -u`:`id -g`" "$EXEC_JAR_PATH"
         chmod -v 0400 "$EXEC_JAR_PATH"

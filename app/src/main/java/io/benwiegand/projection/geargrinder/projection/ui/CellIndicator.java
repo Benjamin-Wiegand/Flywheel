@@ -64,7 +64,7 @@ public class CellIndicator {
     private int overrideNetworkType = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE : 0;
     private boolean showDataIndicator = false;
 
-    private boolean pendingUpdate = false;
+    private boolean pendingUpdate = true;
 
     public CellIndicator(TelephonyManager defaultTelephonyManager, LayoutInflater inflater, ViewGroup parent, int slotIndex, int subscriptionId) {
         this.slotIndex = slotIndex;

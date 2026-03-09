@@ -23,7 +23,7 @@ public class WifiIndicator {
     private int rssi = -1;
     private boolean limited = false;
 
-    private boolean pendingUpdate = false;
+    private boolean pendingUpdate = true;
 
 
     public WifiIndicator(ImageView view) {

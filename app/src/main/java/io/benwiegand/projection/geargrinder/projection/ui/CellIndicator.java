@@ -6,7 +6,6 @@ import static io.benwiegand.projection.geargrinder.util.NetworkUtil.getCurrentCe
 import static io.benwiegand.projection.geargrinder.util.NetworkUtil.isNetworkLimited;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -21,7 +20,6 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -34,6 +32,7 @@ import androidx.annotation.RequiresApi;
 
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.projection.ui.indicator.CellIndicatorIcon;
+import io.benwiegand.projection.geargrinder.projection.ui.telephonyworkaround.CellSignalListenerWrapperHelper;
 
 public class CellIndicator {
     private static final String TAG = CellIndicator.class.getSimpleName();
@@ -51,7 +50,7 @@ public class CellIndicator {
 
     // same callback but new/legacy
     private final CellSignalListener phoneStateListener;
-    private final CellSignalListenerWrapper telephonyCallback;
+    private final CellSignalListenerWrapperHelper telephonyCallbackHelper;
 
     private final CellIndicatorIcon indicatorIcon;
     private final TextView indicatorView;
@@ -76,7 +75,7 @@ public class CellIndicator {
             telephonyManager = null;
             connectivityManager = null;
             phoneStateListener = null;
-            telephonyCallback = null;
+            telephonyCallbackHelper = null;
             indicatorIcon = null;
             indicatorView = null;
             return;
@@ -117,13 +116,13 @@ public class CellIndicator {
 
         phoneStateListener = new CellSignalListener();
         if (USES_TELEPHONY_CALLBACK) {
-            telephonyCallback = new CellSignalListenerWrapper(phoneStateListener);
-            telephonyManager.registerTelephonyCallback(handler::post, telephonyCallback);
+            telephonyCallbackHelper = new CellSignalListenerWrapperHelper(phoneStateListener);
+            telephonyCallbackHelper.registerCallback(telephonyManager, handler);
         } else {
             // noinspection deprecation
             int events = PhoneStateListener.LISTEN_SIGNAL_STRENGTHS | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE | PhoneStateListener.LISTEN_SERVICE_STATE;
             if (useTelephonyDisplayInfo) events |= PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED;
-            telephonyCallback = null;
+            telephonyCallbackHelper = null;
             telephonyManager.listen(phoneStateListener, events);
         }
     }
@@ -132,7 +131,7 @@ public class CellIndicator {
         if (isStub()) return;   // nothing to destroy
 
         if (USES_TELEPHONY_CALLBACK) {
-            telephonyManager.unregisterTelephonyCallback(telephonyCallback);
+            telephonyCallbackHelper.unregisterCallback(telephonyManager);
         } else {
             // noinspection deprecation
             telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_NONE);
@@ -286,36 +285,5 @@ public class CellIndicator {
             update();
         }
 
-    }
-
-    // adapts newer callback to legacy one
-    @RequiresApi(api = Build.VERSION_CODES.S)
-    private class CellSignalListenerWrapper extends TelephonyCallback implements TelephonyCallback.SignalStrengthsListener, TelephonyCallback.DataConnectionStateListener, TelephonyCallback.ServiceStateListener, TelephonyCallback.DisplayInfoListener {
-        private final CellSignalListener wrapped;
-
-        private CellSignalListenerWrapper(CellSignalListener wrapped) {
-            this.wrapped = wrapped;
-        }
-
-        @Override
-        public void onDataConnectionStateChanged(int state, int networkType) {
-            wrapped.onDataConnectionStateChanged(state, networkType);
-        }
-
-        @Override
-        public void onSignalStrengthsChanged(@NonNull SignalStrength signalStrength) {
-            wrapped.onSignalStrengthsChanged(signalStrength);
-        }
-
-        @Override
-        public void onServiceStateChanged(@NonNull ServiceState serviceState) {
-            wrapped.onServiceStateChanged(serviceState);
-        }
-
-        @SuppressLint("MissingPermission")  // this only gets called on api >=31 and the permission is only required for api <=30
-        @Override
-        public void onDisplayInfoChanged(@NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
-            wrapped.onDisplayInfoChanged(telephonyDisplayInfo);
-        }
     }
 }

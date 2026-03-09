@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   sodipodi:docname="wifi.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#000000"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.1904359"
+     inkscape:cx="196.14664"
+     inkscape:cy="172.62584"
+     inkscape:window-width="1918"
+     inkscape:window-height="1038"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer3" />
+  <defs
+     id="defs1">
+    <rect
+       x="108.16211"
+       y="301.54285"
+       width="113.89798"
+       height="104.88447"
+       id="rect1" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath3">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g2"
+         id="use3" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:label="wifi_bg"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path2"
+       style="fill:#808080;fill-opacity:1;fill-rule:evenodd;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke"
+       inkscape:transform-center-y="49.282883"
+       d="M 256.00001,394.75196 85.279092,171.82808 c 0,0 65.958208,-58.11659 170.720908,-58.11659 104.51484,0 170.72091,58.11658 170.72091,58.11658 z"
+       sodipodi:nodetypes="ccscc"
+       inkscape:transform-center-x="-2e-06" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="wifi_fill">
+    <g
+       id="g3"
+       clip-path="url(#clipPath3)">
+      <g
+         inkscape:label="Clip"
+         id="g2">
+        <path
+           id="path2-3"
+           style="display:inline;fill:none;fill-opacity:1;fill-rule:evenodd;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke;stroke:none"
+           inkscape:transform-center-y="49.282883"
+           d="M 256.00001,394.75196 85.27909,171.82808 c 0,0 65.95821,-58.11659 170.72091,-58.11659 104.51484,0 170.72091,58.11658 170.72091,58.11658 z"
+           sodipodi:nodetypes="ccscc"
+           inkscape:transform-center-x="-2e-06" />
+      </g>
+      <circle
+         style="display:none;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+         id="path4-4"
+         cx="256"
+         cy="394.75198"
+         r="95.602974"
+         inkscape:label="state_25" />
+      <circle
+         style="display:none;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+         id="path4-2"
+         cx="256"
+         cy="394.75195"
+         r="164.43797"
+         inkscape:label="state_50" />
+      <circle
+         style="display:none;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+         id="path4-9"
+         cx="256"
+         cy="394.75195"
+         r="220.1398"
+         inkscape:label="state_75" />
+      <rect
+         style="display:none;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+         id="rect4"
+         width="441.57431"
+         height="365.58524"
+         x="31.113638"
+         y="67.013985"
+         inkscape:label="state_100" />
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="limited_indicator">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+       id="rect2"
+       width="32.372059"
+       height="107.90689"
+       x="336.6218"
+       y="239.48334"
+       ry="16.186029" />
+    <circle
+       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+       id="path3"
+       cx="352.80783"
+       cy="379.02777"
+       r="16.186031" />
+  </g>
+</svg>

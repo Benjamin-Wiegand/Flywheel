@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="85.979347"
+       y="100.6307"
+       width="185.93764"
+       height="90.995842"
+       id="rect5" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2">
+      <g
+         id="use2">
+        <path
+           id="path7"
+           style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+           d="M 426.02064,85.979347 V 426.02064 H 85.979348 Z" />
+      </g>
+    </clipPath>
+  </defs>
+  <g
+     id="layer5">
+    <g
+       id="layer7"
+       style="display:inline">
+      <g
+         id="g4"
+         transform="matrix(1.25,0,0,1.25,-61.270024,-125.02003)"
+         style="display:inline;stroke-width:0.8">
+        <rect
+           style="display:inline;fill:#000000;fill-opacity:1;stroke-width:25.6;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke"
+           id="rect4-3"
+           width="52.367424"
+           height="130.27426"
+           x="497.17929"
+           y="-29.074677"
+           transform="rotate(45)"
+           ry="26.183712" />
+        <rect
+           style="display:inline;fill:#000000;fill-opacity:1;stroke-width:25.6;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke"
+           id="rect4-1-6"
+           width="52.331482"
+           height="129.70645"
+           x="-62.095329"
+           y="458.37692"
+           transform="rotate(-45)"
+           ry="26.165741" />
+      </g>
+      <rect
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke"
+         id="rect4"
+         width="32.002876"
+         height="128.01151"
+         x="506.47552"
+         y="-64.005753"
+         transform="rotate(45)"
+         ry="16.001438" />
+      <rect
+         style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke"
+         id="rect4-1"
+         width="32.002876"
+         height="128.01151"
+         x="-16.001438"
+         y="458.47122"
+         transform="rotate(-45)"
+         ry="16.001438" />
+    </g>
+  </g>
+</svg>

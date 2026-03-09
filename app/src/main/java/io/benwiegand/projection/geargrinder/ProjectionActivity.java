@@ -31,6 +31,7 @@ import io.benwiegand.projection.geargrinder.pm.AppCategory;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.BatteryIndicator;
 import io.benwiegand.projection.geargrinder.projection.ui.VirtualActivity;
+import io.benwiegand.projection.geargrinder.projection.ui.NetworkIndicators;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
 import io.benwiegand.projection.geargrinder.projection.ui.AppDock;
 import io.benwiegand.projection.geargrinder.projection.ui.AppDrawer;
@@ -53,6 +54,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private AppDock appDock;
     private AppDrawer appDrawer;
     private BatteryIndicator batteryIndicator;
+    private NetworkIndicators networkIndicators;
 
     private GeargrinderServiceConnector connector;
     private IPrivd privd = null;
@@ -118,6 +120,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         appDock = new AppDock(findViewById(R.id.app_dock), this);
         appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
         batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
+        networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
 
         // layout updates
         findViewById(R.id.root).getViewTreeObserver().addOnGlobalLayoutListener(this::onGlobalLayout);
@@ -144,6 +147,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
         appDrawer.destroy();
         batteryIndicator.destroy();
+        networkIndicators.destroy();
     }
 
     public void onGlobalLayout() {

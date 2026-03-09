@@ -46,4 +46,18 @@
     <string name="battery_percent_format" formatted="true">%d%%</string>
     <string name="pref_category_operations">operations</string>
 
+    <string name="cellular_network_badge_5g_plus">5G+</string>
+    <string name="cellular_network_badge_5g">5G</string>
+    <string name="cellular_network_badge_5ge">5Ge</string>
+    <string name="cellular_network_badge_lte_plus">LTE+</string>
+    <string name="cellular_network_badge_lte">LTE</string>
+    <string name="cellular_network_badge_h_plus">H+</string>
+    <string name="cellular_network_badge_h">H</string>
+    <string name="cellular_network_badge_3g">3G</string>
+    <string name="cellular_network_badge_1x">1X</string>
+    <string name="cellular_network_badge_e">E</string>
+    <string name="cellular_network_badge_g">G</string>
+    <string name="cellular_network_badge_unknown" />
+    <string name="cellular_network_badge_none" />
+
 </resources>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="85.979347"
+       y="100.6307"
+       width="185.93764"
+       height="90.995842"
+       id="rect5" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2">
+      <g
+         id="use2">
+        <path
+           id="path7"
+           style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+           d="M 426.02064,85.979347 V 426.02064 H 85.979348 Z" />
+      </g>
+    </clipPath>
+  </defs>
+  <g
+     id="layer5">
+    <g
+       id="layer3"
+       transform="translate(246.3782,-235.48334)"
+       style="display:inline">
+      <rect
+         style="fill:#000000;fill-opacity:1;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke"
+         id="rect3"
+         width="70.331299"
+         height="209.14919"
+         x="-216.93083"
+         y="468.39001"
+         ry="35.165649"
+         transform="scale(-1,1)" />
+      <rect
+         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+         id="rect2-3"
+         width="32.007053"
+         height="123.77832"
+         x="165.76164"
+         y="489.46036"
+         ry="16.003527" />
+      <circle
+         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:32;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-opacity:1;paint-order:markers fill stroke"
+         id="path3"
+         cx="181.76518"
+         cy="643.07269"
+         r="16.003529" />
+    </g>
+  </g>
+</svg>

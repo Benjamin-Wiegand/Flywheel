@@ -113,10 +113,17 @@
                     >
 
                     <include
+                        android:id="@+id/network_indicators"
+                        layout="@layout/layout_network_indicators"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        />
+
+                    <include
                         android:id="@+id/battery_indicator"
                         layout="@layout/layout_battery_indicator"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         />
 
                 </LinearLayout>

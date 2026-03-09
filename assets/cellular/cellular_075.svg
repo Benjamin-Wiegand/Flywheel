@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1"
+         id="use2" />
+    </clipPath>
+  </defs>
+  <g
+     id="layer1">
+    <path
+       id="rect1"
+       style="fill:#808080;fill-rule:evenodd;stroke-width:32;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:7.1;paint-order:markers fill stroke;stroke:none;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
+       d="M 426.02064,85.979347 V 426.02064 H 85.979347 Z" />
+  </g>
+  <g
+     id="layer2">
+    <g
+       id="g2"
+       clip-path="url(#clipPath2)">
+      <g
+         id="g1">
+        <path
+           id="rect1-3"
+           style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke;fill-opacity:1"
+           d="M 426.02064,85.979347 V 426.02064 H 85.979348 Z" />
+      </g>
+      <rect
+         style="display:inline;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:32;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:7.1;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+         id="rect2-1-2"
+         width="336.31854"
+         height="512"
+         x="-7.6293945e-06"
+         y="-6.5878603e-06" />
+    </g>
+  </g>
+</svg>

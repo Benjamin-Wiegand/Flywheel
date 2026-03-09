@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/wifi_levels" android:drawable="@drawable/wifi_levels" />
+    <item android:id="@+id/wifi_limited" android:drawable="@drawable/wifi_limited" />
+
+</layer-list>

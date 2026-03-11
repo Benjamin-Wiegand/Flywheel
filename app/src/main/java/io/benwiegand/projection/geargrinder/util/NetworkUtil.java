@@ -16,6 +16,9 @@ public class NetworkUtil {
 
     public static final boolean SUPPORTS_MULTI_SIM = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
 
+    // not in the sdk, but that might be because it isn't expected for a phone
+    private static final int TELEPHONY_NETWORK_TYPE_NB_IOT_NTN = 21;
+
     public static int findDefaultCellularSubscriptionId() {
         int subscriptionId = SubscriptionManager.getDefaultSubscriptionId();
 
@@ -101,10 +104,10 @@ public class NetworkUtil {
 
             case TelephonyManager.NETWORK_TYPE_EDGE -> R.string.cellular_network_badge_e;
 
-            case TelephonyManager.NETWORK_TYPE_GPRS -> R.string.cellular_network_badge_g;
+            case TelephonyManager.NETWORK_TYPE_GPRS, TelephonyManager.NETWORK_TYPE_GSM,
+                 TELEPHONY_NETWORK_TYPE_NB_IOT_NTN -> R.string.cellular_network_badge_g;
 
             // no icon for these
-            case TelephonyManager.NETWORK_TYPE_GSM -> R.string.cellular_network_badge_none;
             case TelephonyManager.NETWORK_TYPE_IWLAN -> R.string.cellular_network_badge_none;
             case TelephonyManager.NETWORK_TYPE_IDEN -> R.string.cellular_network_badge_none;
             case TelephonyManager.NETWORK_TYPE_UNKNOWN -> R.string.cellular_network_badge_none;

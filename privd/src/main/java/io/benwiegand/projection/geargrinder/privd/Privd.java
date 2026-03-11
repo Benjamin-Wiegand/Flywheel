@@ -14,8 +14,9 @@ import android.hardware.input.InputManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.InputEvent;
@@ -75,10 +76,12 @@ public class Privd extends IPrivd.Stub {
     }
 
     @Override
-    protected void checkCaller() {
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         int callingUid = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ? Binder.getCallingUidOrThrow() : Binder.getCallingUid();
         if (callingUid != appUid)
             throw new SecurityException("only for use by " + APP_PKG_NAME);
+
+        return super.onTransact(code, data, reply, flags);
     }
 
     @Override
@@ -107,7 +110,7 @@ public class Privd extends IPrivd.Stub {
     }
 
     @Override
-    public boolean injectInputEvent(InputEvent event, int displayId) {
+    public boolean injectInputEventWithDisplayId(InputEvent event, int displayId) {
         try {
             if (LOG_DEBUG) Log.d(TAG, "setting display id to " + displayId + " for input event: " + event);
             ReflectedInputEvent rEvent = new ReflectedInputEvent(event);
@@ -199,10 +202,5 @@ public class Privd extends IPrivd.Stub {
 
         VirtualDisplay virtualDisplay = getVirtualDisplay(displayId);
         virtualDisplay.setSurface(surface);
-    }
-
-    @Override
-    public IBinder asBinder() {
-        return this;
     }
 }

@@ -112,7 +112,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     public void onInputEvent(InputEvent event, int displayId, boolean displayIdSet) {
         if (virtualDisplay == null) return;
         try {
-            boolean result = displayIdSet ? privd.injectInputEvent(event) : privd.injectInputEvent(event, displayId);
+            boolean result = displayIdSet ? privd.injectInputEvent(event) : privd.injectInputEventWithDisplayId(event, displayId);
             if (!result) Log.w(TAG, "motion event result is false");
         } catch (Throwable t) {
             Log.e(TAG, "failed to inject motion event", t);

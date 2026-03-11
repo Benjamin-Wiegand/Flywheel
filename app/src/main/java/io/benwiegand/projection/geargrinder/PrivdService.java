@@ -92,7 +92,7 @@ public class PrivdService extends Service {
 
             Log.i(TAG, "IPC connected");
             launchInProgress = false;
-            privd = IPrivd.fromBinder(binder);
+            privd = IPrivd.Stub.asInterface(binder);
             callListenersLocked(l -> l.onPrivdConnected(privd));
         }
 

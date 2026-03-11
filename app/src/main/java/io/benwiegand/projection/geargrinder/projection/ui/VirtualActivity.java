@@ -196,7 +196,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
 
     private boolean onMotionEvent(View view, MotionEvent event) {
         try {
-            return privd.injectInputEvent(event, getDisplayId());
+            return privd.injectInputEventWithDisplayId(event, getDisplayId());
         } catch (Throwable t) {
             Log.e(TAG, "failed to inject motion event", t);
             return false;

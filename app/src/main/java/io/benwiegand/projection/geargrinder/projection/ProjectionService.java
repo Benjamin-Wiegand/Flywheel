@@ -30,15 +30,20 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
     private static final String VIRTUAL_DISPLAY_NAME = "Geargrinder projection";
 
-    // uses system/protected flags
-    private static final int PRIVD_VIRTUAL_DISPLAY_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE
-            | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+    // privd can use system/protected flags
+    private static final int PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
             | PrivdVirtualDisplayProxy.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD
             | PrivdVirtualDisplayProxy.FLAG_SUPPORTS_TOUCH
             | PrivdVirtualDisplayProxy.FLAG_TRUSTED
             | PrivdVirtualDisplayProxy.FLAG_OWN_DISPLAY_GROUP
             | PrivdVirtualDisplayProxy.FLAG_ALWAYS_UNLOCKED
             | PrivdVirtualDisplayProxy.FLAG_OWN_FOCUS;
+
+    // sets of flags to try since sometimes not all of them work
+    private static final int[] PRIVD_VIRTUAL_DISPLAY_FLAGS = new int[] {
+            PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS | DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE,
+            PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS,
+    };
 
     // this is all that really can be done
     private static final int LOCAL_VIRTUAL_DISPLAY_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY | DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
@@ -223,7 +228,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
             try {
                 Log.d(TAG, "creating virtual display via privd");
-                virtualDisplay = new PrivdVirtualDisplayProxy(
+                virtualDisplay = PrivdVirtualDisplayProxy.tryCreateWithFallbackFlags(
                         privd, VIRTUAL_DISPLAY_NAME,
                         videoPreset.width(), videoPreset.height(), videoPreset.density(),
                         surface, PRIVD_VIRTUAL_DISPLAY_FLAGS

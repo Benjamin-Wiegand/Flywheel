@@ -1,5 +1,6 @@
 package io.benwiegand.projection.geargrinder.privd;
 
+import static io.benwiegand.projection.geargrinder.privd.reflection.ReflectionUtils.createPrivilegedDisplayManager;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.APP_PKG_NAME;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.BIND_TIMEOUT;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.PING_TIMEOUT;
@@ -50,7 +51,18 @@ public class Privd extends IPrivd.Stub {
     public Privd(Context context, int appUid) {
         this.appUid = appUid;
 
-        dm = context.getSystemService(DisplayManager.class);
+        DisplayManager dm;
+        try {
+            dm = createPrivilegedDisplayManager(context);
+        } catch (ReflectionException e) {
+            Log.w(TAG, "failed to get privileged display manager instance, falling back", e);
+
+            // this is fine for root, but shell will fail
+            if (appUid != 0) Log.e(TAG, "virtual displays may fail to create");
+            dm = context.getSystemService(DisplayManager.class);
+        }
+
+        this.dm = dm;
 
         InputManager im = context.getSystemService(InputManager.class);
         rim = new ReflectedInputManager(im);
@@ -165,7 +177,6 @@ public class Privd extends IPrivd.Stub {
     public int createVirtualDisplay(String name, int width, int height, int densityDpi, Surface surface, int flags) {
         Log.v(TAG, "creating virtual display: " + name);
 
-        // TODO: doesn't work for shell (uid 2000)
         VirtualDisplay virtualDisplay = dm.createVirtualDisplay(name, width, height, densityDpi, surface, flags);
         if (virtualDisplay == null) throw new RuntimeException("createVirtualDisplay() returned null");
 

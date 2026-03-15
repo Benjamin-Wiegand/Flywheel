@@ -102,4 +102,26 @@ public class PrivdVirtualDisplayProxy implements VirtualDisplayController {
                 ", flags=" + flags +
                 '}';
     }
+
+    public static PrivdVirtualDisplayProxy tryCreateWithFallbackFlags(IPrivd privd, String name, int width, int height, int densityDpi, Surface surface, int... tryFlags) throws Throwable {
+        Log.i(TAG, "trying to create virtual display: " + name);
+        boolean first = true;
+        Throwable error = new AssertionError(); // this shouldn't be thrown unless no flags were provided
+        for (int flags : tryFlags) {
+            if (!first) Log.v(TAG, "falling back to flags " + flags);
+            else Log.v(TAG, "trying with flags " + flags);
+            first = false;
+
+            try {
+                return new PrivdVirtualDisplayProxy(privd, name, width, height, densityDpi, surface, flags);
+            } catch (Throwable t) {
+                Log.w(TAG, "failed to create virtual display", t);
+                error = t;
+            }
+        }
+
+        Log.e(TAG, "failed to create virtual display with any of the " + tryFlags.length + " combinations of flags");
+        throw error;
+    }
+
 }

@@ -32,14 +32,19 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private static final String VIRTUAL_DISPLAY_NAME = "Geargrinder virtual activity";
 
     // uses system/protected flags to make it work correctly
-    private static final int PRIVD_VIRTUAL_DISPLAY_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE
-            | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+    private static final int PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
             | PrivdVirtualDisplayProxy.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD
             | PrivdVirtualDisplayProxy.FLAG_SUPPORTS_TOUCH
             | PrivdVirtualDisplayProxy.FLAG_TRUSTED
             | PrivdVirtualDisplayProxy.FLAG_OWN_DISPLAY_GROUP
             | PrivdVirtualDisplayProxy.FLAG_ALWAYS_UNLOCKED
             | PrivdVirtualDisplayProxy.FLAG_OWN_FOCUS;
+
+    // sets of flags to try since sometimes not all of them work
+    private static final int[] PRIVD_VIRTUAL_DISPLAY_FLAGS = new int[] {
+            PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS | DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE,
+            PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS,
+    };
 
     // this is all that really can be done without elevated privileges.
     // apps that launch new activities will have those appear on the main display.
@@ -78,7 +83,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
         // display
         VirtualDisplayController virtualDisplay;
         try {
-            virtualDisplay = new PrivdVirtualDisplayProxy(
+            virtualDisplay = PrivdVirtualDisplayProxy.tryCreateWithFallbackFlags(
                     privd, VIRTUAL_DISPLAY_NAME,
                     800, 480, density,  // TODO
                     null, PRIVD_VIRTUAL_DISPLAY_FLAGS

@@ -33,11 +33,42 @@ Tested and working on these emulators:
 
 ### phone compatibility
 
-#### root
+#### root/Shizuku
+> [!NOTE]
+> - KernelSU has not been tested yet.
 
-Launching the projection currently requires root for ease of development. This will change as the project matures.
+Root is no longer required to run Geargrinder on your phone.
 
-You should be able to use audio capture/streaming without root.
+Geargrinder currently requires you to either provide root access (via [Magisk](https://github.com/topjohnwu/Magisk/), [KernelSU](https://github.com/tiann/KernelSU/), etc.) or ADB access via [Shizuku](https://github.com/RikkaApps/Shizuku/).
+
+A "no root" mode is planned which will only support screen mirroring.
+
+#### operating system
+> [!NOTE]
+> - Your device may not work with Geargrinder even if the OS is supported due to differences between vendors.
+> - Geargrinder does not currently work with touch input on Android 9 and below.
+
+Geargrinder currently targets Android 8 and above.
+
+Geargrinder has been verified to work on these operating systems (this list may not be current):
+- LineageOS (de-Googled, some with microG)
+    - LineageOS 18 (AOSP 11)
+    - LineageOS 21 (AOSP 14)
+    - LineageOS 22 (AOSP 15)
+    - LineageOS 23 (AOSP 16)
+- GrapheneOS (no GMS)
+    - latest (Android 16)
+- Stock Android (Google Pixel, with Google services)
+    - Android 9
+    - Android 10
+    - Android 16
+- Stock Android (various vendors, de-googled)
+    - Android 14
+    - Android 15
+- MIUI (de-googled)
+    - MIUI 11 (Android 8)
+
+Any OS not listed above has yet to be tested.
 
 #### video
 

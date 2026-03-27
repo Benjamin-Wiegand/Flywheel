@@ -112,6 +112,7 @@ Currently, your phone must natively support the audio sample rate for your headu
 Non-code contributions:
 
 - [Nick](https://github.com/4channel) for helping test on his car
+- [Zelemar](https://zelemar.eu) for helping me diagnose an OEM headunit for bench testing
 
 Other projects of great help during development:
 

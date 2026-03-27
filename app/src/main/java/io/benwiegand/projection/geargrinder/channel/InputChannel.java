@@ -29,6 +29,7 @@ public class InputChannel implements MessageListener {
     private final MessageBroker mb;
 
     private final InputChannelMeta channelMeta;
+    private final MessageBroker.MessageSendParameters controlMessageParams;
     private final MessageBroker.MessageSendParameters messageParams;
 
     private InputEventListener inputEventListener = null;
@@ -36,6 +37,7 @@ public class InputChannel implements MessageListener {
     public InputChannel(MessageBroker mb, InputChannelMeta channelMeta) {
         this.mb = mb;
         this.channelMeta = channelMeta;
+        controlMessageParams = new MessageBroker.MessageSendParameters(channelMeta.channelId(), true, true);
         messageParams = new MessageBroker.MessageSendParameters(channelMeta.channelId(), true, false);
 
         mb.registerForChannel(channelMeta.channelId(), this);
@@ -47,7 +49,7 @@ public class InputChannel implements MessageListener {
 
     public void openChannel() {
         Log.i(TAG, "sending channel open request");
-        mb.sendMessage(messageParams, CMD_CHANNEL_OPEN_REQUEST, new ChannelOpenRequest(0, channelMeta.channelId()).serialize());
+        mb.sendMessage(controlMessageParams, CMD_CHANNEL_OPEN_REQUEST, new ChannelOpenRequest(0, channelMeta.channelId()).serialize());
     }
 
     public void setInputEventListener(InputEventListener listener) {

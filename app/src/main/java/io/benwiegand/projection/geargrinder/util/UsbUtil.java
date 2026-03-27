@@ -4,12 +4,12 @@ import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
 
-import io.benwiegand.projection.geargrinder.R;
+import java.util.Set;
 
 public class UsbUtil {
     private static final String TAG = UsbUtil.class.getSimpleName();
 
-    private static final String TARGET_ACCESSORY_MODEL = "Android Auto";
+    private static final Set<String> TARGET_ACCESSORY_MODELS = Set.of("Android Auto", "Android Open Automotive Protocol");
 
     public static UsbAccessory findUsbHeadunit(UsbManager usbManager) {
         UsbAccessory[] accessories = usbManager.getAccessoryList();
@@ -20,7 +20,7 @@ public class UsbUtil {
 
         for (UsbAccessory usbAccessory : accessories){
             Log.d(TAG, "accessory: " + usbAccessory);
-            if (!TARGET_ACCESSORY_MODEL.equals(usbAccessory.getModel())) continue;
+            if (!TARGET_ACCESSORY_MODELS.contains(usbAccessory.getModel())) continue;
             return usbAccessory;
         }
 

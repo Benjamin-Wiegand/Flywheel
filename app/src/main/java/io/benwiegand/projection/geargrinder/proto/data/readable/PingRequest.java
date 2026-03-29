@@ -10,7 +10,7 @@ import io.benwiegand.projection.geargrinder.proto.ProtoParser;
 
 public record PingRequest(
         long timestamp,
-        long unknown
+        long unknown    // probably status code
 ) {
     private static final String TAG = PingRequest.class.getSimpleName();
 
@@ -20,7 +20,7 @@ public record PingRequest(
 
             return new PingRequest(
                     ProtoParser.getSingleUnsignedInteger(buffer, fields.get(1), 0),
-                    ProtoParser.getSingleUnsignedInteger(buffer, fields.get(1), 0)
+                    ProtoParser.getSingleUnsignedInteger(buffer, fields.get(2), 0)
             );
         } catch (Throwable t) {
             Log.wtf(TAG, "failed to parse PingRequest: " + Base64.encodeToString(buffer, offset, length, 0), t);

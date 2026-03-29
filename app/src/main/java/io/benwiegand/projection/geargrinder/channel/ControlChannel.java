@@ -22,9 +22,11 @@ import io.benwiegand.projection.geargrinder.crypto.TLSService;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.callback.MessageListener;
 import io.benwiegand.projection.geargrinder.projection.ProjectionService;
+import io.benwiegand.projection.geargrinder.proto.data.readable.PingRequest;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.AudioChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.ChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.InputChannelMeta;
+import io.benwiegand.projection.geargrinder.proto.data.writable.PingResponse;
 import io.benwiegand.projection.geargrinder.proto.data.writable.ServiceDiscoveryRequest;
 import io.benwiegand.projection.geargrinder.proto.data.readable.ServiceDiscoveryResponse;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.VideoChannelMeta;
@@ -170,8 +172,20 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
         int command = readUInt16(buffer, payloadOffset);
         switch (command) {
             case CMD_PING_REQUEST -> {
-                Log.d(TAG, "ping!");
-                mb.sendMessage(unencryptedParams, CMD_PING_RESPONSE);
+                PingRequest request = PingRequest.parse(buffer, payloadOffset + COMMAND_ID_LENGTH, payloadLength - COMMAND_ID_LENGTH);
+                Log.d(TAG, "ping! " + request);
+
+                if (request == null) {
+                    // fallback
+                    mb.sendMessage(
+                            !tlsService.needsHandshake() ? encryptedParams : unencryptedParams,
+                            CMD_PING_RESPONSE);
+                    return;
+                }
+
+                mb.sendMessage(
+                        !tlsService.needsHandshake() ? encryptedParams : unencryptedParams,
+                        CMD_PING_RESPONSE, PingResponse.fromRequest(request).serialize());
             }
 
             case CMD_VERSION_REQUEST -> {

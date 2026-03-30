@@ -33,6 +33,7 @@ import io.benwiegand.projection.geargrinder.proto.data.writable.ServiceDiscovery
 import io.benwiegand.projection.geargrinder.proto.data.readable.ServiceDiscoveryResponse;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.VideoChannelMeta;
 import io.benwiegand.projection.geargrinder.callback.ControlListener;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
 public class ControlChannel implements MessageListener, ProjectionService.Listener {
     private static final String TAG = ControlChannel.class.getSimpleName();
@@ -44,6 +45,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
     private final ConnectionService.ServiceBinder connectionServiceBinder;
     private final MessageBroker mb;
     private final TLSService tlsService;
+    private final SettingsManager settingsManager;
 
     private final MessageBroker.MessageSendParameters unencryptedParams;
     private final MessageBroker.MessageSendParameters encryptedParams;
@@ -58,12 +60,13 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
     private AudioChannelMeta mediaAudioChannelMeta = null;
     private InputChannelMeta inputChannelMeta = null;
 
-    public ControlChannel(Context context, MessageBroker mb, TLSService tlsService, ControlListener controlListener, ConnectionService.ServiceBinder connectionServiceBinder) {
+    public ControlChannel(Context context, MessageBroker mb, TLSService tlsService, ControlListener controlListener, SettingsManager settingsManager, ConnectionService.ServiceBinder connectionServiceBinder) {
         this.context = context;
         this.connectionServiceBinder = connectionServiceBinder;
         this.mb = mb;
         this.tlsService = tlsService;
         this.controlListener = controlListener;
+        this.settingsManager = settingsManager;
 
         unencryptedParams = new MessageBroker.MessageSendParameters(CHANNEL_CONTROL, false, false);
         encryptedParams = new MessageBroker.MessageSendParameters(CHANNEL_CONTROL, true, false);
@@ -117,7 +120,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
 
         if (videoChannelMeta != null) {
             Log.d(TAG, "init video channel");
-            videoChannel = new VideoChannel(mb, projectionService, videoChannelMeta);
+            videoChannel = new VideoChannel(mb, projectionService, settingsManager, videoChannelMeta);
             videoChannel.openChannel();
         }
 

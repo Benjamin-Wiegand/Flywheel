@@ -274,7 +274,7 @@ public class ConnectionService extends Service implements ControlListener {
                 TLSService tlsService = new TLSService(trustManagers, keyManagers);
                 UsbTransferInterface usbTransferInterface = new UsbTransferInterface(pfd, is, os, AAFrame.MAX_LENGTH);
                 MessageBroker messageBroker = new MessageBroker(usbTransferInterface, tlsService);
-                ControlChannel controlChannel = new ControlChannel(this, messageBroker, tlsService, this, binder);
+                ControlChannel controlChannel = new ControlChannel(this, messageBroker, tlsService, this, settingsManager, binder);
                 try {
                     messageBroker.registerForChannel(AAConstants.CHANNEL_CONTROL, controlChannel);
                     messageBroker.loop();

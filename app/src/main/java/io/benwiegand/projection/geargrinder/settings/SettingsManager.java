@@ -39,6 +39,10 @@ public class SettingsManager {
         return castInt(R.string.key_projection_resume_grace_period, 30);
     }
 
+    public int getVideoBufferSize() {
+        return castInt(R.string.key_video_buffer_size, 0);
+    }
+
     private int castInt(@StringRes int key, int defaultValue) {
         String stringValue = prefs.getString(context.getString(key), null);
         if (stringValue == null) return defaultValue;

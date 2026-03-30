@@ -18,6 +18,7 @@ import io.benwiegand.projection.geargrinder.proto.data.writable.av.AVSetupReques
 import io.benwiegand.projection.geargrinder.proto.data.writable.av.AVStartIndication;
 import io.benwiegand.projection.geargrinder.projection.video.FrameRateCounter;
 import io.benwiegand.projection.geargrinder.projection.video.VideoEncoder;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
 public class VideoChannel extends AVChannel<VideoPreset> {
     private static final String TAG = VideoChannel.class.getSimpleName();
@@ -25,9 +26,7 @@ public class VideoChannel extends AVChannel<VideoPreset> {
     private static final boolean LOG_FRAME_DEBUG = false;
     private static final boolean LOG_FRAME_RATE_DEBUG = false;
 
-    // TODO: find the ideal limit
-//    private static final int VIDEO_BUFFER_MAX_LENGTH = 0x10000;     // 64 KiB
-    private static final int VIDEO_BUFFER_MAX_LENGTH = 0x20000;     // 128 KiB
+    private static final int VIDEO_BUFFER_SIZE_DEFAULT = 0x40000;     // 256 KiB
 
     private static final long VIDEO_FRAME_TIMEOUT_US = 500000;  // 500 ms
     private static final int VIDEO_BUFFER_RESERVED = COMMAND_ID_LENGTH + 8; // command + 64-bit timestamp
@@ -35,13 +34,27 @@ public class VideoChannel extends AVChannel<VideoPreset> {
     private final FrameRateCounter frameRateCounter = new FrameRateCounter();
 
     private final ProjectionService projectionService;
+    private final SettingsManager settingsManager;
 
     private final VideoChannelMeta channelMeta;
 
-    public VideoChannel(MessageBroker mb, ProjectionService projectionService, VideoChannelMeta channelMeta) {
-        super(mb, channelMeta.channelId(), 0, VIDEO_BUFFER_MAX_LENGTH);
+    private static int calculateVideoBufferSize(SettingsManager settingsManager) {
+        int prefBufferSize = settingsManager.getVideoBufferSize();
+        if (prefBufferSize > 0) {
+            Log.i(TAG, "using video buffer size set by user: " + prefBufferSize);
+            return prefBufferSize;
+        }
+
+        // TODO: determine video buffer size based on preset
+        Log.i(TAG, "using auto video buffer size: " + VIDEO_BUFFER_SIZE_DEFAULT);
+        return VIDEO_BUFFER_SIZE_DEFAULT;
+    }
+
+    public VideoChannel(MessageBroker mb, ProjectionService projectionService, SettingsManager settingsManager, VideoChannelMeta channelMeta) {
+        super(mb, channelMeta.channelId(), 0, calculateVideoBufferSize(settingsManager));
         this.channelMeta = channelMeta;
         this.projectionService = projectionService;
+        this.settingsManager = settingsManager;
     }
 
     @Override

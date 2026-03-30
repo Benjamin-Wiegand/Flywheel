@@ -76,5 +76,7 @@
     <string name="speak_button">speak</string>
     <string name="clear_button">clear</string>
     <string name="notification_top_text_join_format" formatted="true">%s · %s</string>
+    <string name="pref_category_video">video</string>
+    <string name="video_buffer_size_pref_name">Video buffer size</string>
 
 </resources>

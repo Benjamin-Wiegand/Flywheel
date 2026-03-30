@@ -58,4 +58,21 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        app:title="@string/pref_category_video"
+        app:iconSpaceReserved="false"
+        >
+
+        <ListPreference
+            app:key="@string/key_video_buffer_size"
+            app:iconSpaceReserved="false"
+            app:title="@string/video_buffer_size_pref_name"
+            app:entries="@array/video_buffer_size_entries"
+            app:entryValues="@array/video_buffer_size_values"
+            app:defaultValue="@string/video_buffer_size_auto"
+            app:useSimpleSummaryProvider="true"
+            />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

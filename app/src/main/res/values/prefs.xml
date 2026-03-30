@@ -21,6 +21,16 @@
         <item>2 minutes</item>
     </string-array>
 
+    <string-array name="video_buffer_size_entries">
+        <item>auto</item>
+        <item>64 KiB (tiny)</item>
+        <item>128 KiB (small)</item>
+        <item>256 KiB (moderate)</item>
+        <item>512 KiB (large)</item>
+        <item>768 KiB (extra large)</item>
+        <item>1 MiB (massive)</item>
+    </string-array>
+
 
     <string translatable="false" name="privilege_mode_no_root">no_root</string>
     <string translatable="false" name="privilege_mode_shizuku">shizuku</string>
@@ -59,9 +69,30 @@
     </string-array>
 
 
+    <string translatable="false" name="video_buffer_size_auto">0</string>
+    <string translatable="false" name="video_buffer_size_64k">65536</string>
+    <string translatable="false" name="video_buffer_size_128k">131072</string>
+    <string translatable="false" name="video_buffer_size_256k">262144</string>
+    <string translatable="false" name="video_buffer_size_512k">524288</string>
+    <string translatable="false" name="video_buffer_size_768k">786432</string>
+    <string translatable="false" name="video_buffer_size_1024k">1048576</string>
+
+    <string-array translatable="false" name="video_buffer_size_values">
+        <item>@string/video_buffer_size_auto</item>
+        <item>@string/video_buffer_size_64k</item>
+        <item>@string/video_buffer_size_128k</item>
+        <item>@string/video_buffer_size_256k</item>
+        <item>@string/video_buffer_size_512k</item>
+        <item>@string/video_buffer_size_768k</item>
+        <item>@string/video_buffer_size_1024k</item>
+    </string-array>
+
+
     <string translatable="false" name="key_privilege_mode">privilege_mode</string>
     <string translatable="false" name="key_operational_mode">operational_mode</string>
 
     <string translatable="false" name="key_start_projection_when_locked">start_projection_when_locked</string>
     <string translatable="false" name="key_projection_resume_grace_period">projection_resume_grace_period</string>
+
+    <string translatable="false" name="key_video_buffer_size">video_buffer_size</string>
 </resources>

@@ -3,7 +3,6 @@ package io.benwiegand.projection.geargrinder;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,7 +19,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +28,7 @@ import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.pm.AppCategory;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.BatteryIndicator;
+import io.benwiegand.projection.geargrinder.projection.ui.NotificationDisplay;
 import io.benwiegand.projection.geargrinder.projection.ui.VirtualActivity;
 import io.benwiegand.projection.geargrinder.projection.ui.NetworkIndicators;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
@@ -55,6 +54,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private AppDrawer appDrawer;
     private BatteryIndicator batteryIndicator;
     private NetworkIndicators networkIndicators;
+    private NotificationDisplay notificationDisplay;
 
     private GeargrinderServiceConnector connector;
     private IPrivd privd = null;
@@ -121,6 +121,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
         batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
         networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
+        notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay));
 
         // layout updates
         findViewById(R.id.root).getViewTreeObserver().addOnGlobalLayoutListener(this::onGlobalLayout);
@@ -129,6 +130,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         connector = new GeargrinderServiceConnector(TAG, this, this);
         connector.bindPrivdService(BIND_AUTO_CREATE | BIND_IMPORTANT);
         connector.bindPackageService(BIND_AUTO_CREATE | BIND_IMPORTANT);
+        connector.bindNotificationService();
 
         makeshiftBind = new MakeshiftBind(this, new ComponentName(this, ProjectionActivity.class), this);
     }
@@ -148,6 +150,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         appDrawer.destroy();
         batteryIndicator.destroy();
         networkIndicators.destroy();
+        notificationDisplay.destroy();
     }
 
     public void onGlobalLayout() {
@@ -257,10 +260,15 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     @Override
     public void onPackageServiceConnected(PackageService.ServiceBinder binder) {
         appDrawer.setPackageBinder(binder);
+        notificationDisplay.setPackageServiceBinder(binder);
         binder.registerListener(b -> b.getAppsFor(AppCategory.FOCUSED)
                 .forEach(appDock::addApp));
     }
 
+    @Override
+    public void onNotificationServiceConnected(NotificationService.ServiceBinder binder) {
+        notificationDisplay.setNotificationServiceBinder(binder);
+    }
 
     @Override
     public void onPrivdConnected(IPrivd privd) {

@@ -134,4 +134,30 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/popup_notification_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@drawable/popup_notification_overlay_background"
+        android:alpha="0"
+        android:visibility="gone"
+        >
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
+
+        <FrameLayout
+            android:id="@+id/popup_notification_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="12dp"
+            />
+
+    </LinearLayout>
+
 </FrameLayout>

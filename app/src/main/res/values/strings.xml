@@ -70,5 +70,11 @@
     <string name="projection_resume_grace_period_pref_name">Connection resume grace period</string>
     <string name="start_projection_when_locked_pref_summary_on">You can unlock your phone after connecting to your car</string>
     <string name="start_projection_when_locked_pref_summary_off">You must unlock your phone before connecting to your car</string>
+    <string name="notification_service_description">Allows Geargrinder to display and announce notifications through your car.</string>
+    <string name="notification_tts_announcement_format" formatted="true">%s: %s</string>
+    <string name="notification_tts_announcement_no_content" formatted="true">no speakable content</string>
+    <string name="speak_button">speak</string>
+    <string name="clear_button">clear</string>
+    <string name="notification_top_text_join_format" formatted="true">%s · %s</string>
 
 </resources>

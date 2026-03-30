@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -133,6 +134,13 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         connector.bindNotificationService();
 
         makeshiftBind = new MakeshiftBind(this, new ComponentName(this, ProjectionActivity.class), this);
+
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Log.i(TAG, "consuming back");
+            }
+        });
     }
 
     @Override

@@ -20,6 +20,7 @@ import io.benwiegand.projection.geargrinder.proto.data.readable.input.InputChann
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.InputEventData;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.event.ButtonEvent;
 import io.benwiegand.projection.geargrinder.proto.data.writable.ChannelOpenRequest;
+import io.benwiegand.projection.geargrinder.proto.data.writable.input.InputBindingRequest;
 
 public class InputChannel implements MessageListener {
     private static final String TAG = InputChannel.class.getSimpleName();
@@ -103,8 +104,9 @@ public class InputChannel implements MessageListener {
                     }
                 }
 
+                // for now just do all the keycodes
                 Log.i(TAG, "sending input binding request");
-                mb.sendMessage(messageParams, INPUT_CMD_BINDING_REQUEST, new byte[0]);
+                mb.sendMessage(messageParams, INPUT_CMD_BINDING_REQUEST, new InputBindingRequest(channelMeta.keycodes()).serialize());
             }
 
             case INPUT_CMD_EVENT -> {

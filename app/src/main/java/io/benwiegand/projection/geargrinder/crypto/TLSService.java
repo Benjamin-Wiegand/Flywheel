@@ -50,7 +50,7 @@ public class TLSService {
 
             sslEngine = sslContext.createSSLEngine();
             sslEngine.setUseClientMode(false);  // phone is the server, headunit is the client
-//            sslEngine.setWantClientAuth(true);
+            sslEngine.setNeedClientAuth(true);
             sslEngine.setEnabledProtocols(new String[]{"TLSv1.2",});  // TLSv1.3 does not work, nor does TLSv1.1
 
             Log.d(TAG, "default cipher suites: " + Arrays.toString(sslEngine.getEnabledCipherSuites()));

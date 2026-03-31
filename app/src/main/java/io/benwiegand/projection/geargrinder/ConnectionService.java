@@ -30,6 +30,7 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
 import io.benwiegand.projection.geargrinder.crypto.KeystoreManager;
+import io.benwiegand.projection.geargrinder.crypto.LGTMTrustManager;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
 import io.benwiegand.projection.geargrinder.message.AAFrame;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
@@ -83,7 +84,7 @@ public class ConnectionService extends Service implements ControlListener {
             keystoreManager.saveKeystore();
 
             keyManagers = keystoreManager.getKeyManagers();
-            trustManagers = keystoreManager.getTrustManagers();
+            trustManagers = new TrustManager[] {new LGTMTrustManager()};
 
         } catch (Throwable t) {
             // TODO: properly handle this

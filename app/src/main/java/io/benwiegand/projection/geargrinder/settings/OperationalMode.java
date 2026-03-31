@@ -17,7 +17,7 @@ public enum OperationalMode {
         return SettingsManager.enumForPref(
                 context, prefs,
                 R.string.key_operational_mode,
-                R.string.operational_mode_screen_mirroring,
+                R.string.operational_mode_default,
                 List.of(
                         Pair.create(R.string.operational_mode_audio_only, AUDIO_ONLY),
                         Pair.create(R.string.operational_mode_screen_mirroring, SCREEN_MIRRORING),

@@ -14,7 +14,7 @@
             app:title="@string/privilege_mode_pref_name"
             app:entries="@array/privilege_mode_entries"
             app:entryValues="@array/privilege_mode_values"
-            app:defaultValue="@string/privilege_mode_root"
+            app:defaultValue="@string/privilege_mode_default"
             app:useSimpleSummaryProvider="true"
             />
 
@@ -25,7 +25,7 @@
             app:title="@string/operational_mode_pref_name"
             app:entries="@array/operational_mode_entries"
             app:entryValues="@array/operational_mode_values"
-            app:defaultValue="@string/operational_mode_screen_mirroring"
+            app:defaultValue="@string/operational_mode_default"
             app:useSimpleSummaryProvider="true"
             app:isPreferenceVisible="false"
             />
@@ -41,7 +41,7 @@
             app:key="@string/key_start_projection_when_locked"
             app:iconSpaceReserved="false"
             app:title="@string/start_projection_when_locked_pref_name"
-            app:defaultValue="false"
+            app:defaultValue="@string/start_projection_when_locked_default"
             app:summaryOn="@string/start_projection_when_locked_pref_summary_on"
             app:summaryOff="@string/start_projection_when_locked_pref_summary_off"
             />
@@ -52,7 +52,7 @@
             app:title="@string/projection_resume_grace_period_pref_name"
             app:entries="@array/projection_grace_period_entries"
             app:entryValues="@array/projection_grace_period_values"
-            app:defaultValue="@string/projection_grace_period_30_sec"
+            app:defaultValue="@string/projection_grace_period_default"
             app:useSimpleSummaryProvider="true"
             />
 
@@ -69,7 +69,7 @@
             app:title="@string/video_buffer_size_pref_name"
             app:entries="@array/video_buffer_size_entries"
             app:entryValues="@array/video_buffer_size_values"
-            app:defaultValue="@string/video_buffer_size_auto"
+            app:defaultValue="@string/video_buffer_size_default"
             app:useSimpleSummaryProvider="true"
             />
 

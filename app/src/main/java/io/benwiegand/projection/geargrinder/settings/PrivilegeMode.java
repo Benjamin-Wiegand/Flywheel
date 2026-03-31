@@ -17,7 +17,7 @@ public enum PrivilegeMode {
         return SettingsManager.enumForPref(
                 context, prefs,
                 R.string.key_privilege_mode,
-                R.string.privilege_mode_no_root,
+                R.string.privilege_mode_default,
                 List.of(
                         Pair.create(R.string.privilege_mode_no_root, NO_ROOT),
                         Pair.create(R.string.privilege_mode_shizuku, SHIZUKU),

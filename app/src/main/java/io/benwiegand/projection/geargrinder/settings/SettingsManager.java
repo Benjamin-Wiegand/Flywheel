@@ -32,44 +32,56 @@ public class SettingsManager {
     }
 
     public boolean allowsStartProjectionWhenLocked() {
-        return prefs.getBoolean(context.getString(R.string.key_start_projection_when_locked), false);
+        return getBool(R.string.key_start_projection_when_locked, R.string.start_projection_when_locked_default);
     }
 
     public int getProjectionResumeGracePeriod() {
-        return castInt(R.string.key_projection_resume_grace_period, 30);
+        return castInt(R.string.key_projection_resume_grace_period, R.string.projection_grace_period_default);
     }
 
     public int getVideoBufferSize() {
-        return castInt(R.string.key_video_buffer_size, 0);
+        return castInt(R.string.key_video_buffer_size, R.string.video_buffer_size_default);
     }
 
-    private int castInt(@StringRes int key, int defaultValue) {
+    private int castInt(@StringRes int key, @StringRes int defaultRes) {
         String stringValue = prefs.getString(context.getString(key), null);
-        if (stringValue == null) return defaultValue;
+        if (stringValue == null) stringValue = context.getString(defaultRes);
 
         try {
             return Integer.parseInt(stringValue);
         } catch (NumberFormatException e) {
             Log.wtf(TAG, "failed to cast preference value to integer", e);
             assert false;
-            return defaultValue;
+
+            try {
+                return Integer.parseInt(context.getString(defaultRes));
+            } catch (NumberFormatException ee) {
+                Log.wtf(TAG, "default value failed to parse to int", ee);
+                throw new AssertionError(e);
+            }
         }
     }
 
-    public static <T> T enumForPref(Context context, SharedPreferences prefs, int key, int defaultValue, List<Pair<Integer, T>> mapping) {
+    private boolean getBool(@StringRes int key, @StringRes int defaultRes) {
+        boolean defaultValue = Boolean.parseBoolean(context.getString(defaultRes));
+        return prefs.getBoolean(context.getString(key), defaultValue);
+    }
+
+    public static <T> T enumForPref(Context context, SharedPreferences prefs, @StringRes int key, @StringRes int defaultRes, List<Pair<Integer, T>> mapping) {
+        String defaultValue = context.getString(defaultRes);
         String value = prefs.getString(
                 context.getString(key),
-                context.getString(defaultValue));
+                defaultValue);
 
         T defaultMapping = null;
         for (Pair<Integer, T> entry : mapping) {
-            if (entry.first == defaultValue) defaultMapping = entry.second;
-            if (!context.getString(entry.first).equals(value)) continue;
-            return entry.second;
+            String entryValue = context.getString(entry.first);
+            if (entryValue.equals(defaultValue)) defaultMapping = entry.second;
+            if (entryValue.equals(value)) return entry.second;
         }
 
         if (defaultMapping == null)
-            Log.wtf(TAG, "default value not present in mappings");
+            Log.wtf(TAG, "default value not present in mappings", new AssertionError());
 
         Log.wtf(TAG, "unhandled value for pref " + context.getString(key) + ": " + value);
         assert false;

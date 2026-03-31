@@ -35,6 +35,8 @@
     <string translatable="false" name="privilege_mode_no_root">no_root</string>
     <string translatable="false" name="privilege_mode_shizuku">shizuku</string>
     <string translatable="false" name="privilege_mode_root">root</string>
+    <!-- TODO: set this to no_root when that mode is ready -->
+    <string translatable="false" name="privilege_mode_default">@string/privilege_mode_root</string>
 
     <string-array translatable="false" name="privilege_mode_values">
 <!--        <item>@string/privilege_mode_no_root</item>-->
@@ -46,6 +48,7 @@
     <string translatable="false" name="operational_mode_audio_only">audio_only</string>
     <string translatable="false" name="operational_mode_screen_mirroring">screen_mirroring</string>
     <string translatable="false" name="operational_mode_geargrinder_projection">geargrinder_projection</string>
+    <string translatable="false" name="operational_mode_default">@string/operational_mode_screen_mirroring</string>
 
     <string-array translatable="false" name="operational_mode_values">
         <item>@string/operational_mode_audio_only</item>
@@ -59,6 +62,7 @@
     <string translatable="false" name="projection_grace_period_30_sec">30</string>
     <string translatable="false" name="projection_grace_period_60_sec">60</string>
     <string translatable="false" name="projection_grace_period_120_sec">120</string>
+    <string translatable="false" name="projection_grace_period_default">@string/projection_grace_period_30_sec</string>
 
     <string-array translatable="false" name="projection_grace_period_values">
         <item>@string/projection_grace_period_disabled</item>
@@ -76,6 +80,7 @@
     <string translatable="false" name="video_buffer_size_512k">524288</string>
     <string translatable="false" name="video_buffer_size_768k">786432</string>
     <string translatable="false" name="video_buffer_size_1024k">1048576</string>
+    <string translatable="false" name="video_buffer_size_default">@string/video_buffer_size_auto</string>
 
     <string-array translatable="false" name="video_buffer_size_values">
         <item>@string/video_buffer_size_auto</item>
@@ -86,6 +91,9 @@
         <item>@string/video_buffer_size_768k</item>
         <item>@string/video_buffer_size_1024k</item>
     </string-array>
+
+
+    <string translatable="false" name="start_projection_when_locked_default">false</string>
 
 
     <string translatable="false" name="key_privilege_mode">privilege_mode</string>

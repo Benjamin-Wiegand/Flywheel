@@ -33,6 +33,8 @@ import io.benwiegand.projection.geargrinder.crypto.CryptoManager;
 import io.benwiegand.projection.geargrinder.crypto.KeystoreManager;
 import io.benwiegand.projection.geargrinder.crypto.LGTMTrustManager;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
+import io.benwiegand.projection.geargrinder.exception.CorruptedCertificateException;
+import io.benwiegand.projection.geargrinder.exception.CorruptedKeyException;
 import io.benwiegand.projection.geargrinder.message.AAFrame;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.notification.ConnectionNotificationService;
@@ -58,10 +60,9 @@ public class ConnectionService extends Service implements ControlListener {
     private final Object lock = new Object();
     private Thread connectionThread = null;
 
-    private KeyManager[] keyManagers;
-    private TrustManager[] trustManagers;
     private ConnectionNotificationService notificationService;
     private SettingsManager settingsManager;
+    private CryptoManager cryptoManager;
 
     private MediaProjection mediaProjection = null;
     private MediaProjectionRequestCallback mediaProjectionRequestCallback = null;
@@ -77,19 +78,7 @@ public class ConnectionService extends Service implements ControlListener {
 
         notificationService = new ConnectionNotificationService(this);
         settingsManager = new SettingsManager(this);
-
-        try {
-            // TODO
-            CryptoManager cryptoManager = new CryptoManager(this);
-            KeystoreManager keystoreManager = cryptoManager.getKeystoreForSelfSignedPhoneKeys();
-
-            keyManagers = keystoreManager.getKeyManagers();
-            trustManagers = new TrustManager[] {new LGTMTrustManager()};
-
-        } catch (Throwable t) {
-            // TODO: properly handle this
-            throw new RuntimeException(t);
-        }
+        cryptoManager = new CryptoManager(this);
     }
 
     @Override
@@ -222,6 +211,13 @@ public class ConnectionService extends Service implements ControlListener {
         notificationService.setCarName(carName);
     }
 
+    private TLSService createTlsService() throws CorruptedKeyException, CorruptedCertificateException {
+        KeystoreManager keystoreManager = cryptoManager.getKeystoreForCurrentConfiguration();
+        TrustManager[] trustManagers = new TrustManager[] {new LGTMTrustManager()};
+        KeyManager[] keyManagers = keystoreManager.getKeyManagers();
+        return new TLSService(trustManagers, keyManagers);
+    }
+
     private void usbConnectionLoop() {
         assert !Looper.getMainLooper().isCurrentThread();   // never run on main thread
 
@@ -272,7 +268,7 @@ public class ConnectionService extends Service implements ControlListener {
                 notificationService.clearError();
 
                 Log.d(TAG, "starting services");
-                TLSService tlsService = new TLSService(trustManagers, keyManagers);
+                TLSService tlsService = createTlsService();
                 UsbTransferInterface usbTransferInterface = new UsbTransferInterface(pfd, is, os, AAFrame.MAX_LENGTH);
                 MessageBroker messageBroker = new MessageBroker(usbTransferInterface, tlsService);
                 ControlChannel controlChannel = new ControlChannel(this, messageBroker, tlsService, this, settingsManager, binder);
@@ -287,6 +283,8 @@ public class ConnectionService extends Service implements ControlListener {
             } catch (IOException e) {
                 Log.e(TAG, "IOException in car connection", e);
                 notificationService.postError(R.string.car_connection_unexpected_error, R.string.error_car_io_usb_generic);
+            } catch (CorruptedKeyException | CorruptedCertificateException e) {
+                notificationService.postError(e);
             }
 
         } finally {

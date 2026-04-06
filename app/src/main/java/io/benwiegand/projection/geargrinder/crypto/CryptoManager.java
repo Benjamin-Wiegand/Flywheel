@@ -115,6 +115,16 @@ public class CryptoManager {
         return km;
     }
 
+    public KeystoreManager getKeystoreForCurrentConfiguration() throws CorruptedKeyException, CorruptedCertificateException {
+        if (settingsManager.useImportedPhoneKeys()) {
+            Log.i(TAG, "using imported phone keys");
+            return getKeystoreForImportedPhoneKeys();
+        } else {
+            Log.i(TAG, "using self-signed phone keys");
+            return getKeystoreForSelfSignedPhoneKeys();
+        }
+    }
+
     public boolean importPhonePKCS8PrivateKey(PrivateKey privateKey) {
         return settingsManager.saveImportedPhonePKCS8PrivateKey(encodePrivateKey(privateKey));
     }

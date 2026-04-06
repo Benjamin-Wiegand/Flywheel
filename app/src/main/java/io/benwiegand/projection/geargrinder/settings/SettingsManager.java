@@ -45,6 +45,10 @@ public class SettingsManager {
         return castInt(R.string.key_video_buffer_size, R.string.video_buffer_size_default);
     }
 
+    public boolean useImportedPhoneKeys() {
+        return getBool(R.string.key_use_imported_phone_keys, R.string.start_projection_when_locked_default);
+    }
+
     public byte[][] getX509CertificateChain(String key) {
         return getRawBytesMulti(key);
     }

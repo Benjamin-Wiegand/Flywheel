@@ -18,6 +18,7 @@ import androidx.annotation.StringRes;
 import io.benwiegand.projection.geargrinder.ConnectionService;
 import io.benwiegand.projection.geargrinder.DebugActivity;
 import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 
 public class ConnectionNotificationService {
     private static final String TAG = ConnectionNotificationService.class.getSimpleName();
@@ -94,7 +95,7 @@ public class ConnectionNotificationService {
         nm.cancel(ERROR_NOTIFICATION_ID);
     }
 
-    public void postError(@StringRes int title, @StringRes int content) {
+    public void postError(String title, String content) {
         initErrorNotificationChannel();
 
         // TODO: error activity
@@ -105,12 +106,22 @@ public class ConnectionNotificationService {
         Notification notification = new Notification.Builder(context, ERROR_NOTIFICATION_CHANNEL)
                 .setSmallIcon(android.R.drawable.stat_notify_error)
                 .setContentIntent(pendingIntent)
-                .setContentTitle(context.getString(title))
-                .setContentText(context.getString(content))
+                .setContentTitle(title)
+                .setContentText(content)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .build();
 
         nm.notify(ERROR_NOTIFICATION_ID, notification);
+    }
+
+    public void postError(@StringRes int title, @StringRes int content) {
+        postError(context.getString(title), context.getString(content));
+    }
+
+    public void postError(UserFriendlyException e) {
+        String title = e.getFriendlyTitle();
+        if (title == null) title = context.getString(R.string.default_error_title);
+        postError(title, e.getFriendlyMessage());
     }
 
     private void updateForegroundNotification() {

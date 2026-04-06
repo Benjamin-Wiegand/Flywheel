@@ -29,6 +29,7 @@ import java.io.IOException;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
+import io.benwiegand.projection.geargrinder.crypto.CryptoManager;
 import io.benwiegand.projection.geargrinder.crypto.KeystoreManager;
 import io.benwiegand.projection.geargrinder.crypto.LGTMTrustManager;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
@@ -78,10 +79,9 @@ public class ConnectionService extends Service implements ControlListener {
         settingsManager = new SettingsManager(this);
 
         try {
-            KeystoreManager keystoreManager = new KeystoreManager(this);
-            keystoreManager.loadKeystore();
-            keystoreManager.initKeypair("deez");    // TODO
-            keystoreManager.saveKeystore();
+            // TODO
+            CryptoManager cryptoManager = new CryptoManager(this);
+            KeystoreManager keystoreManager = cryptoManager.getKeystoreForSelfSignedPhoneKeys();
 
             keyManagers = keystoreManager.getKeyManagers();
             trustManagers = new TrustManager[] {new LGTMTrustManager()};

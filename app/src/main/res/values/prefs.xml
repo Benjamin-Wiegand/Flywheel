@@ -103,4 +103,11 @@
     <string translatable="false" name="key_projection_resume_grace_period">projection_resume_grace_period</string>
 
     <string translatable="false" name="key_video_buffer_size">video_buffer_size</string>
+
+    <string translatable="false" name="key_imported_phone_x509_certificate_chain">imported_phone_x509_certificate_chain</string>
+    <string translatable="false" name="key_imported_phone_pkcs8_private_key">imported_phone_pkcs8_private_key</string>
+    <string translatable="false" name="key_self_signed_phone_x509_certificate_chain">self_signed_phone_x509_certificate_chain</string>
+    <string translatable="false" name="key_self_signed_phone_pkcs8_private_key">self_signed_phone_pkcs8_private_key</string>
+    <string translatable="false" name="key_use_imported_phone_keys">use_imported_phone_keys</string>
+
 </resources>

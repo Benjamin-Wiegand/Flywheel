@@ -79,4 +79,46 @@
     <string name="pref_category_video">video</string>
     <string name="video_buffer_size_pref_name">Video buffer size</string>
 
+    <string name="file_import_error_title">Failed to import file</string>
+    <string name="file_import_error_invalid_cert">Not a supported certificate format</string>
+    <string name="file_import_error_invalid_key">Not a supported private key format</string>
+    <string name="file_import_error_too_large">File larger than expected</string>
+    <string name="file_import_error_io_error">Failed to read file</string>
+    <string name="file_import_error_unexpected">Unexpected error</string>
+
+    <string name="default_error_title">An error has occurred</string>
+    <string name="corrupted_key_error_title">Failed to load SSL/TLS private key</string>
+    <string name="corrupted_key_error_imported_phone">The imported phone private key may be corrupted.</string>
+    <string name="corrupted_key_error_self_signed_phone">The stored self-signed phone private key may be corrupted.</string>
+    <string name="corrupted_cert_error_title">Failed to load SSL/TLS certificate</string>
+    <string name="corrupted_cert_error_imported_phone">The imported phone certificate may be corrupted.</string>
+    <string name="corrupted_cert_error_self_signed_phone">The stored self-signed phone certificate may be corrupted.</string>
+
+    <string name="import_key_and_cert_first">import a private key and certificate first</string>
+
+    <string name="pref_category_imported_keys">imported keys</string>
+    <string name="pref_category_self_signed_keys">self-signed keys</string>
+    <string name="pref_category_compatibility">compatibility</string>
+    <string name="use_imported_phone_keys_pref_name">Use imported keys</string>
+    <string name="imported_phone_x509_certificate_chain_pref_name">Import X509 certificate or chain</string>
+    <string name="imported_phone_pkcs8_private_key_pref_name">Import PKCS#8 private key</string>
+    <string name="self_signed_phone_x509_certificate_chain_pref_name">Certificate status</string>
+    <string name="self_signed_phone_pkcs8_private_key_pref_name">Private key status</string>
+    <string name="certificates_and_keys_pref_screen_button">Certificates and keys</string>
+
+    <string name="corrupted_item_pref_summary_format" formatted="true">corrupted: %s</string>
+    <string name="no_item_pref_summary">none</string>
+    <string name="certificate_line_pref_summary_format" formatted="true">%d: %s</string>
+    <string name="certificate_check_failure_line_pref_summary_format" formatted="true">- %s</string>
+
+    <string name="certificate_is_from_car_service">from CarService</string>
+    <string name="certificate_is_not_from_car_service">not from CarService</string>
+    <string name="certificate_is_not_from_car_service_details">this might not be the correct certificate</string>
+    <string name="certificate_is_expired_format" formatted="true">expired as of %s</string>
+    <string name="certificate_is_expired_detail_format" formatted="true">try setting the date on your car/headunit to something after %s and before %s</string>
+    <string name="certificate_is_not_expired_format" formatted="true">expires %s</string>
+    <string name="certificate_is_within_valid_period">within validity period</string>
+    <string name="certificate_is_not_within_valid_period_format" formatted="true">not valid until %s</string>
+    <string name="certificate_is_not_within_valid_period_detail">is your phone time set correctly?</string>
+
 </resources>

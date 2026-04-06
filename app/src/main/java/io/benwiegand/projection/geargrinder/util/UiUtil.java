@@ -26,8 +26,18 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 
 public class UiUtil {
+
+    public static AlertDialog.Builder errorDialog(Context context, UserFriendlyException e) {
+        String title = e.getFriendlyTitle();
+        if (title == null) title = context.getString(R.string.default_error_title);
+        return new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(e.getFriendlyMessage())
+                .setNeutralButton(R.string.close_button, null);
+    }
 
     public static void getViewBoundsInDisplay(View view, Rect bounds) {
         int[] coords = new int[2];

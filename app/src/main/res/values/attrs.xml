@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <declare-styleable name="FileImportPreference">
+        <attr name="maxFileSize" format="integer" />
+        <attr name="acceptedMimeTypes" format="string" />   <!-- comma separated -->
+    </declare-styleable>
+    
+</resources>

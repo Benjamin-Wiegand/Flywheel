@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="@string/pref_category_imported_keys"
+        app:iconSpaceReserved="false"
+        >
+
+        <SwitchPreferenceCompat
+            app:key="@string/key_use_imported_phone_keys"
+            app:title="@string/use_imported_phone_keys_pref_name"
+            app:iconSpaceReserved="false"
+            />
+
+        <io.benwiegand.projection.geargrinder.settings.ui.preference.X509CertificateChainImportPreference
+            app:key="@string/key_imported_phone_x509_certificate_chain"
+            app:iconSpaceReserved="false"
+            app:title="@string/imported_phone_x509_certificate_chain_pref_name"
+            app:maxFileSize="500000"
+            />
+
+        <io.benwiegand.projection.geargrinder.settings.ui.preference.PKCS8PrivateKeyImportPreference
+            app:key="@string/key_imported_phone_pkcs8_private_key"
+            app:iconSpaceReserved="false"
+            app:title="@string/imported_phone_pkcs8_private_key_pref_name"
+            app:maxFileSize="500000"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/pref_category_self_signed_keys"
+        app:iconSpaceReserved="false"
+        >
+
+        <Preference
+            app:key="@string/key_self_signed_phone_x509_certificate_chain"
+            app:title="@string/self_signed_phone_x509_certificate_chain_pref_name"
+            app:iconSpaceReserved="false"
+            />
+
+        <Preference
+            app:key="@string/key_self_signed_phone_pkcs8_private_key"
+            app:title="@string/self_signed_phone_pkcs8_private_key_pref_name"
+            app:iconSpaceReserved="false"
+            />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

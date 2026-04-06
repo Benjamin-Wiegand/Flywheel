@@ -33,6 +33,19 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        app:title="@string/pref_category_compatibility"
+        app:iconSpaceReserved="false"
+        >
+
+        <Preference
+            app:title="@string/certificates_and_keys_pref_screen_button"
+            app:iconSpaceReserved="false"
+            android:fragment="io.benwiegand.projection.geargrinder.settings.ui.fragment.KeysPreferenceFragment"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         app:title="@string/pref_category_connection"
         app:iconSpaceReserved="false"
         >

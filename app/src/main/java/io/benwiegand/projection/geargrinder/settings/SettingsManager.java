@@ -2,6 +2,7 @@ package io.benwiegand.projection.geargrinder.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 
@@ -14,6 +15,7 @@ import io.benwiegand.projection.geargrinder.R;
 public class SettingsManager {
     private static final String TAG = SettingsManager.class.getSimpleName();
     private static final String PREFERENCE_NAME = "io.benwiegand.projection.geargrinder_preferences";
+    private static final String RAW_BYTES_MULTI_SEPARATOR = ",";
 
     private final Context context;
     private final SharedPreferences prefs;
@@ -43,6 +45,46 @@ public class SettingsManager {
         return castInt(R.string.key_video_buffer_size, R.string.video_buffer_size_default);
     }
 
+    public byte[][] getX509CertificateChain(String key) {
+        return getRawBytesMulti(key);
+    }
+
+    public byte[] getPKCS8PrivateKey(String prefKey) {
+        return getRawBytes(prefKey);
+    }
+
+    public boolean saveSelfSignedPhoneX509CertificateChain(byte[][] encodedCertChain) {
+        return saveRawBytes(R.string.key_self_signed_phone_x509_certificate_chain, encodedCertChain);
+    }
+
+    public byte[][] getSelfSignedPhoneX509CertificateChain() {
+        return getRawBytesMulti(R.string.key_self_signed_phone_x509_certificate_chain);
+    }
+
+    public boolean saveSelfSignedPhonePKCS8PrivateKey(byte[] encodedPrivateKey) {
+        return saveRawBytes(R.string.key_self_signed_phone_pkcs8_private_key, encodedPrivateKey);
+    }
+
+    public byte[] getSelfSignedPhonePKCS8PrivateKey() {
+        return getRawBytes(R.string.key_self_signed_phone_pkcs8_private_key);
+    }
+
+    public boolean saveImportedPhoneX509CertificateChain(byte[][] encodedCertChain) {
+        return saveRawBytes(R.string.key_imported_phone_x509_certificate_chain, encodedCertChain);
+    }
+
+    public byte[][] getImportedPhoneX509CertificateChain() {
+        return getRawBytesMulti(R.string.key_imported_phone_x509_certificate_chain);
+    }
+
+    public boolean saveImportedPhonePKCS8PrivateKey(byte[] encodedPrivateKey) {
+        return saveRawBytes(R.string.key_imported_phone_pkcs8_private_key, encodedPrivateKey);
+    }
+
+    public byte[] getImportedPhonePKCS8PrivateKey() {
+        return getRawBytes(R.string.key_imported_phone_pkcs8_private_key);
+    }
+
     private int castInt(@StringRes int key, @StringRes int defaultRes) {
         String stringValue = prefs.getString(context.getString(key), null);
         if (stringValue == null) stringValue = context.getString(defaultRes);
@@ -65,6 +107,45 @@ public class SettingsManager {
     private boolean getBool(@StringRes int key, @StringRes int defaultRes) {
         boolean defaultValue = Boolean.parseBoolean(context.getString(defaultRes));
         return prefs.getBoolean(context.getString(key), defaultValue);
+    }
+
+    private boolean saveRawBytes(@StringRes int key, byte[]... multiData) {
+        String[] encodedMultiData = new String[multiData.length];
+        for (int i = 0; i < multiData.length; i++)
+            encodedMultiData[i] = Base64.encodeToString(multiData[i], Base64.NO_WRAP);
+
+        String value = String.join(RAW_BYTES_MULTI_SEPARATOR, encodedMultiData);
+        return prefs.edit()
+                .putString(context.getString(key), value)
+                .commit();
+    }
+
+    private byte[][] getRawBytesMulti(String key) {
+        String value = prefs.getString(key, null);
+        if (value == null) return null;
+
+        String[] encodedMultiData = value.split(RAW_BYTES_MULTI_SEPARATOR);
+        byte[][] multiData = new byte[encodedMultiData.length][];
+        for (int i = 0; i < multiData.length; i++)
+            multiData[i] = Base64.decode(encodedMultiData[i], Base64.NO_WRAP);
+
+        return multiData;
+    }
+
+    private byte[][] getRawBytesMulti(@StringRes int key) {
+        return getRawBytesMulti(context.getString(key));
+    }
+
+    private byte[] getRawBytes(String key) {
+        byte[][] multiData = getRawBytesMulti(key);
+        if (multiData == null) return null;
+        if (multiData.length == 0) return new byte[0];
+        if (multiData.length > 1) throw new AssertionError("expected 1 or 0 byte arrays for preference \"" + key + "\", but found " + multiData.length);
+        return multiData[0];
+    }
+
+    private byte[] getRawBytes(@StringRes int key) {
+        return getRawBytes(context.getString(key));
     }
 
     public static <T> T enumForPref(Context context, SharedPreferences prefs, @StringRes int key, @StringRes int defaultRes, List<Pair<Integer, T>> mapping) {

@@ -167,7 +167,7 @@ public class ConnectionRequestActivity extends AppCompatActivity {
                     return;
                 }
 
-                startForegroundService(new Intent(this, ConnectionService.class)
+                startService(new Intent(this, ConnectionService.class)
                         .setAction(ConnectionService.INTENT_ACTION_START_MEDIA_PROJECTION)
                         .putExtra(ConnectionService.INTENT_EXTRA_MEDIA_PROJECTION_PERMISSION_RESULT, result));
 

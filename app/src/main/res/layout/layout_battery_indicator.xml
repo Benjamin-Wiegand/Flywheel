@@ -5,8 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center"
-    tools:ignore="UseCompoundDrawables"
-    >
+    tools:ignore="UseCompoundDrawables">
 
     <ImageView
         android:id="@+id/battery_icon"
@@ -23,7 +22,8 @@
         android:lines="1"
         android:ellipsize="none"
         tools:text="69%"
-        style="@style/TextAppearance.MaterialComponents.Subtitle1"
+        style="?attr/textAppearanceSubtitle1"
+        android:textColor="?attr/colorDockForeground"
         />
 
 </LinearLayout>

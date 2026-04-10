@@ -34,7 +34,7 @@
                     android:gravity="center"
                     android:autoSizeMaxTextSize="48sp"
                     android:lines="1"
-                    style="@style/TextAppearance.MaterialComponents.Headline1"
+                    style="?attr/textAppearanceHeadline1"
                     />
 
                 <TextView
@@ -43,7 +43,7 @@
                     android:layout_weight="0"
                     android:text="@string/experimental_app_warning"
                     android:gravity="center"
-                    style="@style/TextAppearance.MaterialComponents.Body1"
+                    style="?attr/textAppearanceBody1"
                     />
 
             </LinearLayout>
@@ -71,7 +71,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingHorizontal="8dp"
-            android:background="@color/black"
+            android:background="?attr/colorDockBackground"
             >
 
             <include
@@ -102,8 +102,8 @@
                 <TextClock
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/TextAppearance.MaterialComponents.Headline6"
-                    android:textColor="@color/white"
+                    style="?attr/textAppearanceHeadline6"
+                    android:textColor="?attr/colorDockForeground"
                     />
 
                 <LinearLayout

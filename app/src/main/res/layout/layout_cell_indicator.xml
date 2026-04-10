@@ -6,7 +6,8 @@
     android:lines="1"
     android:ellipsize="none"
     android:drawablePadding="-6dp"
-    style="@style/TextAppearance.MaterialComponents.Subtitle2"
+    android:textColor="?attr/colorDockForeground"
+    style="?attr/textAppearanceSubtitle2"
     tools:drawableRightCompat="@drawable/cellular_indicator"
     tools:text="LTE"
     />

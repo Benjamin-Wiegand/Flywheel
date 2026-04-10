@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:background="?attr/colorBackgroundFloating"
+        android:background="?attr/colorAppModal"
         android:clickable="true"
         >
 
@@ -56,7 +56,7 @@
                 android:lines="1"
                 android:ellipsize="end"
                 tools:text="Some app"
-                style="@style/TextAppearance.MaterialComponents.Headline5"
+                style="?attr/textAppearanceHeadline5"
                 />
 
         </LinearLayout>

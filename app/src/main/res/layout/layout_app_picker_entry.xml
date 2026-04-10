@@ -25,6 +25,6 @@
         android:lines="1"
         android:ellipsize="marquee"
         tools:text="@string/app_name"
-        style="@style/TextAppearance.MaterialComponents.Body1"
+        style="?attr/textAppearanceBody1"
         />
 </LinearLayout>

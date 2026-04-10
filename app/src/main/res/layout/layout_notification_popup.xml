@@ -67,7 +67,7 @@
                     android:lines="1"
                     android:ellipsize="end"
                     tools:text="Some app · now"
-                    style="@style/TextAppearance.MaterialComponents.Caption"
+                    style="?attr/textAppearanceCaption"
                     />
 
             </LinearLayout>
@@ -79,7 +79,7 @@
                 android:lines="1"
                 android:ellipsize="end"
                 tools:text="Some notification title"
-                style="@style/TextAppearance.MaterialComponents.Subtitle1"
+                style="?attr/textAppearanceSubtitle1"
                 />
 
             <TextView
@@ -89,7 +89,7 @@
                 android:lines="1"
                 android:ellipsize="end"
                 tools:text="Some notification text\nsecond line should not be visible"
-                style="@style/TextAppearance.MaterialComponents.Body1"
+                style="?attr/textAppearanceBody1"
                 />
 
         </LinearLayout>
@@ -111,7 +111,7 @@
             android:drawableLeft="@android:drawable/ic_lock_silent_mode_off"
             android:textColor="?android:attr/colorForeground"
             tools:ignore="RtlHardcoded"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="?attr/borderlessButtonStyle"
             />
 
         <Button
@@ -123,7 +123,7 @@
             android:drawableLeft="@android:drawable/ic_menu_close_clear_cancel"
             android:textColor="?android:attr/colorForeground"
             tools:ignore="RtlHardcoded"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="?attr/borderlessButtonStyle"
             />
 
     </LinearLayout>

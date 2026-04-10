@@ -5,5 +5,12 @@
         <attr name="maxFileSize" format="integer" />
         <attr name="acceptedMimeTypes" format="string" />   <!-- comma separated -->
     </declare-styleable>
+
+    <declare-styleable name="Theme">
+        <attr name="colorDockForeground" format="color" />
+        <attr name="colorDockBackground" format="color" />
+
+        <attr name="colorAppModal" format="color" />
+    </declare-styleable>
     
 </resources>

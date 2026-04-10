@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/connect_your_car_over_usb"
-        style="@style/TextAppearance.MaterialComponents.Body1"
+        style="?attr/textAppearanceBody1"
         />
 
 </LinearLayout>

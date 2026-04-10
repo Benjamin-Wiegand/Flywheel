@@ -3,7 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground"
+    android:background="?android:attr/windowBackground"
+    android:clickable="true"
+    android:focusable="false"
     >
 
     <ImageButton
@@ -19,7 +21,9 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/app_drawer_categories"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        style="?attr/tabStyle"
+        >
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
@@ -51,6 +55,7 @@
             android:id="@+id/app_drawer_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scrollbars="vertical"
             />
 
         <ProgressBar

@@ -14,7 +14,7 @@
         android:lines="1"
         android:ellipsize="end"
         tools:text="Launch app"
-        style="@style/TextAppearance.MaterialComponents.Headline5"
+        style="?attr/textAppearanceHeadline5"
         />
 
     <androidx.recyclerview.widget.RecyclerView

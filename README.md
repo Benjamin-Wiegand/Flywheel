@@ -86,8 +86,10 @@ Geargrinder has been verified to work on these operating systems (this list may 
 - Stock Android (Google Pixel, with Google services)
     - Android 9
     - Android 10
+    - Android 13
     - Android 16
 - Stock Android (various vendors, de-googled)
+    - Android 11
     - Android 14
     - Android 15
 - MIUI (de-googled)

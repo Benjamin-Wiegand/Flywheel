@@ -120,6 +120,9 @@ public class AppDrawer implements PackageService.PackageServiceListener, TabLayo
         if (maxCols > DEFAULT_MAX_DRAWER_COLUMNS) maxCols = DEFAULT_MAX_DRAWER_COLUMNS;
 
         layoutManager.setSpanCount(maxCols);
+
+        int xOffset = (int) (appListWidth - (iconWidth * maxCols)) / maxCols / 2;
+        recycler.setPadding(xOffset, 0, 0, 0);
     }
 
     private void showCategoriesLoadingIndicator() {

@@ -5,7 +5,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.display.DisplayManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -51,8 +54,10 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private static final int LOCAL_VIRTUAL_DISPLAY_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
             | DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 
-    private static final long SPLASH_SHOW_DURATION = 250;
+    private static final long SPLASH_MAX_SHOW_DURATION = 250;
     private static final long SPLASH_ANIMATION_DURATION = 300;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final IPrivd privd;
     private final AppRecord app;
@@ -61,6 +66,11 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private int width;
     private int height;
     private boolean localDisplayFallback = false;
+
+    private long splashShownAt = 0;
+    private boolean splashVisible = false;
+    private boolean validFrame = false;
+    private boolean launched = false;
 
     private final View rootView;
     private final SurfaceView surfaceView;
@@ -93,9 +103,10 @@ public class VirtualActivity implements SurfaceHolder.Callback {
         surfaceView.setOnTouchListener(this::onMotionEvent);
         surfaceView.setOnGenericMotionListener(this::onMotionEvent);
 
-        try {
-            launch();
-        } catch (Throwable ignored) { }
+        // frame
+        surfaceView.getViewTreeObserver().addOnDrawListener(this::onFrame);
+
+        tryLaunch();
     }
 
     public Context getContext() {
@@ -103,12 +114,16 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     }
 
     public void launch() throws RemoteException {
+        if (launched) Log.i(TAG, "re-launching");
+        else Log.i(TAG, "trying launch");
+
         try {
             // display
             if (virtualDisplay != null && localDisplayFallback) {
                 Log.i(TAG, "releasing local virtual display for re-launch");
                 virtualDisplay.release();
                 virtualDisplay = null;
+                launched = false;
             }
 
             if (virtualDisplay == null) {
@@ -139,17 +154,34 @@ public class VirtualActivity implements SurfaceHolder.Callback {
                 this.virtualDisplay = virtualDisplay;
             }
 
+            invalidateFrame();
+
             // launch
             int result = privd.launchActivity(app.launchComponent(), getDisplayId());
             Log.d(TAG, "launch result " + result + " for " + app.launchComponent().flattenToShortString());
+
         } catch (Throwable t) {
             Log.e(TAG, "failed to launch virtual activity", t);
             // TODO: splash with retry button
+            throw t;
         }
     }
 
+    private boolean tryLaunch() {
+        try {
+            launch();
+            return true;
+        } catch (Throwable ignored) { }
+        return false;
+    }
+
+    public boolean isLaunched() {
+        return launched;
+    }
+
     public void destroy() {
-        virtualDisplay.release();
+        if (virtualDisplay != null)
+            virtualDisplay.release();
     }
 
     public ComponentName getComponentName() {
@@ -160,22 +192,37 @@ public class VirtualActivity implements SurfaceHolder.Callback {
         return app;
     }
 
-    private void showSplash(boolean animateIn) {
+    private void updateSplashVisibility() {
+        if (!splashVisible) return;
+
+        boolean timeout = splashShownAt + SPLASH_MAX_SHOW_DURATION <= SystemClock.elapsedRealtime();
+        if (!validFrame && !timeout) return;
+
+        Log.d(TAG, "hiding splash: validFrame=" + validFrame + ", timeout=" + timeout);
         View splash = rootView.findViewById(R.id.virtual_activity_splash);
         splash.animate()
                 .setStartDelay(0)
-                .setDuration(animateIn ? SPLASH_ANIMATION_DURATION : 0)
-                .alpha(0.99f)
-                .withStartAction(() -> splash.setVisibility(View.VISIBLE))
-                .withEndAction(() -> splash.animate()
-                        .setStartDelay(SPLASH_SHOW_DURATION)
-                        .setDuration(SPLASH_ANIMATION_DURATION)
-                        .alpha(0f)
-                        .withEndAction(() -> splash.setVisibility(View.GONE)));
+                .setDuration(SPLASH_ANIMATION_DURATION)
+                .alpha(0f)
+                .withEndAction(() -> splash.setVisibility(View.GONE));
+        splashVisible = false;
     }
 
-    public void showSplash() {
-        showSplash(true);
+    private void showSplash() {
+        splashShownAt = SystemClock.elapsedRealtime();
+        handler.postDelayed(this::updateSplashVisibility, SPLASH_MAX_SHOW_DURATION);
+        if (splashVisible) return;
+
+        Log.d(TAG, "showing splash: validFrame=" + validFrame + ", launched=" + launched);
+        View splash = rootView.findViewById(R.id.virtual_activity_splash);
+        splash.setVisibility(View.VISIBLE);
+        splash.setAlpha(1f);
+        splashVisible = true;
+    }
+
+    private void invalidateFrame() {
+        validFrame = false;
+        showSplash();
     }
 
     public View getRootView() {
@@ -185,6 +232,18 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     public int getDisplayId() {
         if (virtualDisplay == null) return -1;
         return virtualDisplay.getDisplayId();
+    }
+
+    private void onFrame() {
+        if (surfaceView.getWidth() == 0 || surfaceView.getHeight() == 0) return;
+
+        if (!validFrame) {
+            Log.d(TAG, "got initial frame");
+            launched = true;
+            validFrame = true;
+            // TODO: find first activity frame more accurately. this only sees the first virtual display frame
+            //updateSplashVisibility();
+        }
     }
 
     private void onLayoutUpdated(int width, int height) {
@@ -198,16 +257,20 @@ public class VirtualActivity implements SurfaceHolder.Callback {
             this.height = height;
 
             if (virtualDisplay != null) {
+                Log.d(TAG, "resizing display to " + width + "x" + height);
                 virtualDisplay.resize(width, height, density);
-                showSplash(false);
+                invalidateFrame();
             }
         }
     }
 
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-        if (virtualDisplay != null && virtualDisplay.getSurface() != holder.getSurface())
+        if (virtualDisplay != null && virtualDisplay.getSurface() != holder.getSurface()) {
+            Log.d(TAG, "setting new surface");
             virtualDisplay.setSurface(holder.getSurface());
+            invalidateFrame();
+        }
 
         onLayoutUpdated(width, height);
     }
@@ -215,14 +278,16 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         Log.d(TAG, "surface created");
-        showSplash(false);
+        invalidateFrame();
     }
 
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
         Log.d(TAG, "surface destroyed");
-        if (virtualDisplay != null)
+        if (virtualDisplay != null) {
             virtualDisplay.setSurface(null);
+            invalidateFrame();
+        }
     }
 
     private boolean onMotionEvent(View view, MotionEvent event) {

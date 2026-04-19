@@ -29,14 +29,9 @@ public enum AppCategory {
     FOCUSED,
 
     /**
-     * apps which advertise navigation capability
+     * includes apps which advertise navigation capability and apps which play media audio of some sort
      */
-    NAVIGATION,
-
-    /**
-     * apps which play media suitable for a car (usually just audio)
-     */
-    MEDIA,
+    NAVIGATION_AND_AUDIO,
 
     /**
      * apps which advertise AA/Automotive support
@@ -47,8 +42,7 @@ public enum AppCategory {
     public int getLabel() {
         return switch (this) {
             case FOCUSED -> R.string.category_focused_apps;
-            case NAVIGATION -> R.string.category_navigation;
-            case MEDIA -> R.string.category_media;
+            case NAVIGATION_AND_AUDIO -> R.string.category_navigation_and_audio;
             case CAR_APP -> R.string.category_car_apps;
         };
     }
@@ -60,13 +54,13 @@ public enum AppCategory {
         Supplier<Intent> baseIntent = () -> new Intent().setPackage(packageName);
 
         Stream<Pair<AppCategory, Intent>> activityIntentLookups = Stream.of(
-                Pair.create(MEDIA, baseIntent.get()
+                Pair.create(NAVIGATION_AND_AUDIO, baseIntent.get()
                         .setAction(Intent.ACTION_MAIN)
                         .addCategory(Intent.CATEGORY_APP_MUSIC)),
-                Pair.create(NAVIGATION, baseIntent.get()
+                Pair.create(NAVIGATION_AND_AUDIO, baseIntent.get()
                         .setAction(Intent.ACTION_MAIN)
                         .addCategory(Intent.CATEGORY_APP_MAPS)),
-                Pair.create(NAVIGATION, baseIntent.get()
+                Pair.create(NAVIGATION_AND_AUDIO, baseIntent.get()
                         .setAction(Intent.ACTION_VIEW)
                         .setData(Uri.parse("google.navigation:"))),
                 Pair.create(CAR_APP, baseIntent.get()
@@ -75,10 +69,10 @@ public enum AppCategory {
         );
 
         Stream<Pair<AppCategory, Intent>> serviceIntentLookups = Stream.of(
-                Pair.create(MEDIA, baseIntent.get()
+                Pair.create(NAVIGATION_AND_AUDIO, baseIntent.get()
                         .setAction(INTENT_ACTION_CAR_SERVICE)
                         .addCategory(INTENT_CATEGORY_CAR_MEDIA)),
-                Pair.create(NAVIGATION, baseIntent.get()
+                Pair.create(NAVIGATION_AND_AUDIO, baseIntent.get()
                         .setAction(INTENT_ACTION_CAR_SERVICE)
                         .addCategory(INTENT_CATEGORY_CAR_NAVIGATION)),
                 Pair.create(CAR_APP, baseIntent.get()
@@ -103,11 +97,10 @@ public enum AppCategory {
         }
 
         // only the media category has a matching car feature
-        if (carFeatures.contains(CarFeature.MEDIA)) categories.add(MEDIA);
+        if (carFeatures.contains(CarFeature.MEDIA)) categories.add(NAVIGATION_AND_AUDIO);
 
         // "focused"
-        if (categories.contains(NAVIGATION)
-                || categories.contains(MEDIA)
+        if (categories.contains(NAVIGATION_AND_AUDIO)
                 || (!carFeatures.isEmpty() && (!carFeatures.contains(CarFeature.NOTIFICATION) || carFeatures.size() > 1))) {
 
             categories.add(FOCUSED);

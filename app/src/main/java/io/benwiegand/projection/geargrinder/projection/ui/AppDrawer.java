@@ -55,9 +55,7 @@ public class AppDrawer implements PackageService.PackageServiceListener, TabLayo
     private static final TabInfo ALL_APPS_TAB = new TabInfo(R.string.category_all_apps, PackageService.ServiceBinder::getAllApps);
 
     private static final TabInfo[] definedTabInfos = new TabInfo[] {
-            new TabInfo(AppCategory.FOCUSED),
-            new TabInfo(AppCategory.NAVIGATION),
-            new TabInfo(AppCategory.MEDIA),
+            new TabInfo(AppCategory.NAVIGATION_AND_AUDIO),
             ALL_APPS_TAB,
     };
 

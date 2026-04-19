@@ -4,6 +4,7 @@ import static io.benwiegand.projection.geargrinder.util.UiUtil.errorDialog;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -30,6 +31,7 @@ public class ProjectionTask {
     private final LinearLayout splitScreenLayout;
     private boolean attached = false;
 
+    private final FocusTracker focusTracker;
     private final ProjectionTaskSplash splash;
 
     private final ProjectionTaskManager taskManager;
@@ -39,6 +41,8 @@ public class ProjectionTask {
         this.rootView = rootView;
         this.taskManager = taskManager;
         splitScreenLayout = rootView.findViewById(R.id.split_screen_layout);
+
+        focusTracker = new FocusTracker(initialActivities[0]);
 
         splash = new ProjectionTaskSplash(rootView.findViewById(R.id.projection_task_splash));
 
@@ -53,9 +57,11 @@ public class ProjectionTask {
         for (VirtualActivity activity : initialActivities) {
             activities.add(activity);
             splash.addVirtualActivity(activity);
+            activity.registerFocusTracker(focusTracker);
         }
 
         updateContextButtons();
+        updateFocusIndicators();
     }
 
     public Context getContext() {
@@ -94,9 +100,18 @@ public class ProjectionTask {
         }
     }
 
+    private void updateFocusIndicators() {
+        focusTracker.updateIndicators(activities);
+
+        for (VirtualActivity activity : activities) activity
+                .getFocusIndicatorView()
+                .setVisibility(activityCount() > 1 ? View.VISIBLE : View.GONE);
+    }
+
     private void onUpdated() {
         taskManager.onTaskUpdated(this);
         updateContextButtons();
+        updateFocusIndicators();
     }
 
     private void attachVirtualActivities() {
@@ -118,6 +133,7 @@ public class ProjectionTask {
         contentFrame.removeAllViews();
         attachVirtualActivities();
         contentFrame.addView(getRootView());
+        updateFocusIndicators();
     }
 
     public void detach(ViewGroup contentFrame) {
@@ -161,6 +177,7 @@ public class ProjectionTask {
         if (attached) splitScreenLayout.addView(activity.getRootView(), index, SPLIT_SCREEN_LAYOUT_PARAMS);
         activities.add(index, activity);
         splash.addVirtualActivity(activity, index);
+        activity.registerFocusTracker(focusTracker);
         onUpdated();
     }
 
@@ -173,6 +190,7 @@ public class ProjectionTask {
         if (attached) splitScreenLayout.removeView(activity.getRootView());
         activities.remove(activity);
         splash.removeVirtualActivity(activity);
+        activity.unregisterFocusTracker(focusTracker);
         onUpdated();
         taskManager.destroyVirtualActivityIfUnused(activity);
     }

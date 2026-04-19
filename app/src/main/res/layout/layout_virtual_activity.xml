@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
 
-    <SurfaceView
-        android:id="@+id/virtual_activity_surface"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        >
+
+        <SurfaceView
+            android:id="@+id/virtual_activity_surface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+        <include
+            android:id="@+id/virtual_activity_splash"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            layout="@layout/layout_virtual_activity_splash"
+            />
+
+    </FrameLayout>
+
+    <View
+        android:id="@+id/focus_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?colorFocusIndicatorActive"
+        android:visibility="gone"
         />
 
-    <include
-        android:id="@+id/virtual_activity_splash"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        layout="@layout/layout_virtual_activity_splash"
-        />
-
-
-</FrameLayout>
+</LinearLayout>

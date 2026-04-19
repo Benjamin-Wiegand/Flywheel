@@ -14,6 +14,9 @@
 
         <attr name="colorDockItemInactive" format="color" />
         <attr name="colorDockItemActive" format="color" />
+
+        <attr name="colorFocusIndicatorInactive" format="color" />
+        <attr name="colorFocusIndicatorActive" format="color" />
     </declare-styleable>
     
 </resources>

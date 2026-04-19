@@ -19,6 +19,9 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.exception.ProjectedAppLaunchException;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
@@ -26,6 +29,7 @@ import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.display.LocalVirtualDisplayController;
 import io.benwiegand.projection.geargrinder.projection.display.PrivdVirtualDisplayProxy;
 import io.benwiegand.projection.geargrinder.projection.display.VirtualDisplayController;
+import io.benwiegand.projection.geargrinder.projection.ui.task.FocusTracker;
 import io.benwiegand.projection.libprivd.IPrivd;
 
 public class VirtualActivity implements SurfaceHolder.Callback {
@@ -73,6 +77,8 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private final View rootView;
     private final SurfaceView surfaceView;
     private final VirtualActivitySplash splash;
+
+    private final Queue<FocusTracker> focusTrackers = new LinkedList<>();
 
     @SuppressLint("ClickableViewAccessibility")
     public VirtualActivity(IPrivd privd, AppRecord app, ViewGroup parent) {
@@ -194,6 +200,8 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     public void destroy() {
         if (virtualDisplay != null)
             virtualDisplay.release();
+
+        focusTrackers.clear();
     }
 
     public ComponentName getComponentName() {
@@ -232,9 +240,22 @@ public class VirtualActivity implements SurfaceHolder.Callback {
         return rootView;
     }
 
+    public View getFocusIndicatorView() {
+        return rootView.findViewById(R.id.focus_indicator);
+    }
+
     public int getDisplayId() {
         if (virtualDisplay == null) return -1;
         return virtualDisplay.getDisplayId();
+    }
+
+    public void registerFocusTracker(FocusTracker focusTracker) {
+        assert !focusTrackers.contains(focusTracker);
+        focusTrackers.add(focusTracker);
+    }
+
+    public void unregisterFocusTracker(FocusTracker focusTracker) {
+        focusTrackers.remove(focusTracker);
     }
 
     private void onFrame() {
@@ -290,8 +311,14 @@ public class VirtualActivity implements SurfaceHolder.Callback {
         invalidateFrame();
     }
 
+    private void takeFocus() {
+        for (FocusTracker tracker : focusTrackers)
+            tracker.takeFocus(this);
+    }
+
     private boolean onMotionEvent(View view, MotionEvent event) {
         try {
+            takeFocus();
             return privd.injectInputEventWithDisplayId(event, getDisplayId());
         } catch (Throwable t) {
             Log.e(TAG, "failed to inject motion event", t);

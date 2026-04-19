@@ -4,6 +4,8 @@
         <item name="colorDockForeground">@color/white</item>
         <item name="colorDockItemInactive">#666666</item>
         <item name="colorDockItemActive">?attr/colorPrimary</item>
+        <item name="colorFocusIndicatorInactive">#333333</item>
+        <item name="colorFocusIndicatorActive">?attr/colorPrimary</item>
 
         <item name="colorAppModal">?attr/colorSurfaceContainer</item>
 
@@ -18,6 +20,8 @@
         <item name="colorDockBackground">@color/material_dynamic_neutral_variant10</item>
         <item name="colorDockItemInactive">@color/material_dynamic_neutral40</item>
         <item name="colorDockItemActive">@color/material_dynamic_primary70</item>
+        <item name="colorFocusIndicatorInactive">@color/material_dynamic_neutral20</item>
+        <item name="colorFocusIndicatorActive">@color/material_dynamic_primary70</item>
 
         <item name="colorAppModal">@color/material_dynamic_neutral_variant70</item>
 

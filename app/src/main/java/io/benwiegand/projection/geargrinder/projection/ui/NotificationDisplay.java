@@ -19,11 +19,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import io.benwiegand.projection.geargrinder.NotificationService;
@@ -38,7 +38,7 @@ public class NotificationDisplay implements NotificationService.NotificationList
     private static final long POPUP_NOTIFICATION_ANIMATION_DURATION = 200;
     private static final long POPUP_NOTIFICATION_SHOW_DURATION = 10000;
 
-    private final Set<View> popupNotificationViews = new HashSet<>();
+    private final Deque<View> popupNotificationViews = new LinkedList<>();
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ViewGroup popupNotificationOverlay;
     private final ViewGroup popupNotificationFrame;
@@ -62,6 +62,8 @@ public class NotificationDisplay implements NotificationService.NotificationList
         this.popupNotificationOverlay = popupNotificationOverlay;
         popupNotificationFrame = popupNotificationOverlay.findViewById(R.id.popup_notification_frame);
         context = popupNotificationOverlay.getContext();
+
+        popupNotificationOverlay.setOnClickListener(v -> dismissTopNotification());
 
         tts = new TextToSpeech(context, this::onTTSInit);
     }
@@ -159,6 +161,12 @@ public class NotificationDisplay implements NotificationService.NotificationList
                 .start();
     }
 
+    public boolean dismissTopNotification() {
+        if (popupNotificationViews.isEmpty()) return false;
+        hidePopupNotification(popupNotificationViews.peek());
+        return true;
+    }
+
     private CharSequence joinTopText(List<CharSequence> texts) {
         if (texts.isEmpty()) return "";
 
@@ -230,10 +238,9 @@ public class NotificationDisplay implements NotificationService.NotificationList
         touchTarget.setOnClickListener(v -> speakNotification(sbn, true));
         speakButton.setOnClickListener(v -> speakNotification(sbn, true));
         clearButton.setOnClickListener(v -> hidePopupNotification(notificationView));
-        popupNotificationOverlay.setOnClickListener(v -> hidePopupNotification(notificationView));
 
         popupNotificationFrame.addView(notificationView);
-        popupNotificationViews.add(notificationView);
+        popupNotificationViews.addFirst(notificationView);
         animatePopupNotificationOverlay();
 
         handler.post(() -> {

@@ -113,8 +113,13 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                Log.i(TAG, "consuming back");
-                appDrawer.close();
+                if (appDrawer.close()) return;
+                if (notificationDisplay.dismissTopNotification()) return;
+
+                ProjectionTask task = taskManager.getActiveTask();
+                if (task != null && task.injectBackButton()) return;
+
+                Log.v(TAG, "back button consumed");
             }
         });
     }

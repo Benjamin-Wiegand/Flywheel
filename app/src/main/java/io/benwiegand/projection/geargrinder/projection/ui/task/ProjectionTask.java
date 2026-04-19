@@ -4,6 +4,9 @@ import static io.benwiegand.projection.geargrinder.util.UiUtil.errorDialog;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.SystemClock;
+import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -205,6 +208,20 @@ public class ProjectionTask {
                     .setPositiveButton(R.string.relaunch_button, (d, i) -> relaunchActivity(activity))
                     .show();
         }
+    }
+
+    public boolean injectInputEvent(InputEvent event) {
+        VirtualActivity activity = focusTracker.getFocus();
+        assert activities.contains(activity);
+        assert attached;
+        return activity.injectInputEvent(event);
+    }
+
+    public boolean injectBackButton() {
+        long timestamp = SystemClock.uptimeMillis();
+        boolean result = injectInputEvent(new KeyEvent(timestamp, timestamp, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, 0));
+        result |= injectInputEvent(new KeyEvent(timestamp, timestamp, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK, 0));
+        return result;
     }
 
 }

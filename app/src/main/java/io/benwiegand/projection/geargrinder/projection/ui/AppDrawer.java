@@ -172,8 +172,8 @@ public class AppDrawer implements PackageService.PackageServiceListener, TabLayo
         open = true;
     }
 
-    public void close() {
-        if (!isOpen()) return;
+    public boolean close() {
+        if (!isOpen()) return false;
 
         rootView.animate()
                 .setStartDelay(0)
@@ -183,6 +183,8 @@ public class AppDrawer implements PackageService.PackageServiceListener, TabLayo
                 .withEndAction(() -> rootView.setVisibility(View.GONE))
                 .start();
         open = false;
+
+        return true;
     }
 
     public boolean isOpen() {

@@ -48,6 +48,10 @@ public class FocusTracker {
         focusedActivity = activity;
     }
 
+    public VirtualActivity getFocus() {
+        return focusedActivity;
+    }
+
     public void updateIndicators(List<VirtualActivity> activities) {
         if (activities.isEmpty()) return;
 

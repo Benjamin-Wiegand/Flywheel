@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.InputEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -316,13 +317,18 @@ public class VirtualActivity implements SurfaceHolder.Callback {
             tracker.takeFocus(this);
     }
 
-    private boolean onMotionEvent(View view, MotionEvent event) {
+    public boolean injectInputEvent(InputEvent event) {
         try {
             takeFocus();
             return privd.injectInputEventWithDisplayId(event, getDisplayId());
         } catch (Throwable t) {
-            Log.e(TAG, "failed to inject motion event", t);
+            Log.e(TAG, "failed to inject input event: " + event, t);
             return false;
         }
     }
+
+    private boolean onMotionEvent(View view, MotionEvent event) {
+        return injectInputEvent(event);
+    }
+
 }

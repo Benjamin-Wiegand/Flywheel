@@ -1,5 +1,7 @@
 package io.benwiegand.projection.geargrinder;
 
+import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -15,6 +17,8 @@ import android.view.View;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import io.benwiegand.projection.geargrinder.callback.AppLauncherListener;
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
@@ -58,6 +62,11 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_projection);
+
+        WindowInsetsControllerCompat windowInsetsController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+        windowInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        windowInsetsController.hide(WindowInsetsCompat.Type.displayCutout());
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
 
         // screen lock
         // only do this on init so the device can be re-locked (like AA)

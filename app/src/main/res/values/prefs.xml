@@ -21,14 +21,12 @@
         <item>2 minutes</item>
     </string-array>
 
-    <string-array name="video_buffer_size_entries">
+    <string-array name="video_bitrate_mode_entries">
         <item>auto</item>
-        <item>64 KiB (tiny)</item>
-        <item>128 KiB (small)</item>
-        <item>256 KiB (moderate)</item>
-        <item>512 KiB (large)</item>
-        <item>768 KiB (extra large)</item>
-        <item>1 MiB (massive)</item>
+        <item>Variable bitrate</item>
+        <item>Constant bitrate</item>
+        <item>Constant bitrate with frame drops</item>
+        <item>Constant quality</item>
     </string-array>
 
 
@@ -73,24 +71,23 @@
     </string-array>
 
 
-    <string translatable="false" name="video_buffer_size_auto">0</string>
-    <string translatable="false" name="video_buffer_size_64k">65536</string>
-    <string translatable="false" name="video_buffer_size_128k">131072</string>
-    <string translatable="false" name="video_buffer_size_256k">262144</string>
-    <string translatable="false" name="video_buffer_size_512k">524288</string>
-    <string translatable="false" name="video_buffer_size_768k">786432</string>
-    <string translatable="false" name="video_buffer_size_1024k">1048576</string>
-    <string translatable="false" name="video_buffer_size_default">@string/video_buffer_size_auto</string>
+    <string translatable="false" name="video_bitrate_mode_auto">-1</string>
+    <string translatable="false" name="video_bitrate_mode_cq">0</string>        <!-- MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ -->
+    <string translatable="false" name="video_bitrate_mode_vbr">1</string>       <!-- MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR -->
+    <string translatable="false" name="video_bitrate_mode_cbr">2</string>       <!-- MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR -->
+    <string translatable="false" name="video_bitrate_mode_cbr_fd">3</string>    <!-- MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR_FD -->
+    <string translatable="false" name="video_bitrate_mode_default">@string/video_bitrate_mode_auto</string>
 
-    <string-array translatable="false" name="video_buffer_size_values">
-        <item>@string/video_buffer_size_auto</item>
-        <item>@string/video_buffer_size_64k</item>
-        <item>@string/video_buffer_size_128k</item>
-        <item>@string/video_buffer_size_256k</item>
-        <item>@string/video_buffer_size_512k</item>
-        <item>@string/video_buffer_size_768k</item>
-        <item>@string/video_buffer_size_1024k</item>
+    <string-array translatable="false" name="video_bitrate_mode_values">
+        <item>@string/video_bitrate_mode_auto</item>
+        <item>@string/video_bitrate_mode_vbr</item>
+        <item>@string/video_bitrate_mode_cbr</item>
+        <item>@string/video_bitrate_mode_cbr_fd</item>
+        <item>@string/video_bitrate_mode_cq</item>
     </string-array>
+
+
+    <string translatable="false" name="video_bitrate_custom_default">-1</string>
 
 
     <string translatable="false" name="start_projection_when_locked_default">false</string>
@@ -102,7 +99,8 @@
     <string translatable="false" name="key_start_projection_when_locked">start_projection_when_locked</string>
     <string translatable="false" name="key_projection_resume_grace_period">projection_resume_grace_period</string>
 
-    <string translatable="false" name="key_video_buffer_size">video_buffer_size</string>
+    <string translatable="false" name="key_video_bitrate_mode">video_bitrate_mode</string>
+    <string translatable="false" name="key_video_bitrate_custom">video_bitrate_custom</string>
 
     <string translatable="false" name="key_imported_phone_x509_certificate_chain">imported_phone_x509_certificate_chain</string>
     <string translatable="false" name="key_imported_phone_pkcs8_private_key">imported_phone_pkcs8_private_key</string>

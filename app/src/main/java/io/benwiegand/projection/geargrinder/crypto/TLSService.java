@@ -19,6 +19,8 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 
+import io.benwiegand.projection.geargrinder.data.BufferReader;
+
 public class TLSService {
     private static final String TAG = TLSService.class.getSimpleName();
 
@@ -92,13 +94,14 @@ public class TLSService {
         return !handshakeComplete;
     }
 
-    public <T> T encrypt(byte[] input, int inOffset, int inLength, Function<ByteBuffer, T> outBufferConsumer) throws IOException {
+
+    public <T> T encrypt(BufferReader input, int inLimit, Function<ByteBuffer, T> outBufferConsumer) throws IOException {
         if (!handshakeComplete) throw new IllegalStateException("handshake must be completed before encrypting data");
 
         appTxBuffer.clear();
         devTxBuffer.clear();
 
-        appTxBuffer.put(input, inOffset, inLength);
+        input.read(appTxBuffer, inLimit);
         appTxBuffer.flip();
 
         SSLEngineResult result = sslEngine.wrap(appTxBuffer, devTxBuffer);
@@ -115,6 +118,10 @@ public class TLSService {
 
         devTxBuffer.flip();
         return outBufferConsumer.apply(devTxBuffer);
+    }
+
+    public <T> T encrypt(BufferReader input, Function<ByteBuffer, T> outBufferConsumer) throws IOException {
+        return encrypt(input, input.length(), outBufferConsumer);
     }
 
     public <T> T decrypt(byte[] input, int inOffset, int inLength, Function<ByteBuffer, T> outBufferConsumer) throws IOException {

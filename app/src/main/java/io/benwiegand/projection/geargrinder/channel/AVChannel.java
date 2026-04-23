@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import io.benwiegand.projection.geargrinder.data.BufferReader;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.callback.MessageListener;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.AVSetupResponse;
@@ -47,9 +48,6 @@ public abstract class AVChannel<T> implements MessageListener {
     private Thread avThread = null;
     private Runnable stopAvThreadRunnable = null;
 
-    protected final byte[] buffer;
-
-
     protected final MessageBroker mb;
 
     protected final MessageBroker.MessageSendParameters controlParams;
@@ -61,10 +59,9 @@ public abstract class AVChannel<T> implements MessageListener {
 
     protected boolean dead = false;
 
-    public AVChannel(MessageBroker mb, int channelId, int channelPriority, int bufferSize) {
+    public AVChannel(MessageBroker mb, int channelId, int channelPriority) {
         this.mb = mb;
         this.channelPriority = channelPriority;
-        buffer = new byte[bufferSize];
 
         // TODO: determine correct places to use control flag, this is just a guess
         controlParams = new MessageBroker.MessageSendParameters(channelId, true, true);
@@ -159,8 +156,8 @@ public abstract class AVChannel<T> implements MessageListener {
         mb.sendMessage(mediaParams, AV_CMD_STOP, new byte[0]);
     }
 
-    protected void sendAvBuffer(int offset, int length) {
-        mb.sendMessage(mediaParams, buffer, offset, length);
+    protected void sendAvBuffer(BufferReader bufferReader) {
+        mb.sendMessage(mediaParams, bufferReader);
         expectAck();
     }
 

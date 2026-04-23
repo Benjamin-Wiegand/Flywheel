@@ -10,6 +10,7 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
+import io.benwiegand.projection.geargrinder.data.BufferReader;
 import io.benwiegand.projection.geargrinder.projection.audio.AudioCapture;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.AVSetupResponse;
@@ -30,12 +31,18 @@ public class AudioChannel extends AVChannel<AudioPreset> {
 
     private final AudioChannelMeta channelMeta;
 
+    protected final byte[] buffer;
+
 
     public interface AudioCaptureProvider {
         AudioCapture getInstance(AudioPreset audioPreset, int bufferSize);
     }
 
-    private static int calculateBufferSize(AudioChannelMeta channelMeta) {
+    public AudioChannel(MessageBroker mb, AudioChannelMeta channelMeta, AudioCaptureProvider audioCaptureProvider) {
+        super(mb, channelMeta.channelId(), 0);
+        this.channelMeta = channelMeta;
+        this.audioCaptureProvider = audioCaptureProvider;
+
         int bufferSize = 0;
         for (AudioPreset preset : channelMeta.presets()) {
             if (!preset.isSupported()) continue;
@@ -43,14 +50,9 @@ public class AudioChannel extends AVChannel<AudioPreset> {
             bufferSize = preset.getMinBufferSize();
         }
         Log.i(TAG, "selected buffer size of " + bufferSize + " (plus " + AUDIO_BUFFER_RESERVED + " reserved)");
-        return bufferSize + AUDIO_BUFFER_RESERVED;
-    }
+        bufferSize += AUDIO_BUFFER_RESERVED;
 
-
-    public AudioChannel(MessageBroker mb, AudioChannelMeta channelMeta, AudioCaptureProvider audioCaptureProvider) {
-        super(mb, channelMeta.channelId(), 0, calculateBufferSize(channelMeta));
-        this.channelMeta = channelMeta;
-        this.audioCaptureProvider = audioCaptureProvider;
+        buffer = new byte[bufferSize];
     }
 
     @Override
@@ -172,7 +174,7 @@ public class AudioChannel extends AVChannel<AudioPreset> {
                 writeUInt16(AV_CMD_MEDIA_WITH_TIMESTAMP, buffer, 0);
                 writeInt64(result.timestamp, buffer, COMMAND_ID_LENGTH);
 
-                sendAvBuffer(0, result.length + AUDIO_BUFFER_RESERVED);
+                sendAvBuffer(BufferReader.from(buffer, 0, result.length + AUDIO_BUFFER_RESERVED));
             }
         } catch (InterruptedException e) {
             Log.e(TAG, "interrupted", e);

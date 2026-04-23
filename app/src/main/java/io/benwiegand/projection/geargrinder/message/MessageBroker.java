@@ -19,6 +19,7 @@ import java.util.Map;
 
 import io.benwiegand.projection.geargrinder.callback.MessageListener;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
+import io.benwiegand.projection.geargrinder.data.BufferReader;
 import io.benwiegand.projection.geargrinder.transfer.AATransferInterface;
 import io.benwiegand.projection.geargrinder.util.ByteUtil;
 
@@ -117,16 +118,15 @@ public class MessageBroker {
     /**
      * sends a full message with a payload
      * @param params the parameters to send the message with
-     * @param payload a byte array containing the payload
-     * @param offset the offset of the payload
-     * @param length the length of the payload
+     * @param payloadReader buffer reader to read the payload with
      */
-    public void sendMessage(MessageSendParameters params, byte[] payload, int offset, int length) {
+    public void sendMessage(MessageSendParameters params, BufferReader payloadReader) {
+        assert payloadReader.initialized();
         synchronized (writeLock) {
             try {
                 int extendedPayloadMaxLength = params.encrypted() ? tlsService.getMaxPlaintextSize(EXTENDED_PAYLOAD_MAX_LENGTH) : EXTENDED_PAYLOAD_MAX_LENGTH;
                 int payloadMaxLength = params.encrypted() ? tlsService.getMaxPlaintextSize(PAYLOAD_MAX_LENGTH) : PAYLOAD_MAX_LENGTH;
-                int sequenceLength = calculateSequenceLength(extendedPayloadMaxLength, payloadMaxLength, length);
+                int sequenceLength = calculateSequenceLength(extendedPayloadMaxLength, payloadMaxLength, payloadReader.length());
 
                 // single frame
                 if (sequenceLength == 1) {
@@ -135,9 +135,9 @@ public class MessageBroker {
                             .setChannelId(params.channelId());
 
                     if (params.encrypted()) {
-                        tlsService.encrypt(payload, offset, length, frame::copyPayload);
+                        tlsService.encrypt(payloadReader, frame::copyPayload);
                     } else {
-                        frame.copyPayload(payload, offset, length);
+                        frame.copyPayload(payloadReader);
                     }
 
                     sendFrame(frame);
@@ -146,8 +146,7 @@ public class MessageBroker {
 
                 // multi-frame
                 Log.v(TAG, "multi-frame message of len " + sequenceLength);
-                int payloadOffset = offset;
-                int payloadRemaining = length;
+                int payloadRemaining = payloadReader.length();
                 int payloadLength;
                 for (int i = 0; i < sequenceLength; i++) {
                     int flags = params.getFlags();
@@ -158,16 +157,20 @@ public class MessageBroker {
                             .setChannelId(params.channelId());
 
                     if (i == 0) {
-                        frame.setTotalMessageLength(length);
+                        frame.setTotalMessageLength(payloadReader.length());
                         payloadLength = Math.min(extendedPayloadMaxLength, payloadRemaining);
                     } else {
                         payloadLength = Math.min(payloadMaxLength, payloadRemaining);
                     }
 
-                    tlsService.encrypt(payload, payloadOffset, payloadLength, frame::copyPayload);
+                    if (params.encrypted()) {
+                        tlsService.encrypt(payloadReader, payloadLength, frame::copyPayload);
+                    } else {
+                        frame.copyPayload(payloadReader, payloadLength);
+                    }
+
                     sendFrame(frame);
 
-                    payloadOffset += payloadLength;
                     payloadRemaining -= payloadLength;
                 }
 
@@ -175,6 +178,17 @@ public class MessageBroker {
                 Log.e(TAG, "IOException while sending message", e);
             }
         }
+    }
+
+    /**
+     * sends a full message with a payload
+     * @param params the parameters to send the message with
+     * @param payload a byte array containing the payload
+     * @param offset the offset of the payload
+     * @param length the length of the payload
+     */
+    public void sendMessage(MessageSendParameters params, byte[] payload, int offset, int length) {
+        sendMessage(params, BufferReader.from(payload, offset, length));
     }
 
     /**

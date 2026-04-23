@@ -77,12 +77,21 @@
         >
 
         <ListPreference
-            app:key="@string/key_video_buffer_size"
+            app:key="@string/key_video_bitrate_mode"
             app:iconSpaceReserved="false"
-            app:title="@string/video_buffer_size_pref_name"
-            app:entries="@array/video_buffer_size_entries"
-            app:entryValues="@array/video_buffer_size_values"
-            app:defaultValue="@string/video_buffer_size_default"
+            app:title="@string/video_bitrate_mode_pref_name"
+            app:entries="@array/video_bitrate_mode_entries"
+            app:entryValues="@array/video_bitrate_mode_values"
+            app:defaultValue="@string/video_bitrate_mode_default"
+            app:useSimpleSummaryProvider="true"
+            />
+
+        <EditTextPreference
+            app:key="@string/key_video_bitrate_custom"
+            app:iconSpaceReserved="false"
+            app:title="@string/video_bitrate_custom_pref_name"
+            app:dialogMessage="@string/video_bitrate_custom_pref_desc"
+            app:defaultValue="@string/video_bitrate_custom_default"
             app:useSimpleSummaryProvider="true"
             />
 

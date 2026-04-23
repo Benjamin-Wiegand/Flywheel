@@ -11,6 +11,7 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
+import io.benwiegand.projection.geargrinder.data.BufferReader;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.projection.ProjectionService;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.VideoChannelMeta;
@@ -28,35 +29,24 @@ public class VideoChannel extends AVChannel<VideoPreset> {
     private static final boolean LOG_FRAME_DEBUG = false;
     private static final boolean LOG_FRAME_RATE_DEBUG = false;
 
-    private static final int VIDEO_BUFFER_SIZE_DEFAULT = 0x40000;     // 256 KiB
-
     private static final long VIDEO_FRAME_TIMEOUT_US = 500000;  // 500 ms
-    private static final int VIDEO_BUFFER_RESERVED = COMMAND_ID_LENGTH + 8; // command + 64-bit timestamp
+    private static final int MAX_VIDEO_HEADER_SIZE = COMMAND_ID_LENGTH + 8; // command + 64-bit timestamp
 
     private final FrameRateCounter frameRateCounter = new FrameRateCounter();
 
     private final ProjectionService projectionService;
-    private final SettingsManager settingsManager;
 
     private final VideoChannelMeta channelMeta;
-
-    private static int calculateVideoBufferSize(SettingsManager settingsManager) {
-        int prefBufferSize = settingsManager.getVideoBufferSize();
-        if (prefBufferSize > 0) {
-            Log.i(TAG, "using video buffer size set by user: " + prefBufferSize);
-            return prefBufferSize;
-        }
-
-        // TODO: determine video buffer size based on preset
-        Log.i(TAG, "using auto video buffer size: " + VIDEO_BUFFER_SIZE_DEFAULT);
-        return VIDEO_BUFFER_SIZE_DEFAULT;
-    }
+    private final int bitrateMode;
+    private final int bitrateCustom;
 
     public VideoChannel(MessageBroker mb, ProjectionService projectionService, SettingsManager settingsManager, VideoChannelMeta channelMeta) {
-        super(mb, channelMeta.channelId(), 0, calculateVideoBufferSize(settingsManager));
+        super(mb, channelMeta.channelId(), 0);
         this.channelMeta = channelMeta;
         this.projectionService = projectionService;
-        this.settingsManager = settingsManager;
+
+        bitrateMode = settingsManager.getVideoBitrateMode();
+        bitrateCustom = settingsManager.getVideoBitrateCustom();
     }
 
     @Override
@@ -115,30 +105,40 @@ public class VideoChannel extends AVChannel<VideoPreset> {
     @Override
     protected void avLoop(Supplier<Boolean> runCondition) {
         Log.i(TAG, "video loop start");
+        byte[] headerBuffer = new byte[MAX_VIDEO_HEADER_SIZE];
         long lastFrameGeneratedAt = 0;
         long minFrameInterval, frameTs, timeToNextFrame;
-        int payloadOffset, payloadLength;
+        int headerLength;
         VideoEncoder.FrameResult result = new VideoEncoder.FrameResult();
 
         // find working preset
         AVPreset<VideoPreset> avPreset = null;
         VideoEncoder videoEncoder = null;
         for (AVPreset<VideoPreset> p : avPresets) {
-            videoEncoder = new VideoEncoder(
-                    p.preset().width(),
-                    p.preset().height(),
-                    p.preset().refreshRate().hz(),
-                    buffer.length - VIDEO_BUFFER_RESERVED
-            );
-            try {
-                Log.i(TAG, "video mode: " + p.preset().width() + " x " + p.preset().height() + " @ " + p.preset().refreshRate().hz() + ", density = " + p.preset().density());
-                videoEncoder.init();
-            } catch (Throwable t) {
-                Log.e(TAG, "failed to initialize video with preset: " + p.preset(), t);
-                videoEncoder.destroy();
-                videoEncoder = null;
-                continue;
+            int[] bitrateTargets = bitrateCustom > -1 ? new int[] {bitrateCustom} : p.preset().bitrateTargets();
+
+            // some encoders refuse to init when bitrate isn't valid
+            for (int bitrate : bitrateTargets) {
+                videoEncoder = new VideoEncoder(
+                        p.preset().width(),
+                        p.preset().height(),
+                        p.preset().refreshRate().hz(),
+                        bitrateMode,
+                        bitrateTargets[0]
+                );
+                try {
+                    Log.i(TAG, "video mode: " + p.preset().width() + " x " + p.preset().height() + " @ " + p.preset().refreshRate().hz() + ", density = " + p.preset().density());
+                    Log.i(TAG, "bitrate: mode=" + bitrateMode + ", bps=" + bitrate);
+                    videoEncoder.init();
+                    break;
+                } catch (Throwable t) {
+                    Log.e(TAG, "failed to initialize video with preset: " + p.preset(), t);
+                    videoEncoder.destroy();
+                    videoEncoder = null;
+                }
             }
+
+            if (videoEncoder == null) continue;
 
             avPreset = p;
             break;
@@ -174,7 +174,7 @@ public class VideoChannel extends AVChannel<VideoPreset> {
                 }
 
                 frameTs = SystemClock.elapsedRealtime();
-                videoEncoder.getFrame(result, buffer, VIDEO_BUFFER_RESERVED, VIDEO_FRAME_TIMEOUT_US);
+                BufferReader outputBuffer = videoEncoder.getFrame(result, VIDEO_FRAME_TIMEOUT_US);
 
                 switch (result.error) {
                     case NO_ERROR -> {}
@@ -187,11 +187,6 @@ public class VideoChannel extends AVChannel<VideoPreset> {
                         if (LOG_FRAME_DEBUG) Log.d(TAG, "try again");
                         continue;
                     }
-                    case DROP -> {
-                        Log.w(TAG, "dropping frame!!");
-                        lastFrameGeneratedAt = frameTs;
-                        continue;
-                    }
                     case END_OF_STREAM -> {
                         Log.i(TAG, "end of stream");
                         return;
@@ -202,28 +197,34 @@ public class VideoChannel extends AVChannel<VideoPreset> {
                     }
                 }
 
-                assert result.length > 0;
-                assert result.length + VIDEO_BUFFER_RESERVED <= buffer.length;
+                try {
 
-                if (result.timestamp == 0) {
-                    // with no timestamp
-                    writeUInt16(AV_CMD_MEDIA, buffer, 8);
-                    payloadOffset = 8;
-                    payloadLength = COMMAND_ID_LENGTH + result.length;
-                } else {
-                    // with timestamp
-                    writeUInt16(AV_CMD_MEDIA_WITH_TIMESTAMP, buffer, 8);
-                    writeInt64(result.timestamp, buffer, 0);
-                    payloadOffset = 0;
-                    payloadLength = COMMAND_ID_LENGTH + 8 + result.length;
+                    assert result.length > 0;
+                    assert outputBuffer != null;
+
+                    if (result.timestamp == 0) {
+                        // with no timestamp
+                        writeUInt16(AV_CMD_MEDIA, headerBuffer, 0);
+                        headerLength = COMMAND_ID_LENGTH;
+                    } else {
+                        // with timestamp
+                        writeUInt16(AV_CMD_MEDIA_WITH_TIMESTAMP, headerBuffer, 0);
+                        writeInt64(result.timestamp, headerBuffer, 2);
+                        headerLength = COMMAND_ID_LENGTH + 8;
+                    }
+
+
+                    lastFrameGeneratedAt = frameTs;
+                    frameRateCounter.onFrame();
+                    if (LOG_FRAME_RATE_DEBUG) Log.v(TAG, "fps: " + frameRateCounter.getFrameRate());
+                    if (LOG_FRAME_DEBUG) Log.v(TAG, "sending frame size: " + result.length);
+
+                    BufferReader headerBufferReader = BufferReader.from(headerBuffer, 0, headerLength);
+                    sendAvBuffer(BufferReader.join(headerBufferReader, outputBuffer));
+
+                } finally {
+                    videoEncoder.releaseOutputBuffer(result.bufferIndex);
                 }
-
-                lastFrameGeneratedAt = frameTs;
-                frameRateCounter.onFrame();
-                if (LOG_FRAME_RATE_DEBUG) Log.v(TAG, "fps: " + frameRateCounter.getFrameRate());
-
-                if (LOG_FRAME_DEBUG) Log.v(TAG, "sending frame size: " + payloadLength);
-                sendAvBuffer(payloadOffset, payloadLength);
             }
         } catch (InterruptedException e) {
             Log.e(TAG, "interrupted", e);

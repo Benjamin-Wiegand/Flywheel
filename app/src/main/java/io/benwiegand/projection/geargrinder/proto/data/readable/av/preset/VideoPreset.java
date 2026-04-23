@@ -80,6 +80,15 @@ public record VideoPreset(
         return resolution().height();
     }
 
+    public int[] bitrateTargets() {
+        return switch (resolution()) {
+            case UNKNOWN -> new int[] {1000000, 500000, 250000, 100000};
+            case RES_480P -> new int[] {5000000, 250000, 100000};
+            case RES_720P -> new int[] {15000000, 10000000, 5000000};
+            case RES_1080P -> new int[] {30000000, 15000000, 10000000};
+        };
+    }
+
     public static VideoPreset getDefault() {
         return new VideoPreset(
                 Resolution.UNKNOWN,

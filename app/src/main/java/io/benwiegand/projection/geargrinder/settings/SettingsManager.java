@@ -41,8 +41,12 @@ public class SettingsManager {
         return castInt(R.string.key_projection_resume_grace_period, R.string.projection_grace_period_default);
     }
 
-    public int getVideoBufferSize() {
-        return castInt(R.string.key_video_buffer_size, R.string.video_buffer_size_default);
+    public int getVideoBitrateMode() {
+        return castInt(R.string.key_video_bitrate_mode, R.string.video_bitrate_mode_default);
+    }
+
+    public int getVideoBitrateCustom() {
+        return castInt(R.string.key_video_bitrate_custom, R.string.video_bitrate_custom_default);
     }
 
     public boolean useImportedPhoneKeys() {

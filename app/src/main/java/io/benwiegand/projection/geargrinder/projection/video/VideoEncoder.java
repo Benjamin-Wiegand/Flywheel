@@ -13,8 +13,12 @@ import android.view.Surface;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import io.benwiegand.projection.geargrinder.data.BufferReader;
+
 public class VideoEncoder {
     private static final String TAG = VideoEncoder.class.getSimpleName();
+
+    private static final int BITRATE_MODE_AUTO = -1;
 
     /**
      * minimum number of duplicate frames to send after video output stops changing
@@ -25,17 +29,6 @@ public class VideoEncoder {
 
     private static final int I_FRAME_INTERVAL = 5;
 
-    private static final int BITRATE_MIN = 100000;    // 100 kb/s
-
-    // fraction of estimated max bitrate to target
-    private static final float BITRATE_MARGIN_MAX = 0.5f;   // aim for half the buffer
-
-    // multiplier for bitrate when a frame is dropped for being too large
-    private static final float BITRATE_DROP_MULTIPLIER = 0.7f;
-
-    // multiplier for bitrate recovery (once per I frame)
-    private static final float BITRATE_RECOVERY_MULTIPLIER = 1.1f;
-
 
     private MediaCodec encoder = null;
     private Surface hardwareSurface = null;
@@ -44,12 +37,9 @@ public class VideoEncoder {
     private final int width;
     private final int height;
     private final int maxFrameRate;
-    private final int maxFrameSize;
+    private final int bitrateMode;
 
     private int bitrate;
-    private float targetBitrateMargin = BITRATE_MARGIN_MAX;
-
-    private boolean dropUntilSync = false;
 
     private int lastFrameNumber = -1;
     private int duplicateFrames = 0;
@@ -57,14 +47,14 @@ public class VideoEncoder {
     private final MediaCodec.BufferInfo bufferInfo;
 
 
-    public VideoEncoder(int width, int height, int maxFrameRate, int maxFrameSize) {
+    public VideoEncoder(int width, int height, int maxFrameRate, int bitrateMode, int bitrate) {
         this.width = width;
         this.height = height;
         this.maxFrameRate = maxFrameRate;
-        this.maxFrameSize = maxFrameSize;
+        this.bitrateMode = bitrateMode;
+        this.bitrate = bitrate;
 
         bufferInfo = new MediaCodec.BufferInfo();
-        bitrate = getTargetBitrate();
     }
 
     public void init() throws IOException {
@@ -77,18 +67,17 @@ public class VideoEncoder {
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL);
         format.setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline);
         format.setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel31);
-        format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+        if (bitrateMode != BITRATE_MODE_AUTO)
+            format.setInteger(MediaFormat.KEY_BITRATE_MODE, bitrateMode);
         format.setInteger(MediaFormat.KEY_LATENCY, 1);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            format.setInteger(MediaFormat.KEY_VIDEO_QP_P_MIN, 30);
-            format.setInteger(MediaFormat.KEY_VIDEO_QP_P_MAX, 100);
-//
-            format.setInteger(MediaFormat.KEY_VIDEO_QP_B_MIN, 30);
-            format.setInteger(MediaFormat.KEY_VIDEO_QP_B_MAX, 100);
-//
-            format.setInteger(MediaFormat.KEY_VIDEO_QP_I_MIN, 40);
-            format.setInteger(MediaFormat.KEY_VIDEO_QP_I_MAX, 100);
+            format.setInteger(MediaFormat.KEY_VIDEO_QP_P_MIN, 20);
+            format.setInteger(MediaFormat.KEY_VIDEO_QP_P_MAX, 50);
+            format.setInteger(MediaFormat.KEY_VIDEO_QP_B_MIN, 20);
+            format.setInteger(MediaFormat.KEY_VIDEO_QP_B_MAX, 50);
+            format.setInteger(MediaFormat.KEY_VIDEO_QP_I_MIN, 20);
+            format.setInteger(MediaFormat.KEY_VIDEO_QP_I_MAX, 50);
         }
 
         MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
@@ -97,21 +86,29 @@ public class VideoEncoder {
         }
 
         String codecName = codecList.findEncoderForFormat(format);
-        if (codecName == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Log.w(TAG, "trying cbr fd bitrate mode");
-            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR_FD);
-            codecName = codecList.findEncoderForFormat(format);
+        if (bitrateMode == BITRATE_MODE_AUTO) {
+            if (codecName == null) {
+                Log.w(TAG, "trying vbr bitrate mode");
+                format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
+                codecName = codecList.findEncoderForFormat(format);
+            }
+            if (codecName == null) {
+                Log.w(TAG, "trying cbr bitrate mode");
+                format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR);
+                codecName = codecList.findEncoderForFormat(format);
+            }
+            if (codecName == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Log.w(TAG, "trying cbr fd bitrate mode");
+                format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR_FD);
+                codecName = codecList.findEncoderForFormat(format);
+            }
+            if (codecName == null) {
+                Log.w(TAG, "trying cq bitrate mode");
+                format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ);
+                codecName = codecList.findEncoderForFormat(format);
+            }
         }
-        if (codecName == null) {
-            Log.w(TAG, "trying cq bitrate mode");
-            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ);
-            codecName = codecList.findEncoderForFormat(format);
-        }
-        if (codecName == null) {
-            Log.w(TAG, "trying vbr bitrate mode");
-            format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR);
-            codecName = codecList.findEncoderForFormat(format);
-        }
+
         if (codecName == null) {
             Log.e(TAG, "couldn't find encoder");
             throw new RuntimeException("failed to find a suitable encoder");
@@ -168,23 +165,13 @@ public class VideoEncoder {
         return frameCopier.getInputSurface();
     }
 
-    private int getTargetBitrate() {
-        int targetBitrate = (int) (maxFrameSize * maxFrameRate * targetBitrateMargin);
-        if (targetBitrate < BITRATE_MIN) {
-            Log.w(TAG, "hit min bitrate of " + BITRATE_MIN);
-            return BITRATE_MIN;
-        }
-        return targetBitrate;
-    }
-
-    private void updateBitrate(boolean requestSync) {
-        int targetBitrate = getTargetBitrate();
-        if (targetBitrate == bitrate) return;
+    private void updateBitrate(int bitrate, boolean requestSync) {
+        if (this.bitrate == bitrate) return;
 
         Bundle params = new Bundle();
 
-        Log.i(TAG, "updating bitrate: " + bitrate + " -> " + targetBitrate);
-        params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, targetBitrate);
+        Log.i(TAG, "updating bitrate: " + this.bitrate + " -> " + bitrate);
+        params.putInt(MediaCodec.PARAMETER_KEY_VIDEO_BITRATE, bitrate);
 
         if (requestSync) {
             Log.v(TAG, "requesting I frame");
@@ -192,35 +179,13 @@ public class VideoEncoder {
         }
 
         encoder.setParameters(params);
-        bitrate = targetBitrate;
-    }
-
-    private void onOversizedFrame() {
-        // any new P frames should be discarded to avoid ghost UI elements and other jank
-        dropUntilSync = true;
-
-        // need to get a usable I frame ASAP, video will remain frozen until then
-        targetBitrateMargin *= BITRATE_DROP_MULTIPLIER;
-        updateBitrate(true);
-    }
-
-    private void onKeyFrame() {
-        dropUntilSync = false;
-
-        // recover bitrate
-        if (targetBitrateMargin < BITRATE_MARGIN_MAX) {
-            targetBitrateMargin *= BITRATE_RECOVERY_MULTIPLIER;
-            if (targetBitrateMargin > BITRATE_MARGIN_MAX) targetBitrateMargin = BITRATE_MARGIN_MAX;
-            updateBitrate(false);
-        }
-
+        this.bitrate = bitrate;
     }
 
     public enum FrameError {
         NO_ERROR,
         NO_FRAME,       // nothing to output
         TRY_AGAIN,      // something changed, next frame should probably work
-        DROP,           // drop this frame
         FAILURE,        // something unexpected happened
         END_OF_STREAM,
     }
@@ -229,13 +194,14 @@ public class VideoEncoder {
         public int length = 0;
         public long timestamp = 0;
         public FrameError error = FrameError.NO_ERROR;
+        public int bufferIndex = -1;
     }
 
-    public void getFrame(FrameResult result, byte[] buffer, int offset, long timeoutUs) throws InterruptedException {
+    public BufferReader getFrame(FrameResult result, long timeoutUs) throws InterruptedException {
         if (frameCopier.nextFrameNumber() == lastFrameNumber) {
             if (duplicateFrames >= MIN_DUPLICATE_FRAMES) {
                 result.error = FrameError.NO_FRAME;
-                return;
+                return null;
             }
 
             duplicateFrames++;
@@ -245,6 +211,7 @@ public class VideoEncoder {
 
         lastFrameNumber = frameCopier.copyFrame();
         int index = encoder.dequeueOutputBuffer(bufferInfo, timeoutUs);
+        result.bufferIndex = index;
         if (index < 0) {
             switch (index) {
                 case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
@@ -263,14 +230,14 @@ public class VideoEncoder {
                     result.error = FrameError.FAILURE;
                 }
             }
-            return;
+            return null;
         }
 
         ByteBuffer encoded = encoder.getOutputBuffer(index);
         if (encoded == null) {
             Log.wtf(TAG, "got null output buffer"); // this shouldn't happen
             result.error = FrameError.FAILURE;
-            return;
+            return null;
         }
 
         try {
@@ -283,41 +250,30 @@ public class VideoEncoder {
                 Log.v(TAG, "I frame size: " + bufferInfo.size);
             }
 
-            if (bufferInfo.size > maxFrameSize) {
-                if (isKeyFrame || !dropUntilSync) {
-                    Log.e(TAG, "frame too large for output buffer: " + bufferInfo.size + " / " + (buffer.length - offset));
-                    onOversizedFrame();
-                }
-                result.error = FrameError.DROP;
-                return;
-            }
-            
-            if (isKeyFrame) {
-                onKeyFrame();
-            } else if (dropUntilSync && isFrame) {
-                result.error = FrameError.DROP;
-                return;
-            }
-
             if (isEOS) {
                 Log.i(TAG, "end of stream");
                 result.error = FrameError.END_OF_STREAM;
-                return;
+                return null;
             } else if (bufferInfo.size == 0) {    // this isn't supposed to happen
                 Log.e(TAG, "buffer size is 0, but not end of stream");
                 result.error = FrameError.FAILURE;
-                return;
+                return null;
             }
 
             encoded.position(bufferInfo.offset);
             encoded.limit(bufferInfo.offset + bufferInfo.size);
-            encoded.get(buffer, offset, bufferInfo.size);
 
-            result.error = FrameError.NO_ERROR;
-            result.length = bufferInfo.size;
             if (isFrame) result.timestamp = bufferInfo.presentationTimeUs;
+            result.length = bufferInfo.size;
+            result.error = FrameError.NO_ERROR;
+            return BufferReader.from(encoded);
         } finally {
-            encoder.releaseOutputBuffer(index, false);
+            if (result.error != FrameError.NO_ERROR)
+                encoder.releaseOutputBuffer(index, false);
         }
+    }
+
+    public void releaseOutputBuffer(int index) {
+        encoder.releaseOutputBuffer(index, false);
     }
 }

@@ -8,6 +8,8 @@ import static io.benwiegand.projection.geargrinder.util.ByteUtil.writeUInt16;
 
 import java.nio.ByteBuffer;
 
+import io.benwiegand.projection.geargrinder.data.BufferReader;
+
 public class AAFrame {
     public static final int CHANNEL_ID_OFFSET = 0;
     public static final int FLAGS_OFFSET = 1;
@@ -122,6 +124,16 @@ public class AAFrame {
         setPayloadLength(length);
         System.arraycopy(src, offset, buffer, getPayloadOffset(), length);
         return this;
+    }
+
+    public AAFrame copyPayload(BufferReader src, int length) {
+        setPayloadLength(length);
+        src.read(buffer, getPayloadOffset(), length);
+        return this;
+    }
+
+    public AAFrame copyPayload(BufferReader src) {
+        return copyPayload(src, src.length());
     }
 
     public AAFrame copyPayload(ByteBuffer src) {

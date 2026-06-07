@@ -21,12 +21,11 @@ public interface AVChannelMeta extends ChannelMeta {
             return switch (type) {
                 case 1 -> AudioChannelMeta.parse(channelId, buffer, offset, length, fields);
                 // idk what 2 is
-                case 3 -> VideoChannelMeta.parse(channelId, buffer, offset, length, fields);
+                case 3, -1 -> VideoChannelMeta.parse(channelId, buffer, offset, length, fields);
                 case 0 -> { // none
                     Log.wtf(TAG, "AV channel type none");
                     yield null;
                 }
-                case -1 -> throw new AssertionError("AV channel type not defined");
                 default -> throw new AssertionError("unknown AV channel type: " + type);
             };
         } catch (Throwable t) {

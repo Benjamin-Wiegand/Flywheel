@@ -30,6 +30,9 @@ import io.benwiegand.projection.geargrinder.logs.LogcatReader;
 public class DebugActivity extends AppCompatActivity {
     private static final String TAG = DebugActivity.class.getSimpleName();
 
+    // useful for debugging
+    private static final boolean AUTOSTART_TCP_SERVER = false;
+
     private LogcatReader logcatReader;
 
     @Override
@@ -101,6 +104,10 @@ public class DebugActivity extends AppCompatActivity {
 
         logcatReader = new LogcatReader(logUiAdapter);
         logcatReader.start();
+
+        if (AUTOSTART_TCP_SERVER)
+            startService(new Intent(this, ConnectionService.class)
+                    .setAction(ConnectionService.INTENT_ACTION_START_TCP));
     }
 
     @Override

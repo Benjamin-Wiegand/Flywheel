@@ -151,7 +151,9 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
                                     .build(),
                             preset, bufferSize
                     ));
-                    mediaAudioChannel.openChannel();
+                    // TODO: the audio channel should probably open first, then wait for mediaprojection
+                    new Thread(mediaAudioChannel::openChannel).start();
+//                    mediaAudioChannel.openChannel();
                 } catch (SecurityException e) {
                     Log.e(TAG, "can't launch audio capture: need explicit RECORD_AUDIO permission", e);
                     // TODO: request

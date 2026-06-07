@@ -63,7 +63,6 @@ public abstract class AVChannel<T> implements MessageListener {
         this.mb = mb;
         this.channelPriority = channelPriority;
 
-        // TODO: determine correct places to use control flag, this is just a guess
         controlParams = new MessageBroker.MessageSendParameters(channelId, true, true);
         mediaParams = new MessageBroker.MessageSendParameters(channelId, true, false);
 

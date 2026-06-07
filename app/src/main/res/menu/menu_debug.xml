@@ -4,8 +4,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/start_tcp_server_button"
+        android:title="start tcp development server"
+        tools:ignore="HardcodedText"
+        app:showAsAction="never"
+        />
+
+    <item
         android:id="@+id/force_start_service_button"
-        android:title="force start connection service"
+        android:title="force init USB connection"
         tools:ignore="HardcodedText"
         app:showAsAction="never"
         />

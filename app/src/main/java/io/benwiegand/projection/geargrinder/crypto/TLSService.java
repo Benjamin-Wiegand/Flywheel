@@ -60,7 +60,7 @@ public class TLSService {
 
             // TODO: if wireless is ever implemented, this needs to be removed since it is insecure.
             //       and also the certificate needs to be validated too.
-            sslEngine.setEnabledCipherSuites(sslEngine.getSupportedCipherSuites());
+//            sslEngine.setEnabledCipherSuites(sslEngine.getSupportedCipherSuites());
 
             sslSession = sslEngine.getSession();
 

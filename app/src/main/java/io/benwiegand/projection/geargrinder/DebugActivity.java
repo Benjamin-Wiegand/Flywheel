@@ -124,6 +124,11 @@ public class DebugActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Map<Integer, Supplier<Boolean>> actionMap = Map.of(
+                R.id.start_tcp_server_button, () -> {
+                    startService(new Intent(this, ConnectionService.class)
+                            .setAction(ConnectionService.INTENT_ACTION_START_TCP));
+                    return true;
+                },
                 R.id.force_start_service_button, () -> {
                     startService(new Intent(this, ConnectionService.class)
                             .setAction(ConnectionService.INTENT_ACTION_CONNECT_USB));

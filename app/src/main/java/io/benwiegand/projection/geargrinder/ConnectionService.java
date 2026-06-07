@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import io.benwiegand.projection.geargrinder.connector.AAConnector;
+import io.benwiegand.projection.geargrinder.connector.AATcpConnector;
 import io.benwiegand.projection.geargrinder.connector.AAUsbConnector;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.notification.ConnectionNotificationService;
@@ -30,6 +31,7 @@ public class ConnectionService extends Service implements ControlListener, AACon
     private static final String TAG = ConnectionService.class.getSimpleName();
 
     public static final String INTENT_ACTION_CONNECT_USB = "io.benwiegand.projection.geargrinder.USB_HEADUNIT_CONNECTED";
+    public static final String INTENT_ACTION_START_TCP = "io.benwiegand.projection.geargrinder.START_TCP_SERVER";
     public static final String INTENT_ACTION_START_MEDIA_PROJECTION = "io.benwiegand.projection.geargrinder.START_MEDIA_PROJECTION";
     public static final String INTENT_ACTION_STOP_CONNECTION = "io.benwiegand.projection.geargrinder.STOP_CONNECTION";
 
@@ -86,6 +88,7 @@ public class ConnectionService extends Service implements ControlListener, AACon
         Log.d(TAG, "start intent: " + intent);
         switch (intent.getAction()) {
             case INTENT_ACTION_CONNECT_USB -> connectUsb();
+            case INTENT_ACTION_START_TCP -> startTcpServer();
             case INTENT_ACTION_START_MEDIA_PROJECTION -> startMediaProjection(intent);
             case INTENT_ACTION_STOP_CONNECTION -> stopConnection();
             case null -> Log.e(TAG, "no intent action");
@@ -197,6 +200,24 @@ public class ConnectionService extends Service implements ControlListener, AACon
 
             Log.i(TAG, "trying to connect over USB");
             connector = new AAUsbConnector(this, this, this, binder, settingsManager);
+            connector.start();
+        }
+    }
+
+    private void startTcpServer() {
+        synchronized (lock) {
+            if (connector != null) {
+                Log.e(TAG, "connection already active");
+                return;
+            }
+
+            projectionGracePeriodToken = new Object();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                notificationService.addForegroundFlag(ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE);
+
+            Log.i(TAG, "starting TCP development server");
+            connector = new AATcpConnector(this, this, this, binder, settingsManager);
             connector.start();
         }
     }

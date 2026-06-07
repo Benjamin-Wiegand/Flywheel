@@ -7,6 +7,7 @@
     <string name="looking_for_car">looking for car…</string>
     <string name="connecting_to_car">connecting to your car…</string>
     <string name="connected_to_car">connected to your car</string>
+    <string name="disconnected_from_car">disconnected from car</string>
 
     <string name="car_connection_error">car connection error</string>
     <string name="error_grant_usb_permission">Flywheel needs permission to connect to your car</string>

@@ -95,7 +95,7 @@ public class ConnectionNotificationService {
         nm.cancel(ERROR_NOTIFICATION_ID);
     }
 
-    public void postError(String title, String content) {
+    private void postError(String title, String content) {
         initErrorNotificationChannel();
 
         // TODO: error activity

@@ -1,14 +1,10 @@
 package io.benwiegand.projection.geargrinder;
 
-import static io.benwiegand.projection.geargrinder.util.UsbUtil.findUsbHeadunit;
-
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
-import android.hardware.usb.UsbAccessory;
-import android.hardware.usb.UsbManager;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
@@ -16,36 +12,21 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.TrustManager;
-
-import io.benwiegand.projection.geargrinder.crypto.CryptoManager;
-import io.benwiegand.projection.geargrinder.crypto.KeystoreManager;
-import io.benwiegand.projection.geargrinder.crypto.LGTMTrustManager;
-import io.benwiegand.projection.geargrinder.crypto.TLSService;
-import io.benwiegand.projection.geargrinder.exception.CorruptedCertificateException;
-import io.benwiegand.projection.geargrinder.exception.CorruptedKeyException;
-import io.benwiegand.projection.geargrinder.message.AAFrame;
-import io.benwiegand.projection.geargrinder.message.MessageBroker;
+import io.benwiegand.projection.geargrinder.connector.AAConnector;
+import io.benwiegand.projection.geargrinder.connector.AAUsbConnector;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.notification.ConnectionNotificationService;
 import io.benwiegand.projection.geargrinder.projection.ProjectionService;
-import io.benwiegand.projection.geargrinder.protocol.AAConstants;
 import io.benwiegand.projection.geargrinder.callback.ControlListener;
-import io.benwiegand.projection.geargrinder.channel.ControlChannel;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
-import io.benwiegand.projection.geargrinder.transfer.UsbTransferInterface;
 
-public class ConnectionService extends Service implements ControlListener {
+public class ConnectionService extends Service implements ControlListener, AAConnector.StateListener {
     private static final String TAG = ConnectionService.class.getSimpleName();
 
     public static final String INTENT_ACTION_CONNECT_USB = "io.benwiegand.projection.geargrinder.USB_HEADUNIT_CONNECTED";
@@ -58,12 +39,11 @@ public class ConnectionService extends Service implements ControlListener {
     private final ServiceBinder binder = new ServiceBinder();
 
     private final Object lock = new Object();
-    private Thread connectionThread = null;
 
     private ConnectionNotificationService notificationService;
     private SettingsManager settingsManager;
-    private CryptoManager cryptoManager;
 
+    private AAConnector connector = null;
     private MediaProjection mediaProjection = null;
     private MediaProjectionRequestCallback mediaProjectionRequestCallback = null;
 
@@ -78,14 +58,13 @@ public class ConnectionService extends Service implements ControlListener {
 
         notificationService = new ConnectionNotificationService(this);
         settingsManager = new SettingsManager(this);
-        cryptoManager = new CryptoManager(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "on destroy");
-        if (connectionThread != null) connectionThread.interrupt();
+        if (connector != null) connector.stop();
         if (projectionService != null) projectionService.destroy();
         if (mediaProjection != null) mediaProjection.stop();
         notificationService.destroy();
@@ -118,7 +97,7 @@ public class ConnectionService extends Service implements ControlListener {
 
     private void stopConnectionLocked() {
         Log.i(TAG, "stopping headunit connection");
-        if (connectionThread != null) connectionThread.interrupt();
+        if (connector != null) connector.stop();
         if (projectionService != null) {
             projectionService.destroy();
             projectionService = null;
@@ -189,113 +168,69 @@ public class ConnectionService extends Service implements ControlListener {
         }
     }
 
-    private void connectUsb() {
-        Thread thread = new Thread(this::usbConnectionLoop, "Geargrinder USB connection loop");
-
-        synchronized (lock) {
-            if (connectionThread != null) {
-                Log.e(TAG, "connection thread already active");
-                return;
-            }
-
-            Log.i(TAG, "trying to connect over USB");
-            connectionThread = thread;
-        }
-
-        connectionThread.start();
-
-    }
-
     @Override
     public void onCarNameDiscovered(String carName) {
         notificationService.setCarName(carName);
     }
 
-    private TLSService createTlsService() throws CorruptedKeyException, CorruptedCertificateException {
-        KeystoreManager keystoreManager = cryptoManager.getKeystoreForCurrentConfiguration();
-        TrustManager[] trustManagers = new TrustManager[] {new LGTMTrustManager()};
-        KeyManager[] keyManagers = keystoreManager.getKeyManagers();
-        return new TLSService(trustManagers, keyManagers);
-    }
-
-    private void usbConnectionLoop() {
-        assert !Looper.getMainLooper().isCurrentThread();   // never run on main thread
-
-        try {
-            synchronized (lock) {
-                if (!settingsManager.allowsStartProjectionWhenLocked() && projectionService == null) {
-                    KeyguardManager km = getSystemService(KeyguardManager.class);
-                    if (km.isKeyguardLocked()) {
-                        // this is currently default behavior since the keyguard modal in the projection activity is insecure
-                        Log.e(TAG, "blocking connection due to keyguard");
-                        notificationService.postError(R.string.unlock_your_phone, R.string.unlock_device_before_connecting);
-                        return;
-                    }
-                }
-                projectionGracePeriodToken = new Object();
+    private void connectUsb() {
+        synchronized (lock) {
+            if (connector != null) {
+                Log.e(TAG, "connection already active");
+                return;
             }
 
-            notificationService.setConnectionStatusText(R.string.looking_for_car);
+            if (!settingsManager.allowsStartProjectionWhenLocked() && projectionService == null) {
+                KeyguardManager km = getSystemService(KeyguardManager.class);
+                if (km.isKeyguardLocked()) {
+                    // this is currently default behavior since the keyguard modal in the projection activity is insecure
+                    Log.e(TAG, "blocking connection due to keyguard");
+                    notificationService.postError(R.string.unlock_your_phone, R.string.unlock_device_before_connecting);
+                    return;
+                }
+            }
+
+            projectionGracePeriodToken = new Object();
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 notificationService.addForegroundFlag(ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE);
 
-            UsbManager usbManager = getSystemService(UsbManager.class);
+            Log.i(TAG, "trying to connect over USB");
+            connector = new AAUsbConnector(this, this, this, binder, settingsManager);
+            connector.start();
+        }
+    }
 
-            UsbAccessory headunit = findUsbHeadunit(usbManager);
-            if (headunit == null) {
-                Log.e(TAG, "no headunit found");
-                notificationService.postError(R.string.car_connection_error, R.string.error_no_usb_headunit);
-                return;
-            }
+    @Override
+    public void onConnectingStatus(@StringRes int status) {
+        notificationService.setConnectionStatusText(status);
+    }
 
-            if (!usbManager.hasPermission(headunit)) {
-                Log.e(TAG, "no permission for usb accessory");
-                notificationService.postError(R.string.car_connection_error, R.string.error_grant_usb_permission);
-                return;
-            }
+    @Override
+    public void onConnected() {
+        notificationService.setConnectionStatusText(R.string.connected_to_car);
+        notificationService.clearError();
+    }
 
+    @Override
+    public void onConnectionError(UserFriendlyException e) {
+        notificationService.postError(e);
+    }
 
-            Log.i(TAG, "headunit found");
-            notificationService.setConnectionStatusText(R.string.connecting_to_car);
+    @Override
+    public void onDisconnected() {
+        notificationService.setConnectionStatusText(R.string.disconnected_from_car);
+    }
 
-            // TODO: open accessory more efficiently (see openAccessory()
-            try (ParcelFileDescriptor pfd = usbManager.openAccessory(headunit);
-                 FileInputStream is = new FileInputStream(pfd.getFileDescriptor());
-                 FileOutputStream os = new FileOutputStream(pfd.getFileDescriptor())) {
+    @Override
+    public void onConnectorDeath() {
+        synchronized (lock) {
+            notificationService.setConnectionStatusText(R.string.looking_for_car);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                notificationService.removeForegroundFlag(ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE);
 
-                Log.d(TAG, "opened usb file descriptor [" + pfd.getFd() + "]: " + pfd);
-                notificationService.setConnectionStatusText(R.string.connected_to_car);
-                notificationService.clearError();
-
-                Log.d(TAG, "starting services");
-                TLSService tlsService = createTlsService();
-                UsbTransferInterface usbTransferInterface = new UsbTransferInterface(pfd, is, os, AAFrame.MAX_LENGTH);
-                MessageBroker messageBroker = new MessageBroker(usbTransferInterface, tlsService);
-                ControlChannel controlChannel = new ControlChannel(this, messageBroker, tlsService, this, settingsManager, binder);
-                try {
-                    messageBroker.registerForChannel(AAConstants.CHANNEL_CONTROL, controlChannel);
-                    messageBroker.loop();
-                } finally {
-                    controlChannel.destroy();
-                    messageBroker.destroy();
-                }
-
-            } catch (IOException e) {
-                Log.e(TAG, "IOException in car connection", e);
-                notificationService.postError(R.string.car_connection_unexpected_error, R.string.error_car_io_usb_generic);
-            } catch (CorruptedKeyException | CorruptedCertificateException e) {
-                notificationService.postError(e);
-            }
-
-        } finally {
-            // suspend
-            synchronized (lock) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                    notificationService.removeForegroundFlag(ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE);
-                notificationService.setConnectionStatusText(R.string.looking_for_car);
-                connectionThread = null;
-                suspendProjectionLocked();
-            }
+            connector = null;
+            suspendProjectionLocked();
         }
     }
 

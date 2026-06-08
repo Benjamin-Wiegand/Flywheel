@@ -6,8 +6,6 @@ import static io.benwiegand.projection.geargrinder.util.ByteUtil.readInt64;
 import android.util.Base64;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -210,9 +208,12 @@ public class ProtoParser {
 
     private static ProtoField parseField(byte[] buffer, int offset) {
         int i = offset;
-        int fieldId = buffer[i] >> 3;
-        int fieldType = buffer[i] & 0x07;
-        i++;
+
+        ProtoVarInt fieldTag = parseVarInt(0, buffer, i);
+        long fieldTagDecoded = fieldTag.decode(buffer);
+        int fieldId = (int) (fieldTagDecoded >> 3);
+        int fieldType = (int) (fieldTagDecoded & 0x07);
+        i += fieldTag.length();
 
         return switch (fieldType) {
             case FIELD_TYPE_64 -> new Proto64(fieldId, i);
@@ -231,30 +232,8 @@ public class ProtoParser {
             case FIELD_TYPE_GROUP_START -> {
                 Log.w(TAG, "skipping group");
                 // groups aren't supported
-                while (buffer[i] >> 3 != fieldId && (buffer[i++] & 0x07) != FIELD_TYPE_GROUP_END) { /* weee */ }
-                final int iFinal = i;
-                yield new ProtoField() {
-                    @Override
-                    public int fieldId() {
-                        return fieldId;
-                    }
-
-                    @Override
-                    public int offset() {
-                        return offset + 1;
-                    }
-
-                    @Override
-                    public int length() {
-                        return iFinal - offset();
-                    }
-
-                    @NonNull
-                    @Override
-                    public String toString() {
-                        return "unparsed group (length " + length() + ")";
-                    }
-                };
+                // groups also need to be parsed to properly skip them, so just throw for now
+                throw new AssertionError("groups aren't supported (field id: " + fieldId + ")");
             }
             case FIELD_TYPE_GROUP_END -> {
                 Log.wtf(TAG, "group end without group start!!!");
@@ -285,6 +264,7 @@ public class ProtoParser {
 //                    Log.i(TAG, "field " + id + " dat : " + new String(buffer, vd.offset(), vd.length()));
             Log.i(TAG, indent + "- field " + field.fieldId() + " dat : " + Base64.encodeToString(buffer, vd.offset(), vd.length(), Base64.NO_WRAP));
         }
+//        Log.d(TAG, indent + "  (off=" + field.offset() + ", len=" + field.length() + ")");
     }
 
     private static void debugDumpRecursive(byte[] buffer, Map<Integer, List<ProtoField>> fields, int indent) {

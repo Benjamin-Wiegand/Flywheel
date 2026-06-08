@@ -12,8 +12,6 @@ import android.media.AudioPlaybackCaptureConfiguration;
 import android.os.Build;
 import android.util.Log;
 
-import java.util.Arrays;
-
 import javax.net.ssl.SSLException;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
@@ -53,15 +51,12 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
 
     private final ControlListener controlListener;
 
+    private ServiceDiscoveryResponse serviceDiscoveryResponse = null;
+
     private VideoChannel videoChannel = null;
     private AudioChannel mediaAudioChannel = null;
     private InputChannel inputChannel = null;
     private SensorChannel sensorChannel = null;
-
-    private VideoChannelMeta videoChannelMeta = null;
-    private AudioChannelMeta mediaAudioChannelMeta = null;
-    private InputChannelMeta inputChannelMeta = null;
-    private SensorChannelMeta sensorChannelMeta = null;
 
     public ControlChannel(Context context, MessageBroker mb, TLSService tlsService, ControlListener controlListener, SettingsManager settingsManager, ConnectionService.ServiceBinder connectionServiceBinder) {
         this.context = context;
@@ -79,101 +74,95 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
         if (videoChannel != null) videoChannel.destroy();
         if (mediaAudioChannel != null) mediaAudioChannel.destroy();
         if (inputChannel != null) inputChannel.destroy();
-    }
-
-    private void handleServiceDiscoveryResponse(ServiceDiscoveryResponse response) {
-        controlListener.onCarNameDiscovered(response.friendlyName());
-
-        for (ChannelMeta channelMeta : response.channelMetadata()) switch (channelMeta) {
-            case VideoChannelMeta vcm -> {
-                if (videoChannelMeta != null) Log.w(TAG, "multiple video channels detected.");  // this maybe won't happen
-                videoChannelMeta = vcm;
-                Log.d(TAG, "found video channel: " + videoChannelMeta);
-                Log.d(TAG, " - presets: " + Arrays.toString(videoChannelMeta.presets()));
-            }
-            case AudioChannelMeta acm -> {
-                if (acm.audioType() != AudioChannelMeta.AudioType.MEDIA) {
-                    Log.d(TAG, "found audio channel: " + acm);
-                    continue;
-                }
-                if (mediaAudioChannelMeta != null) Log.w(TAG, "multiple media audio channels detected.");   // this probably won't happen
-                mediaAudioChannelMeta = acm;
-                Log.d(TAG, "found media audio channel: " + mediaAudioChannelMeta);
-                Log.d(TAG, " - presets: " + Arrays.toString(mediaAudioChannelMeta.presets()));
-            }
-            case InputChannelMeta icm -> {
-                if (inputChannelMeta != null) Log.w(TAG, "multiple input channels detected.");  // this probably won't happen
-                inputChannelMeta = icm;
-                Log.d(TAG, "found input channel: " + inputChannelMeta);
-                if (!inputChannelMeta.hasTouchScreen()) Log.w(TAG, "no touch screen found");
-            }
-            case SensorChannelMeta scm -> {
-                if (sensorChannelMeta != null) Log.w(TAG, "multiple sensor channels detected.");  // this probably won't happen
-                sensorChannelMeta = scm;
-                Log.d(TAG, "found sensor channel: " + sensorChannelMeta);
-            }
-            case null -> {}
-            default -> Log.d(TAG, "found channel: " + channelMeta);
-        }
-
-        if (videoChannelMeta == null) Log.w(TAG, "can't start video: no video channel");
-        if (mediaAudioChannelMeta == null) Log.w(TAG, "can't start audio: no media audio channel");
-        if (inputChannelMeta == null) Log.w(TAG, "can't start input: no input channel");
-        if (sensorChannelMeta == null) Log.w(TAG, "can't start sensors: no sensor channel");
+        if (sensorChannel != null) sensorChannel.destroy();
     }
 
     private void startProjection() {
+        controlListener.onCarNameDiscovered(serviceDiscoveryResponse.friendlyName());
+
         ProjectionService projectionService = connectionServiceBinder.getOrCreateGeargrinderProjectionService(this);
 
         mb.sendMessage(encryptedParams, CMD_AUDIO_FOCUS_REQUEST, new AudioFocusRequest(AudioFocusRequest.Type.GAIN).serialize());
 
-        if (videoChannelMeta != null) {
-            Log.d(TAG, "init video channel");
-            videoChannel = new VideoChannel(mb, projectionService, settingsManager, videoChannelMeta);
-            videoChannel.openChannel();
-        }
-
-        if (mediaAudioChannelMeta != null) {
-            connectionServiceBinder.requestMediaProjection(mediaProjection -> {
-                if (!mb.isAlive()) return;
-
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    Log.e(TAG, "can't launch audio capture through MediaProjection: android version too old");
-                    // TODO: error
-                    return;
+        Log.i(TAG, "initializing channels");
+        for (ChannelMeta channelMeta : serviceDiscoveryResponse.channelMetadata()) switch (channelMeta) {
+            case VideoChannelMeta vcm -> {
+                if (videoChannel != null) {     // I don't know of any cars that do multi-display, but I wouldn't be surprised
+                    Log.w(TAG, "multiple video channels!");
+                    Log.w(TAG, "not initializing: " + vcm);
+                    continue;
+                }
+                Log.d(TAG, "init video channel: " + vcm);
+                videoChannel = new VideoChannel(mb, projectionService, settingsManager, vcm);
+                videoChannel.openChannel();
+            }
+            case AudioChannelMeta acm -> {
+                if (acm.audioType() != AudioChannelMeta.AudioType.MEDIA) {
+                    Log.w(TAG, "non-media audio channels aren't supported yet");
+                    Log.w(TAG, "not initializing: " + acm);
+                    continue;
                 }
 
-                try {
-                    Log.d(TAG, "init media audio channel");
-                    mediaAudioChannel = new AudioChannel(mb, mediaAudioChannelMeta, (preset, bufferSize) -> new AudioRecordCapture(
-                            new AudioPlaybackCaptureConfiguration.Builder(mediaProjection)
-                                    .excludeUsage(USAGE_ALARM)
-                                    .build(),
-                            preset, bufferSize
-                    ));
-                    // TODO: the audio channel should probably open first, then wait for mediaprojection
-                    new Thread(mediaAudioChannel::openChannel).start();
+                if (mediaAudioChannel != null) {    // this probably won't happen
+                    Log.wtf(TAG, "multiple media audio channels!");
+                    Log.w(TAG, "not initializing: " + acm);
+                    continue;
+                }
+
+                connectionServiceBinder.requestMediaProjection(mediaProjection -> {
+                    if (!mb.isAlive()) return;
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                        Log.e(TAG, "can't launch audio capture through MediaProjection: android version too old");
+                        // TODO: error
+                        return;
+                    }
+
+                    try {
+                        Log.d(TAG, "init media audio channel: " + acm);
+                        mediaAudioChannel = new AudioChannel(mb, acm, (preset, bufferSize) -> new AudioRecordCapture(
+                                new AudioPlaybackCaptureConfiguration.Builder(mediaProjection)
+                                        .excludeUsage(USAGE_ALARM)
+                                        .build(),
+                                preset, bufferSize
+                        ));
+                        // TODO: the audio channel should probably open first, then wait for mediaprojection
+                        new Thread(mediaAudioChannel::openChannel).start();
 //                    mediaAudioChannel.openChannel();
-                } catch (SecurityException e) {
-                    Log.e(TAG, "can't launch audio capture: need explicit RECORD_AUDIO permission", e);
-                    // TODO: request
+                    } catch (SecurityException e) {
+                        Log.e(TAG, "can't launch audio capture: need explicit RECORD_AUDIO permission", e);
+                        // TODO: request
+                    }
+                });
+            }
+            case InputChannelMeta icm -> {
+                if (inputChannel != null) {
+                    Log.wtf(TAG, "multiple input channels!");
+                    Log.w(TAG, "not initializing: " + icm);
+                    continue;
                 }
-            });
+
+                Log.d(TAG, "init input channel: " + icm);
+                inputChannel = new InputChannel(mb, icm);
+                inputChannel.openChannel();
+                projectionService.setInput(inputChannel);
+            }
+            case SensorChannelMeta scm -> {
+                if (sensorChannel != null) {    // this probably shouldn't happen
+                    Log.wtf(TAG, "multiple sensor channels!");
+                    Log.w(TAG, "not initializing: " + scm);
+                    continue;
+                }
+
+                Log.d(TAG, "init sensor channel: " + scm);
+                sensorChannel = new SensorChannel(mb, scm);
+                sensorChannel.openChannel();
+            }
+            case null -> Log.w(TAG, "not initializing channel with unparsed metadata");
+            default -> Log.e(TAG, "not initializing channel with unhandled metadata: " + channelMeta, new AssertionError());
         }
 
-        if (inputChannelMeta != null) {
-            Log.d(TAG, "init input channel");
-            inputChannel = new InputChannel(mb, inputChannelMeta);
-            inputChannel.openChannel();
-            projectionService.setInput(inputChannel);
-        }
-
-        if (sensorChannelMeta != null) {
-            Log.d(TAG, "init sensor channel");
-            sensorChannel = new SensorChannel(mb, sensorChannelMeta);
-            sensorChannel.openChannel();
-        }
-
+        Log.i(TAG, "done initializing channels");
     }
 
     @Override
@@ -284,7 +273,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
                 }
 
                 Log.d(TAG, "response data: " + response);
-                handleServiceDiscoveryResponse(response);
+                serviceDiscoveryResponse = response;
                 startProjection();
 
             }

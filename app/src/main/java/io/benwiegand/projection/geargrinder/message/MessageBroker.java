@@ -349,8 +349,13 @@ public class MessageBroker {
         Log.i(TAG, "connection loop start");
         try {
 
-            while (transferInterface.alive())
+            while (transferInterface.alive()) {
+                if (Thread.interrupted()) {
+                    Log.w(TAG, "connection loop interrupted");
+                    transferInterface.close();
+                }
                 readMessage();
+            }
 
         } catch (IOException e) {
             Log.v(TAG, "connection died", e);

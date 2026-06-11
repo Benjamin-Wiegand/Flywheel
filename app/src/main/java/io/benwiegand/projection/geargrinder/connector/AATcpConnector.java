@@ -17,7 +17,7 @@ import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.geargrinder.transfer.TcpTransferInterface;
 
 public class AATcpConnector extends AAConnector {
-    private static final String TAG = AAUsbConnector.class.getSimpleName();
+    private static final String TAG = AATcpConnector.class.getSimpleName();
     private static final int PORT_NUMBER = 5277;
 
     private final Thread thread = new Thread(this::serverThread, "Geargrinder TCP development server");

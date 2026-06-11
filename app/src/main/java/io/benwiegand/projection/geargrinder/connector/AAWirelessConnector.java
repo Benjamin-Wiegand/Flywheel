@@ -27,7 +27,7 @@ import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.geargrinder.transfer.TcpTransferInterface;
 
 public class AAWirelessConnector extends AAConnector {
-    private static final String TAG = AAUsbConnector.class.getSimpleName();
+    private static final String TAG = AAWirelessConnector.class.getSimpleName();
 
     private final Thread thread = new Thread(this::clientThread, "Geargrinder wireless connection thread");
 

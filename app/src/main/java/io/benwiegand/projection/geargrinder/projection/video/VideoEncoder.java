@@ -38,6 +38,7 @@ public class VideoEncoder {
     private final int height;
     private final int maxFrameRate;
     private final int bitrateMode;
+    private final boolean frameRateOptimization;
 
     private int bitrate;
 
@@ -47,12 +48,13 @@ public class VideoEncoder {
     private final MediaCodec.BufferInfo bufferInfo;
 
 
-    public VideoEncoder(int width, int height, int maxFrameRate, int bitrateMode, int bitrate) {
+    public VideoEncoder(int width, int height, int maxFrameRate, int bitrateMode, int bitrate, boolean frameRateOptimization) {
         this.width = width;
         this.height = height;
         this.maxFrameRate = maxFrameRate;
         this.bitrateMode = bitrateMode;
         this.bitrate = bitrate;
+        this.frameRateOptimization = frameRateOptimization;
 
         bufferInfo = new MediaCodec.BufferInfo();
     }
@@ -198,7 +200,7 @@ public class VideoEncoder {
     }
 
     public BufferReader getFrame(FrameResult result, long timeoutUs) throws InterruptedException {
-        if (frameCopier.nextFrameNumber() == lastFrameNumber) {
+        if (frameRateOptimization && frameCopier.nextFrameNumber() == lastFrameNumber) {
             if (duplicateFrames >= MIN_DUPLICATE_FRAMES) {
                 result.error = FrameError.NO_FRAME;
                 return null;

@@ -39,6 +39,7 @@ public class VideoChannel extends AVChannel<VideoPreset> {
     private final VideoChannelMeta channelMeta;
     private final int bitrateMode;
     private final int bitrateCustom;
+    private final boolean frameRateOptimization;
 
     public VideoChannel(MessageBroker mb, ProjectionService projectionService, SettingsManager settingsManager, VideoChannelMeta channelMeta) {
         super(mb, channelMeta.channelId(), 0);
@@ -47,6 +48,7 @@ public class VideoChannel extends AVChannel<VideoPreset> {
 
         bitrateMode = settingsManager.getVideoBitrateMode();
         bitrateCustom = settingsManager.getVideoBitrateCustom();
+        frameRateOptimization = settingsManager.isVideoFrameRateOptimizationEnabled();
     }
 
     @Override
@@ -124,7 +126,8 @@ public class VideoChannel extends AVChannel<VideoPreset> {
                         p.preset().height(),
                         p.preset().refreshRate().hz(),
                         bitrateMode,
-                        bitrateTargets[0]
+                        bitrateTargets[0],
+                        frameRateOptimization
                 );
                 try {
                     Log.i(TAG, "video mode: " + p.preset().width() + " x " + p.preset().height() + " @ " + p.preset().refreshRate().hz() + ", density = " + p.preset().density());

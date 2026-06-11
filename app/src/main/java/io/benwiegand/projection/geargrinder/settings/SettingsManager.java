@@ -49,6 +49,10 @@ public class SettingsManager {
         return castInt(R.string.key_video_bitrate_custom, R.string.video_bitrate_custom_default);
     }
 
+    public boolean isVideoFrameRateOptimizationEnabled() {
+        return getBool(R.string.key_video_frame_rate_optimization, R.string.video_frame_rate_optimization_default);
+    }
+
     public boolean useImportedPhoneKeys() {
         return getBool(R.string.key_use_imported_phone_keys, R.string.start_projection_when_locked_default);
     }

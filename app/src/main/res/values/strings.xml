@@ -84,6 +84,8 @@
     <string name="video_bitrate_mode_pref_name">Video bitrate mode</string>
     <string name="video_bitrate_custom_pref_name">Custom video bitrate</string>
     <string name="video_bitrate_custom_pref_desc">Custom bitrate in bits per second. Set to -1 for auto bitrate.</string>
+    <string name="video_frame_rate_optimization_name">Frame rate optimization</string>
+    <string name="video_frame_rate_optimization_summary">breaks compatibility with some emulators</string>
 
     <string name="file_import_error_title">Failed to import file</string>
     <string name="file_import_error_invalid_cert">Not a supported certificate format</string>

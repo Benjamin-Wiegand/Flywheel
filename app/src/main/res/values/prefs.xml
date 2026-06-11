@@ -88,6 +88,7 @@
 
 
     <string translatable="false" name="video_bitrate_custom_default">-1</string>
+    <string translatable="false" name="video_frame_rate_optimization_default">true</string>
 
 
     <string translatable="false" name="start_projection_when_locked_default">false</string>
@@ -101,6 +102,7 @@
 
     <string translatable="false" name="key_video_bitrate_mode">video_bitrate_mode</string>
     <string translatable="false" name="key_video_bitrate_custom">video_bitrate_custom</string>
+    <string translatable="false" name="key_video_frame_rate_optimization">video_frame_rate_optimization</string>
 
     <string translatable="false" name="key_imported_phone_x509_certificate_chain">imported_phone_x509_certificate_chain</string>
     <string translatable="false" name="key_imported_phone_pkcs8_private_key">imported_phone_pkcs8_private_key</string>

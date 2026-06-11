@@ -25,7 +25,9 @@ public record VideoPreset(
         UNKNOWN,
         RES_480P,
         RES_720P,
-        RES_1080P;
+        RES_1080P,
+        RES_1440P,
+        RES_2160P;
 
         public int width() {
             return switch (this) {
@@ -33,6 +35,8 @@ public record VideoPreset(
                 case RES_480P -> 800;
                 case RES_720P -> 1280;
                 case RES_1080P -> 1920;
+                case RES_1440P -> 2560;
+                case RES_2160P -> 3840;
             };
         }
 
@@ -42,6 +46,8 @@ public record VideoPreset(
                 case RES_480P -> 480;
                 case RES_720P -> 720;
                 case RES_1080P -> 1080;
+                case RES_1440P -> 1440;
+                case RES_2160P -> 2160;
             };
         }
 
@@ -86,6 +92,8 @@ public record VideoPreset(
             case RES_480P -> new int[] {5000000, 250000, 100000};
             case RES_720P -> new int[] {15000000, 10000000, 5000000};
             case RES_1080P -> new int[] {30000000, 15000000, 10000000};
+            case RES_1440P -> new int[] {48000000, 30000000, 15000000};
+            case RES_2160P -> new int[] {64000000, 48000000, 30000000};
         };
     }
 

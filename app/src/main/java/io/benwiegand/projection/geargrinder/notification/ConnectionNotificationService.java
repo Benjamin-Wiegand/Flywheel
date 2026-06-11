@@ -35,6 +35,7 @@ public class ConnectionNotificationService {
     private @StringRes int connectionStatusText = R.string.looking_for_car;
     private String carName = null;
     private int foregroundFlags = 0;
+    private boolean dead = false;
 
     public ConnectionNotificationService(Service context) {
         this.context = context;
@@ -42,6 +43,7 @@ public class ConnectionNotificationService {
     }
 
     public void destroy() {
+        dead = true;
         context.stopForeground(STOP_FOREGROUND_REMOVE);
         nm.cancel(FOREGROUND_NOTIFICATION_ID);
     }
@@ -125,6 +127,8 @@ public class ConnectionNotificationService {
     }
 
     private void updateForegroundNotification() {
+        if (dead) return;
+
         initForegroundNotificationChannel();
 
         Intent intent = new Intent(context, DebugActivity.class);

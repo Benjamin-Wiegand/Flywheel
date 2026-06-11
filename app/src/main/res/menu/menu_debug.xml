@@ -4,6 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/connect_bluetooth_button"
+        android:title="connect bluetooth (experimental)"
+        tools:ignore="HardcodedText"
+        app:showAsAction="never"
+        />
+
+    <item
         android:id="@+id/start_tcp_server_button"
         android:title="start tcp development server"
         tools:ignore="HardcodedText"

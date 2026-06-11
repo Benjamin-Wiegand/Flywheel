@@ -9,6 +9,7 @@ import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -21,10 +22,13 @@ import androidx.annotation.StringRes;
 import io.benwiegand.projection.geargrinder.connector.AAConnector;
 import io.benwiegand.projection.geargrinder.connector.AATcpConnector;
 import io.benwiegand.projection.geargrinder.connector.AAUsbConnector;
+import io.benwiegand.projection.geargrinder.connector.AAWirelessConnector;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.notification.ConnectionNotificationService;
 import io.benwiegand.projection.geargrinder.projection.ProjectionService;
 import io.benwiegand.projection.geargrinder.callback.ControlListener;
+import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiInfoResponse;
+import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiStartRequest;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
 public class ConnectionService extends Service implements ControlListener, AAConnector.StateListener {
@@ -32,10 +36,13 @@ public class ConnectionService extends Service implements ControlListener, AACon
 
     public static final String INTENT_ACTION_CONNECT_USB = "io.benwiegand.projection.geargrinder.USB_HEADUNIT_CONNECTED";
     public static final String INTENT_ACTION_START_TCP = "io.benwiegand.projection.geargrinder.START_TCP_SERVER";
+    public static final String INTENT_ACTION_START_WIRELESS = "io.benwiegand.projection.geargrinder.START_WIRELESS";
     public static final String INTENT_ACTION_START_MEDIA_PROJECTION = "io.benwiegand.projection.geargrinder.START_MEDIA_PROJECTION";
     public static final String INTENT_ACTION_STOP_CONNECTION = "io.benwiegand.projection.geargrinder.STOP_CONNECTION";
 
     public static final String INTENT_EXTRA_MEDIA_PROJECTION_PERMISSION_RESULT = "projection_result";
+    public static final String INTENT_EXTRA_WIRELESS_WIFI_INFO = "wifi_info";
+    public static final String INTENT_EXTRA_WIRELESS_CONNECTION_INFO = "conn_info";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ServiceBinder binder = new ServiceBinder();
@@ -89,6 +96,7 @@ public class ConnectionService extends Service implements ControlListener, AACon
         switch (intent.getAction()) {
             case INTENT_ACTION_CONNECT_USB -> connectUsb();
             case INTENT_ACTION_START_TCP -> startTcpServer();
+            case INTENT_ACTION_START_WIRELESS -> startWireless(intent);
             case INTENT_ACTION_START_MEDIA_PROJECTION -> startMediaProjection(intent);
             case INTENT_ACTION_STOP_CONNECTION -> stopConnection();
             case null -> Log.e(TAG, "no intent action");
@@ -176,6 +184,19 @@ public class ConnectionService extends Service implements ControlListener, AACon
         notificationService.setCarName(carName);
     }
 
+    private boolean checkKeyguard() {
+        if (!settingsManager.allowsStartProjectionWhenLocked() && projectionService == null) {
+            KeyguardManager km = getSystemService(KeyguardManager.class);
+            if (km.isKeyguardLocked()) {
+                // this is currently default behavior since the keyguard modal in the projection activity is insecure
+                Log.e(TAG, "blocking connection due to keyguard");
+                notificationService.postError(R.string.unlock_your_phone, R.string.unlock_device_before_connecting);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void connectUsb() {
         synchronized (lock) {
             if (connector != null) {
@@ -183,15 +204,7 @@ public class ConnectionService extends Service implements ControlListener, AACon
                 return;
             }
 
-            if (!settingsManager.allowsStartProjectionWhenLocked() && projectionService == null) {
-                KeyguardManager km = getSystemService(KeyguardManager.class);
-                if (km.isKeyguardLocked()) {
-                    // this is currently default behavior since the keyguard modal in the projection activity is insecure
-                    Log.e(TAG, "blocking connection due to keyguard");
-                    notificationService.postError(R.string.unlock_your_phone, R.string.unlock_device_before_connecting);
-                    return;
-                }
-            }
+            if (checkKeyguard()) return;
 
             projectionGracePeriodToken = new Object();
 
@@ -211,6 +224,8 @@ public class ConnectionService extends Service implements ControlListener, AACon
                 return;
             }
 
+            if (checkKeyguard()) return;
+
             projectionGracePeriodToken = new Object();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
@@ -220,6 +235,36 @@ public class ConnectionService extends Service implements ControlListener, AACon
             connector = new AATcpConnector(this, this, this, binder, settingsManager);
             connector.start();
         }
+    }
+
+    private void startWireless(Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras == null) {
+            Log.wtf(TAG, "intent has no extras");
+            return;
+        }
+
+        WifiStartRequest connectionInfo = (WifiStartRequest) extras.getSerializable(INTENT_EXTRA_WIRELESS_CONNECTION_INFO);
+        WifiInfoResponse wifiInfo = (WifiInfoResponse) extras.getSerializable(INTENT_EXTRA_WIRELESS_WIFI_INFO);
+
+        synchronized (lock) {
+            if (connector != null) {
+                Log.e(TAG, "connection already active");
+                return;
+            }
+
+            if (checkKeyguard()) return;
+
+            projectionGracePeriodToken = new Object();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                notificationService.addForegroundFlag(ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE);
+
+            Log.i(TAG, "starting wireless connection");
+            connector = new AAWirelessConnector(this, this, this, binder, settingsManager, connectionInfo, wifiInfo);
+            connector.start();
+        }
+
     }
 
     @Override

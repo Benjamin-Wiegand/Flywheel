@@ -55,10 +55,14 @@ public class BluetoothClient {
         this.listener = listener;
         btManager = context.getSystemService(BluetoothManager.class);
         adapter = btManager.getAdapter();
+
+        // if it's not ALL CAPS it explodes
+        targetMac = targetMac.toUpperCase();
+
         device = adapter != null ? adapter.getRemoteDevice(targetMac) : null;
     }
 
-    public void close() throws IOException {
+    public void close() {
         thread.interrupt();
     }
 

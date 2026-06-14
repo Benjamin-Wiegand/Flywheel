@@ -140,6 +140,7 @@
     <string name="bluetooth_connection_error_title">Bluetooth connection failure</string>
     <string name="bluetooth_connection_error_no_adapter">Failed to get Bluetooth adapter, your device may not support Bluetooth.</string>
     <string name="bluetooth_connection_error_off">Bluetooth is turned off.</string>
+    <string name="bluetooth_connection_error_missing_permission">Missing Bluetooth permission.</string>
     <string name="bluetooth_connection_error_general_failure">Failed to establish Bluetooth connection.</string>
 
 </resources>

@@ -1,12 +1,22 @@
 package io.benwiegand.projection.geargrinder;
 
+import static io.benwiegand.projection.geargrinder.util.UiUtil.errorDialog;
+
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.companion.AssociationInfo;
+import android.companion.AssociationRequest;
+import android.companion.BluetoothDeviceFilter;
+import android.companion.CompanionDeviceManager;
+import android.companion.ObservingDevicePresenceRequest;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,6 +26,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -30,14 +41,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import io.benwiegand.projection.geargrinder.bluetooth.BluetoothClient;
 import io.benwiegand.projection.geargrinder.exception.BluetoothConnectionException;
 import io.benwiegand.projection.geargrinder.logs.LogUiAdapter;
 import io.benwiegand.projection.geargrinder.logs.LogcatReader;
-import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiInfoResponse;
-import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiStartRequest;
 
 public class DebugActivity extends AppCompatActivity {
     private static final String TAG = DebugActivity.class.getSimpleName();
@@ -140,31 +149,19 @@ public class DebugActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void connectBluetooth() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "missing bluetooth permission");
-                    ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.BLUETOOTH_CONNECT}, 69);
-                return;
-            }
-        } else {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "missing location permission (for bluetooth)");
-                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 69);
-                return;
-            }
-        }
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    private AlertDialog.Builder createBluetoothDeviceSelectionDialog(Consumer<BluetoothDevice> onSelection) {
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             Log.e(TAG, "no bluetooth adapter");
-            return;
+            return errorDialog(this, new BluetoothConnectionException(this, R.string.bluetooth_connection_error_no_adapter));
         }
 
         if (!bluetoothAdapter.isEnabled()) {
             Log.e(TAG, "bluetooth is turned off");
             startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
-            return;
+            return errorDialog(this, new BluetoothConnectionException(this, R.string.bluetooth_connection_error_off));
         }
 
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
@@ -173,44 +170,107 @@ public class DebugActivity extends AppCompatActivity {
                 .map(device -> device.getName() + " [" + device.getAddress() + "]")
                 .toArray(String[]::new);
 
-        new AlertDialog.Builder(this)
+        return new AlertDialog.Builder(this)
                 .setItems(deviceNames, (dialog, which) -> {
                     BluetoothDevice selectedDevice = deviceList.get(which);
-                    BluetoothClient client = new BluetoothClient(this, selectedDevice.getAddress(), new BluetoothClient.Listener() {
-                        @Override
-                        public void onStartWireless(WifiStartRequest connectionInfo, WifiInfoResponse wifiInfo) {
-                            Log.i(TAG, "got request to start wireless");
-                            startService(new Intent(DebugActivity.this, ConnectionService.class)
-                                    .setAction(ConnectionService.INTENT_ACTION_START_WIRELESS)
-                                    .putExtra(ConnectionService.INTENT_EXTRA_WIRELESS_CONNECTION_INFO, connectionInfo)
-                                    .putExtra(ConnectionService.INTENT_EXTRA_WIRELESS_WIFI_INFO, wifiInfo));
-                        }
+                    onSelection.accept(selectedDevice);
+                });
 
-                        @Override
-                        public void onBluetoothConnectionError(Throwable t) {
-                            Log.e(TAG, "bluetooth connection error", t);
-//                            throw new BluetoothConnectionException(context, R.string.bluetooth_connection_error_general_failure, e);
-                        }
+    }
 
-                        @Override
-                        public void onBluetoothDisconnected() {
-                            Log.v(TAG, "bluetooth disconnected");
-                        }
-                    });
+    private boolean checkBluetoothPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "missing bluetooth permission");
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.BLUETOOTH_CONNECT}, 69);
+                return true;
+            }
+        } else {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "missing location permission (for bluetooth)");
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 69);
+                return true;
+            }
+        }
+        return false;
+    }
 
-                    Log.i(TAG, "connecting to bluetooth");
-                    try {
-                        client.connect();
-                    } catch (BluetoothConnectionException e) {
-                        Log.e(TAG, "failed to start bluetooth connection", e);
-                    }
-                })
-                .show();
+    private void connectBluetooth() {
+        if (checkBluetoothPermission()) return;
+
+        createBluetoothDeviceSelectionDialog(selectedDevice -> {
+            Log.i(TAG, "selected " + selectedDevice + " for manual bluetooth connection");
+            startService(new Intent(this, ConnectionService.class)
+                    .setAction(ConnectionService.INTENT_ACTION_CONNECT_BLUETOOTH)
+                    .putExtra(ConnectionService.INTENT_EXTRA_BLUETOOTH_DEVICE_ADDRESS, selectedDevice.getAddress()));
+        }).show();
+    }
+
+    private void associateCompanionDevice(String address) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        CompanionDeviceManager deviceManager = getSystemService(CompanionDeviceManager.class);
+
+        AssociationRequest pairingRequest = new AssociationRequest.Builder()
+                .addDeviceFilter(new BluetoothDeviceFilter.Builder()
+                        .setAddress(address)
+                        .build())
+                .setSingleDevice(true)
+                .build();
+
+        deviceManager.associate(pairingRequest, new CompanionDeviceManager.Callback() {
+            @Override
+            public void onAssociationPending(@NonNull IntentSender chooserLauncher) {
+                try {
+                    Log.i(TAG, "association pending");
+                    chooserLauncher.sendIntent(DebugActivity.this, 0, null, null, handler);
+                } catch (IntentSender.SendIntentException e) {
+                    Log.e(TAG, "failed to send intent", e);
+                }
+            }
+
+            @Override
+            public void onAssociationCreated(@NonNull AssociationInfo associationInfo) {
+                Log.v(TAG, "association created: " + associationInfo);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                    deviceManager.startObservingDevicePresence(new ObservingDevicePresenceRequest.Builder()
+                            .setAssociationId(associationInfo.getId())
+                            .build());
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    deviceManager.startObservingDevicePresence(address);
+                } else {
+                    Log.e(TAG, "can't observe association: requires android 12+");
+                }
+            }
+
+            @Override
+            public void onFailure(CharSequence errorMessage) {
+                Log.e(TAG, "device pairing failed: " + errorMessage);
+            }
+        }, handler);
+
+    }
+
+    private void selectCompanionDevice() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            Log.e(TAG, "automatic wireless connection only works on android 12+");
+            return;
+        }
+
+        if (checkBluetoothPermission()) return;
+
+        createBluetoothDeviceSelectionDialog(selectedDevice -> {
+            Log.i(TAG, "selected device for association: " + selectedDevice);
+            associateCompanionDevice(selectedDevice.getAddress());
+        }).show();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Map<Integer, Supplier<Boolean>> actionMap = Map.of(
+                R.id.pair_bluetooth_button, () -> {
+                    selectCompanionDevice();
+                    return true;
+                },
                 R.id.connect_bluetooth_button, () -> {
                     connectBluetooth();
                     return true;

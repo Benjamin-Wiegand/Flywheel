@@ -1,9 +1,11 @@
 package io.benwiegand.projection.geargrinder;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
@@ -18,11 +20,14 @@ import android.util.Log;
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.app.ActivityCompat;
 
+import io.benwiegand.projection.geargrinder.bluetooth.BluetoothClient;
 import io.benwiegand.projection.geargrinder.connector.AAConnector;
 import io.benwiegand.projection.geargrinder.connector.AATcpConnector;
 import io.benwiegand.projection.geargrinder.connector.AAUsbConnector;
 import io.benwiegand.projection.geargrinder.connector.AAWirelessConnector;
+import io.benwiegand.projection.geargrinder.exception.BluetoothConnectionException;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.notification.ConnectionNotificationService;
 import io.benwiegand.projection.geargrinder.projection.ProjectionService;
@@ -31,18 +36,20 @@ import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiInfoRespo
 import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiStartRequest;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
-public class ConnectionService extends Service implements ControlListener, AAConnector.StateListener {
+public class ConnectionService extends Service implements ControlListener, AAConnector.StateListener, BluetoothClient.Listener {
     private static final String TAG = ConnectionService.class.getSimpleName();
 
     public static final String INTENT_ACTION_CONNECT_USB = "io.benwiegand.projection.geargrinder.USB_HEADUNIT_CONNECTED";
     public static final String INTENT_ACTION_START_TCP = "io.benwiegand.projection.geargrinder.START_TCP_SERVER";
     public static final String INTENT_ACTION_START_WIRELESS = "io.benwiegand.projection.geargrinder.START_WIRELESS";
+    public static final String INTENT_ACTION_CONNECT_BLUETOOTH = "io.benwiegand.projection.geargrinder.CONNECT_BLUETOOTH";
     public static final String INTENT_ACTION_START_MEDIA_PROJECTION = "io.benwiegand.projection.geargrinder.START_MEDIA_PROJECTION";
     public static final String INTENT_ACTION_STOP_CONNECTION = "io.benwiegand.projection.geargrinder.STOP_CONNECTION";
 
     public static final String INTENT_EXTRA_MEDIA_PROJECTION_PERMISSION_RESULT = "projection_result";
     public static final String INTENT_EXTRA_WIRELESS_WIFI_INFO = "wifi_info";
     public static final String INTENT_EXTRA_WIRELESS_CONNECTION_INFO = "conn_info";
+    public static final String INTENT_EXTRA_BLUETOOTH_DEVICE_ADDRESS = "address";
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ServiceBinder binder = new ServiceBinder();
@@ -53,6 +60,7 @@ public class ConnectionService extends Service implements ControlListener, AACon
     private SettingsManager settingsManager;
 
     private AAConnector connector = null;
+    private BluetoothClient bluetoothClient = null;
     private MediaProjection mediaProjection = null;
     private MediaProjectionRequestCallback mediaProjectionRequestCallback = null;
 
@@ -74,6 +82,7 @@ public class ConnectionService extends Service implements ControlListener, AACon
         super.onDestroy();
         Log.d(TAG, "on destroy");
         if (connector != null) connector.stop();
+        if (bluetoothClient != null) bluetoothClient.close();
         if (projectionService != null) projectionService.destroy();
         if (mediaProjection != null) mediaProjection.stop();
         notificationService.destroy();
@@ -97,6 +106,7 @@ public class ConnectionService extends Service implements ControlListener, AACon
             case INTENT_ACTION_CONNECT_USB -> connectUsb();
             case INTENT_ACTION_START_TCP -> startTcpServer();
             case INTENT_ACTION_START_WIRELESS -> startWireless(intent);
+            case INTENT_ACTION_CONNECT_BLUETOOTH -> connectBluetooth(intent);
             case INTENT_ACTION_START_MEDIA_PROJECTION -> startMediaProjection(intent);
             case INTENT_ACTION_STOP_CONNECTION -> stopConnection();
             case null -> Log.e(TAG, "no intent action");
@@ -267,6 +277,46 @@ public class ConnectionService extends Service implements ControlListener, AACon
 
     }
 
+    private void connectBluetooth(Intent intent) {
+        String deviceAddress = intent.getStringExtra(INTENT_EXTRA_BLUETOOTH_DEVICE_ADDRESS);
+        if (deviceAddress == null) {
+            Log.wtf(TAG, "missing required intent extra");
+            return;
+        }
+
+        synchronized (lock) {
+            if (bluetoothClient != null) {
+                Log.e(TAG, "bluetooth connection already active");
+                return;
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    Log.e(TAG, "missing bluetooth permission");
+                    notificationService.postError(new BluetoothConnectionException(this, R.string.bluetooth_connection_error_missing_permission));
+                    return;
+                }
+            } else {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    Log.e(TAG, "missing location permission (for bluetooth)");
+                    notificationService.postError(new BluetoothConnectionException(this, R.string.bluetooth_connection_error_missing_permission));
+                    return;
+                }
+            }
+
+            bluetoothClient = new BluetoothClient(this, deviceAddress, this);
+
+            Log.i(TAG, "connecting to bluetooth");
+            try {
+                bluetoothClient.connect();
+            } catch (BluetoothConnectionException e) {
+                Log.e(TAG, "failed to start bluetooth connection", e);
+            }
+        }
+    }
+
+
+    // projection callbacks
     @Override
     public void onConnectingStatus(@StringRes int status) {
         notificationService.setConnectionStatusText(status);
@@ -299,6 +349,30 @@ public class ConnectionService extends Service implements ControlListener, AACon
             suspendProjectionLocked();
         }
     }
+
+
+    // bluetooth callbacks
+    @Override
+    public void onStartWireless(WifiStartRequest connectionInfo, WifiInfoResponse wifiInfo) {
+        Log.i(TAG, "got request to start wireless");
+        startService(new Intent(this, ConnectionService.class)
+                .setAction(ConnectionService.INTENT_ACTION_START_WIRELESS)
+                .putExtra(ConnectionService.INTENT_EXTRA_WIRELESS_CONNECTION_INFO, connectionInfo)
+                .putExtra(ConnectionService.INTENT_EXTRA_WIRELESS_WIFI_INFO, wifiInfo));
+    }
+
+    @Override
+    public void onBluetoothConnectionError(Throwable t) {
+        Log.e(TAG, "bluetooth connection error", t);
+        notificationService.postError(new BluetoothConnectionException(this, R.string.bluetooth_connection_error_general_failure, t));
+    }
+
+    @Override
+    public void onBluetoothDisconnected() {
+        Log.v(TAG, "bluetooth disconnected");
+        bluetoothClient = null;
+    }
+
 
     private void suspendProjectionLocked() {
         if (projectionService == null) return;

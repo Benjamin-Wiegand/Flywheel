@@ -97,6 +97,15 @@ public class SettingsManager {
         return getRawBytes(R.string.key_imported_phone_pkcs8_private_key);
     }
 
+    public boolean saveDockPinned(String config) {
+        return saveString(R.string.key_dock_pinned, config);
+    }
+
+    public String getDockPinned() {
+        return getString(R.string.key_dock_pinned);
+    }
+
+
     private int castInt(@StringRes int key, @StringRes int defaultRes) {
         String stringValue = prefs.getString(context.getString(key), null);
         if (stringValue == null) stringValue = context.getString(defaultRes);
@@ -121,15 +130,23 @@ public class SettingsManager {
         return prefs.getBoolean(context.getString(key), defaultValue);
     }
 
+    private boolean saveString(@StringRes int key, String value) {
+        return prefs.edit()
+                .putString(context.getString(key), value)
+                .commit();
+    }
+
+    private String getString(@StringRes int key) {
+        return prefs.getString(context.getString(key), null);
+    }
+
     private boolean saveRawBytes(@StringRes int key, byte[]... multiData) {
         String[] encodedMultiData = new String[multiData.length];
         for (int i = 0; i < multiData.length; i++)
             encodedMultiData[i] = Base64.encodeToString(multiData[i], Base64.NO_WRAP);
 
         String value = String.join(RAW_BYTES_MULTI_SEPARATOR, encodedMultiData);
-        return prefs.edit()
-                .putString(context.getString(key), value)
-                .commit();
+        return saveString(key, value);
     }
 
     private byte[][] getRawBytesMulti(String key) {

@@ -34,6 +34,7 @@ import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
 import io.benwiegand.projection.geargrinder.projection.ui.AppDock;
 import io.benwiegand.projection.geargrinder.projection.ui.AppDrawer;
 import io.benwiegand.projection.geargrinder.projection.ui.ProjectionModal;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.libprivd.IPrivd;
 
 public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener, AppDock.Listener, AppLauncherListener, ProjectionTaskManager.Listener {
@@ -47,6 +48,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private final ActivityBinder binder = new ActivityBinder();
     private MakeshiftBind makeshiftBind;
 
+    private SettingsManager settingsManager;
     private ProjectionTaskManager taskManager;
     private AppDock appDock;
     private AppDrawer appDrawer;
@@ -103,8 +105,10 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
         findViewById(R.id.soft_back_button).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
+        settingsManager = new SettingsManager(this);
+
         // components
-        taskManager = new ProjectionTaskManager(findViewById(R.id.content_frame));
+        taskManager = new ProjectionTaskManager(findViewById(R.id.content_frame), settingsManager);
         appDock = new AppDock(findViewById(R.id.app_dock), taskManager, this);
         appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
         batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
@@ -139,8 +143,6 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
-
-        connector.getPackageBinder().ifPresent(b -> b.unregisterListener(this::onPackageListUpdated));
 
         taskManager.unregisterListener(this);
         taskManager.destroy();
@@ -204,16 +206,11 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         binder.requestDaemon(ProjectionActivity.this);
     }
 
-    private void onPackageListUpdated(PackageService.ServiceBinder binder) {
-//        binder.getAppsFor(AppCategory.FOCUSED)
-//                .forEach(appDock::addApp);
-    }
-
     @Override
     public void onPackageServiceConnected(PackageService.ServiceBinder binder) {
         appDrawer.setPackageBinder(binder);
         notificationDisplay.setPackageServiceBinder(binder);
-        binder.registerListener(this::onPackageListUpdated);
+        taskManager.setPackageServiceBinder(binder);
     }
 
     @Override

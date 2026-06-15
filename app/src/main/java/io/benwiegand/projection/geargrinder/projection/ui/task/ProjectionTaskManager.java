@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,12 +21,14 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import io.benwiegand.projection.geargrinder.PackageService;
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.VirtualActivity;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.libprivd.IPrivd;
 
-public class ProjectionTaskManager {
+public class ProjectionTaskManager implements PackageService.PackageServiceListener {
     private static final String TAG = ProjectionTaskManager.class.getSimpleName();
 
     public interface Listener {
@@ -41,7 +44,9 @@ public class ProjectionTaskManager {
 
     private final ViewGroup contentFrame;
     private final Context context;
+    private final SettingsManager settingsManager;
     private IPrivd privd = null;
+    private PackageService.ServiceBinder packageServiceBinder = null;
 
     private final Map<ComponentName, VirtualActivity> virtualActivities = new HashMap<>();
     private final List<ProjectionTask> pinnedTasks = new ArrayList<>();
@@ -50,12 +55,14 @@ public class ProjectionTaskManager {
     private ProjectionTask activeTask = null;
 
     private int splitScreenOrientation = LinearLayout.HORIZONTAL;
+    private boolean loadedPinned = false;
 
     private final Queue<Listener> listeners = new LinkedList<>();
 
-    public ProjectionTaskManager(ViewGroup contentFrame) {
+    public ProjectionTaskManager(ViewGroup contentFrame, SettingsManager settingsManager) {
         this.contentFrame = contentFrame;
         this.context = contentFrame.getContext();
+        this.settingsManager = settingsManager;
 
         // layout updates
         contentFrame.getViewTreeObserver().addOnGlobalLayoutListener(this::onGlobalLayout);
@@ -69,6 +76,7 @@ public class ProjectionTaskManager {
         openTasks.clear();
         activeTask = null;
         listeners.clear();
+        if (packageServiceBinder != null) packageServiceBinder.unregisterListener(this);
     }
 
     private void onGlobalLayout() {
@@ -127,6 +135,7 @@ public class ProjectionTaskManager {
         taskList.remove(task);
 
         callListeners(l -> l.onTaskRemoved(oldIndex, task, pinned));
+        savePinned();
     }
 
     public void movePinnedTask(int index, ProjectionTask task) {
@@ -138,6 +147,7 @@ public class ProjectionTaskManager {
 
         int newIndex = index;
         callListeners(l -> l.onTaskMoved(oldIndex, newIndex, task, true));
+        savePinned();
     }
 
     public void pinTask(int index, ProjectionTask task) {
@@ -149,6 +159,7 @@ public class ProjectionTaskManager {
         pinnedTasks.add(index, task);
 
         callListeners(l -> l.onTaskPinned(oldIndex, index, task));
+        savePinned();
     }
 
     public void pinTask(ProjectionTask task) {
@@ -164,6 +175,7 @@ public class ProjectionTaskManager {
         openTasks.add(0, task);
 
         callListeners(l -> l.onTaskUnpinned(oldIndex, 0, task));
+        savePinned();
     }
 
     private void moveToFront(ProjectionTask task) {
@@ -218,6 +230,15 @@ public class ProjectionTaskManager {
         ProjectionTask task = createTask(app);
         pinnedTasks.add(index, task);
         callListeners(l -> l.onTaskAdded(index, task, true));
+        savePinned();
+        return task;
+    }
+
+    public ProjectionTask createNewPinnedTask(int index, AppRecord... apps) {
+        ProjectionTask task = createTask(apps);
+        pinnedTasks.add(index, task);
+        callListeners(l -> l.onTaskAdded(index, task, true));
+        savePinned();
         return task;
     }
 
@@ -338,5 +359,72 @@ public class ProjectionTaskManager {
         return true;
     }
 
+    private String generatePinnedConfig() {
+        StringBuilder sb = new StringBuilder("v1:");
+        for (ProjectionTask task : pinnedTasks) {
+            for (AppRecord app : task.getAppRecords()) sb
+                    .append(app.packageName())
+                    .append("|");
+            sb.append("]");
+        }
+        return sb.toString();
+    }
+
+    private void savePinned() {
+        String config = generatePinnedConfig();
+        Log.d(TAG, "saving new pinned config: " + config);
+        if (!settingsManager.saveDockPinned(config))
+            Log.e(TAG, "failed to commit new config");
+    }
+
+    private void loadPinned() throws ParseException {
+        assert packageServiceBinder != null;
+
+        String config = settingsManager.getDockPinned();
+        if (config == null) {
+            Log.w(TAG, "no pinned items config");
+            return;
+        }
+
+        Log.d(TAG, "loading pinned items: " + config);
+        int index = 0;
+        if (!config.startsWith("v1:"))
+            throw new ParseException("invalid format (expected 'v1:')", index);
+        index += 3;
+
+        List<AppRecord> taskAppList = new LinkedList<>();
+        while (index < config.length()) {
+            int pkgEnd = config.indexOf('|', index);
+            if (pkgEnd < 0)
+                throw new ParseException("package name has no terminator", index);
+            taskAppList.add(packageServiceBinder.getApp(config.substring(index, pkgEnd)));
+            index = pkgEnd + 1;
+
+            if (config.charAt(index) == ']') {
+                Log.d(TAG, "parsed task: " + taskAppList);
+                createNewPinnedTask(pinnedTasks.size(), taskAppList.stream().toArray(AppRecord[]::new));
+                taskAppList.clear();
+                index++;
+            }
+        }
+    }
+
+    @Override
+    public void onPackageListUpdated(PackageService.ServiceBinder binder) {
+        if (loadedPinned) return;
+        loadedPinned = true;
+
+        try {
+            loadPinned();
+        } catch (Throwable t) {
+            Log.e(TAG, "failed to load pinned config", t);
+        }
+    }
+
+
+    public void setPackageServiceBinder(PackageService.ServiceBinder packageServiceBinder) {
+        this.packageServiceBinder = packageServiceBinder;
+        packageServiceBinder.registerListener(this);
+    }
 
 }

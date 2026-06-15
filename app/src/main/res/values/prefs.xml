@@ -110,4 +110,7 @@
     <string translatable="false" name="key_self_signed_phone_pkcs8_private_key">self_signed_phone_pkcs8_private_key</string>
     <string translatable="false" name="key_use_imported_phone_keys">use_imported_phone_keys</string>
 
+
+    <string translatable="false" name="key_dock_pinned">dock_pinned</string>
+
 </resources>

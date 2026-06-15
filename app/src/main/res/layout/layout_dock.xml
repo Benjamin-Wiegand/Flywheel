@@ -43,6 +43,7 @@
                 android:layout_width="2dp"
                 android:layout_height="match_parent"
                 android:layout_margin="6dp"
+                android:focusable="false"
                 />
 
             <LinearLayout

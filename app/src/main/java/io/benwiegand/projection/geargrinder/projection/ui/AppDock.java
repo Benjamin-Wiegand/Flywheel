@@ -31,6 +31,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
     private final LinearLayout pinnedItemsView;
     private final LinearLayout openItemsView;
     private final LinearLayout[] itemsViews;
+    private final View dividerView;
 
     private final View dropPlaceholder;
 
@@ -58,6 +59,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
         pinnedItemsView = rootView.findViewById(R.id.dock_pinned_items);
         openItemsView = rootView.findViewById(R.id.dock_open_items);
         itemsViews = new LinearLayout[] {pinnedItemsView, openItemsView};
+        dividerView = rootView.findViewById(R.id.dock_divider);
 
         taskManager.registerListener(this);
 
@@ -114,6 +116,10 @@ public class AppDock implements ProjectionTaskManager.Listener {
         return itemView;
     }
 
+    private void updateDividerVisibility() {
+        dividerView.setVisibility(openItemsView.getChildCount() > 0 ? View.VISIBLE : View.INVISIBLE);
+    }
+
     @Override
     public void onTaskMoved(int oldIndex, int newIndex, ProjectionTask task, boolean pinned) {
         LinearLayout itemsView = pinned ? pinnedItemsView : openItemsView;
@@ -128,6 +134,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
         View itemView = taskItemViewMap.get(task);
         openItemsView.removeView(itemView);
         pinnedItemsView.addView(itemView, newIndex);
+        updateDividerVisibility();
     }
 
     @Override
@@ -135,6 +142,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
         View itemView = taskItemViewMap.get(task);
         pinnedItemsView.removeView(itemView);
         openItemsView.addView(itemView, newIndex);
+        updateDividerVisibility();
     }
 
     @Override
@@ -143,6 +151,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
         View itemView = inflateDockItemView(task);
         taskItemViewMap.put(task, itemView);
         itemsView.addView(itemView, index);
+        updateDividerVisibility();
     }
 
     @Override
@@ -150,6 +159,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
         LinearLayout itemsView = pinned ? pinnedItemsView : openItemsView;
         View itemView = taskItemViewMap.remove(task);
         itemsView.removeView(itemView);
+        updateDividerVisibility();
     }
 
     @Override
@@ -253,6 +263,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
                 }
 
                 dropLocation.itemsView().addView(dropPlaceholder, index);
+                updateDividerVisibility();
 
                 yield true;
             }
@@ -266,6 +277,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
                 if (placeholderLocation != null)
                     placeholderLocation.itemsView().removeView(dropPlaceholder);
 
+                updateDividerVisibility();
                 yield true;
             }
             case DragEvent.ACTION_DRAG_ENDED -> {
@@ -293,12 +305,15 @@ public class AppDock implements ProjectionTaskManager.Listener {
                         assert pinned && pin;
                         taskManager.movePinnedTask(dropLocation.index(), task);
                     }
+
+                    updateDividerVisibility();
                     yield true;
                 }
 
                 AppRecord app = getAppRecordFromDragState(event);
                 if (app != null) {
                     taskManager.createNewPinnedTask(dropLocation.index(), app);
+                    updateDividerVisibility();
                     yield true;
                 }
 

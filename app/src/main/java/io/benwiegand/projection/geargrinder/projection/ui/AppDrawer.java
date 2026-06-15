@@ -36,7 +36,6 @@ public class AppDrawer implements PackageService.PackageServiceListener, TabLayo
     private static final long DRAWER_ANIMATION_DURATION = 200;
     private static final int DEFAULT_MAX_DRAWER_COLUMNS = 6;
 
-    private static final long APP_LOAD_ANIMATION_DURATION = 200;
     private static final long ICON_LOAD_THREAD_KEEPALIVE = 1000;
 
     // 100dp + 6dp margin
@@ -305,11 +304,7 @@ public class AppDrawer implements PackageService.PackageServiceListener, TabLayo
                         labelView.setText(app.label(pm));
                         iconView.setImageDrawable(r.icon());
 
-                        view.animate()
-                                .setStartDelay(0)
-                                .setDuration(APP_LOAD_ANIMATION_DURATION)
-                                .alpha(1f)
-                                .start();
+                        view.setAlpha(1f);
                     }
             );
         }

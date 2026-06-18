@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "requesting notification permission");
             if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
                 new AlertDialog.Builder(this)
-                        .setTitle(R.string.post_notifications_permission_request)
+                        .setTitle(R.string.post_notifications_permission_title)
                         .setMessage(R.string.post_notifications_permission_rationale)
                         .setPositiveButton(R.string.grant_permission_button, (d, i) ->
                                 requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 69))
@@ -61,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Map<Integer, Supplier<Boolean>> actionMap = Map.of(
+                R.id.manage_permissions_button, () -> {
+                    startActivity(new Intent(this, PermissionGrantActivity.class));
+                    return true;
+                },
                 R.id.settings_button, () -> {
                     startActivity(new Intent(this, SettingsActivity.class));
                     return false;

@@ -16,9 +16,10 @@ import android.view.View;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import io.benwiegand.projection.geargrinder.permission.PermissionEntry;
+import io.benwiegand.projection.geargrinder.permission.PermissionRequirements;
 import rikka.shizuku.Shizuku;
 
 public class ConnectionRequestActivity extends AppCompatActivity {
@@ -28,8 +29,6 @@ public class ConnectionRequestActivity extends AppCompatActivity {
     public static final String INTENT_ACTION_REQUEST_SHIZUKU = "io.benwiegand.projection.geargrinder.REQUEST_SHIZUKU";
 
     private static final String INTENT_ACTION_USB_PERMISSION_RESULT = "io.benwiegand.projection.geargrinder.USB_PERMISSION";
-
-    private static final String SHIZUKU_PACKAGE_NAME = "moe.shizuku.privileged.api";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -102,57 +101,14 @@ public class ConnectionRequestActivity extends AppCompatActivity {
                 return; // not done yet
             }
             case INTENT_ACTION_REQUEST_SHIZUKU -> {
-                if (Shizuku.isPreV11()) {
-                    Log.e(TAG, "shizuku app too old");
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.shizuku_permission_request)
-                            .setMessage(R.string.shizuku_too_old)
-                            .setPositiveButton(R.string.close_button, (d, i) -> finish())
-                            .setCancelable(false)
-                            .show();
+                Log.v(TAG, "request for shizuku permission");
+                PermissionEntry entry = PermissionRequirements.SHIZUKU_PERMISSION_ENTRY;
+                if (entry.shouldShowRationale().apply(this)) {
+                    entry.createRationaleDialog(this).show();
                     return;
                 }
-
-                if (Shizuku.getBinder() == null) {
-                    Log.e(TAG, "shizuku binder is null. is shizuku running?");
-                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this)
-                            .setTitle(R.string.shizuku_permission_request)
-                            .setNegativeButton(R.string.close_button, (d, i) -> finish())
-                            .setPositiveButton(R.string.settings_button, (d, i) -> {
-                                startActivity(new Intent(this, SettingsActivity.class));
-                                finish();
-                            })
-                            .setCancelable(false);
-
-                    Intent shizukuLaunchIntent = getPackageManager().getLaunchIntentForPackage(SHIZUKU_PACKAGE_NAME);
-                    if (shizukuLaunchIntent != null) dialogBuilder
-                            .setMessage(R.string.shizuku_not_running)
-                            .setNeutralButton(R.string.launch_shizuku_button, (d, i) -> {
-                                startActivity(shizukuLaunchIntent);
-                                finish();
-                            });
-                    else dialogBuilder
-                            .setMessage(R.string.shizuku_not_installed);
-
-                    dialogBuilder.show();
-                    return;
-                }
-
-                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(TAG, "shizuku already granted: uid = " + Shizuku.getUid());
-                    finish();
-                } else if (Shizuku.shouldShowRequestPermissionRationale()) {
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.shizuku_permission_request)
-                            .setMessage(R.string.shizuku_permission_rationale)
-                            .setPositiveButton(R.string.grant_permission_button, (d, i) ->
-                                    Shizuku.requestPermission(69))
-                            .setNegativeButton(R.string.not_now_button, (d, i) -> finish())
-                            .setCancelable(false)
-                            .show();
-                } else {
-                    Shizuku.requestPermission(69);
-                }
+                entry.request().accept(this);
+                return;
             }
         }
 

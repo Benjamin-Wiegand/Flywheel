@@ -95,6 +95,12 @@
             android:theme="@style/Theme.Geargrinder.Projection"
             />
 
+        <activity
+            android:name=".PermissionGrantActivity"
+            android:label="@string/permission_grant_activity_title"
+            android:exported="false"
+            />
+
         <service
             android:name=".ConnectionService"
             android:exported="false"
@@ -140,7 +146,7 @@
         <service
             android:name=".NotificationService"
             android:exported="false"
-            android:label="@string/notification_service_description"
+            android:label="@string/notification_service_permission_rationale"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />

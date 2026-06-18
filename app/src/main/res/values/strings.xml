@@ -19,10 +19,7 @@
     <string name="error_development_server_io">failed to start TCP development server.</string>
     <string name="error_car_io_usb_generic">lost connection with your car. check the cable or try again.</string>
     <string name="error_wireless_net_client_io">lost connection with your car. try connecting again or try a wired connection.</string>
-    <string name="post_notifications_permission_rationale">Notifications are used to communicate errors and connection status. Flywheel may not work properly without this permission.</string>
     <string name="not_now_button">not now</string>
-    <string name="grant_permission_button">grant</string>
-    <string name="post_notifications_permission_request">Notifications permission</string>
     <string name="accessibility_service_description">Allows Flywheel to forward inputs from your car to your device.</string>
     <string name="close_button">close</string>
     <string name="cancel_button">cancel</string>
@@ -43,14 +40,44 @@
     <string name="connect_your_car_over_usb">Connect your car over USB to start Flywheel.</string>
     <string name="privilege_mode_pref_name">Privilege mode</string>
     <string name="operational_mode_pref_name">Operational mode</string>
-    <string name="shizuku_permission_request">Shizuku permission</string>
-    <string name="shizuku_permission_rationale">Shizuku is used to access system APIs for a better user experience. Things like creating trusted virtual displays, injecting input events into said displays, etc.</string>
-    <string name="shizuku_not_running">Unable to connect to Shizuku. Please start Shizuku or choose a different privilege mode.</string>
-    <string name="shizuku_not_installed">Unable to connect to Shizuku. Please install and start Shizuku or choose a different privilege mode.</string>
-    <string name="launch_shizuku_button">launch Shizuku</string>
-    <string name="shizuku_too_old">Please update Shizuku.</string>
     <string name="battery_percent_format" formatted="true">%d%%</string>
     <string name="pref_category_operations">operations</string>
+
+    <string name="permission_grant_activity_title">Permissions</string>
+    <string name="manage_permissions_button">Permissions</string>
+    <string name="required_permissions_section_header">required</string>
+    <string name="optional_permissions_section_header">optional</string>
+    <string name="grant_permission_button">grant</string>
+    <string name="check_permission_button">check</string>
+    <string name="enable_service_button">enable</string>
+    <string name="permission_granted_indicator">granted</string>
+    <string name="service_enabled_indicator">enabled</string>
+    <string name="manage_service_button">manage</string>
+    <string name="show_permission_rationale_button">info</string>
+
+    <string name="post_notifications_permission_title">Post notifications</string>
+    <string name="post_notifications_permission_rationale">Allows Flywheel to run in the background, communicate errors, and show connection status. Things may not work properly without this permission.</string>
+    <string name="read_phone_state_permission_title">Read phone state</string>
+    <string name="read_phone_state_permission_rationale">Allows Flywheel to display more accurate telephone signal status on Android 11 and below.\n\nThis permission is optional.</string>
+    <string name="record_audio_permission_title">Record audio</string>
+    <string name="record_audio_permission_rationale">Allows Flywheel to capture device audio via screen sharing for playback through your car.</string>
+    <string name="bluetooth_connect_permission_title">Bluetooth connection</string>
+    <string name="bluetooth_connect_permission_rationale">Allows Flywheel to connect to your car over Bluetooth, which is needed to start a wireless connection.\n\nThis is permission only needed if you want to connect wirelessly.</string>
+    <string name="access_fine_location_permission_title">Fine location</string>
+    <string name="access_fine_location_permission_rationale">Allows Flywheel to connect to your car over Bluetooth, which is needed to start a wireless connection. Devices on Android 11 and below categorize Bluetooth access under \"location\" due to privacy concerns. Flywheel does not use this permission to derive your geographic location.\n\nThis permission is only needed if you want to connect wirelessly.</string>
+    <string name="notification_service_permission_title">Notification listening</string>
+    <string name="notification_service_permission_rationale">Allows Flywheel to display and announce notifications through your car.\n\nThis permission is only needed if you want to see notifications on your car display.</string>
+    <string name="shizuku_permission_title">Shizuku</string>
+    <string name="shizuku_permission_rationale">Shizuku is used as an alternative to root, allowing access to system APIs for a better user experience. Currently, it\'s used for embedding apps within Flywheel so they can be shown on your headunit display.</string>
+    <string name="root_permission_title">Root</string>
+    <string name="root_permission_rationale">Root is used to access system APIs for a better user experience. Currently, it\'s used for embedding apps within Flywheel so they can be shown on your headunit display.</string>
+
+    <string name="launch_shizuku_button">launch Shizuku</string>
+    <string name="shizuku_too_old">Your Shizuku manager is too old to work with Flywheel. Please update it or choose a different privilege mode.</string>
+    <string name="shizuku_not_installed">Unable to find Shizuku. Please install and start Shizuku or choose a different privilege mode.</string>
+    <string name="shizuku_not_running">Unable to connect to Shizuku. Please start Shizuku or choose a different privilege mode.</string>
+
+    <string name="root_permission_failed">Failed to obtain root. Either your device isn\'t rooted or root access has been denied. Please grant access from your root manager or choose a different privilege mode.</string>
 
     <string name="cellular_network_badge_5g_plus">5G+</string>
     <string name="cellular_network_badge_5g">5G</string>
@@ -74,7 +101,6 @@
     <string name="projection_resume_grace_period_pref_name">Connection resume grace period</string>
     <string name="start_projection_when_locked_pref_summary_on">You can unlock your phone after connecting to your car</string>
     <string name="start_projection_when_locked_pref_summary_off">You must unlock your phone before connecting to your car</string>
-    <string name="notification_service_description">Allows Flywheel to display and announce notifications through your car.</string>
     <string name="notification_tts_announcement_format" formatted="true">%s: %s</string>
     <string name="notification_tts_announcement_no_content" formatted="true">no speakable content</string>
     <string name="speak_button">speak</string>

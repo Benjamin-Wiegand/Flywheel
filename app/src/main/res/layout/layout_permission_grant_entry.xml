@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="12dp"
+    >
+
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        tools:text="Some permission"
+        style="?textAppearanceBody1"
+        />
+
+    <Button
+        android:id="@+id/manage_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:visibility="gone"
+        android:text="@string/manage_service_button"
+        style="?borderlessButtonStyle"
+        tools:visibility="visible"
+        />
+
+    <Button
+        android:id="@+id/grant_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:text="@string/grant_permission_button"
+        />
+
+    <ImageButton
+        android:id="@+id/show_rationale_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_weight="0"
+        android:contentDescription="@string/show_permission_rationale_button"
+        android:src="@android:drawable/ic_menu_info_details"
+        style="?actionButtonStyle"
+        />
+
+</LinearLayout>

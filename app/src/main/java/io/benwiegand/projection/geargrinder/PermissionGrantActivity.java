@@ -5,9 +5,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static io.benwiegand.projection.geargrinder.permission.PermissionRequirements.PERMISSION_ENTRIES;
 import static io.benwiegand.projection.geargrinder.permission.PermissionRequirements.PERMISSION_KEY_ROOT;
 import static io.benwiegand.projection.geargrinder.permission.PermissionRequirements.PERMISSION_KEY_SHIZUKU;
-import static io.benwiegand.projection.geargrinder.permission.PermissionRequirements.ROOT_PERMISSION_ENTRY;
 
-import android.app.ComponentCaller;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,9 +21,7 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -148,7 +144,7 @@ public class PermissionGrantActivity extends AppCompatActivity {
         PermissionEntryHolder holder = permissionEntryMap.get(key);
         if (holder == null) {
             Log.wtf(TAG, "no permission entry holder for key: " + key);
-            assert false;
+            return;
         }
 
         holder.granted = true;
@@ -239,16 +235,7 @@ public class PermissionGrantActivity extends AppCompatActivity {
                 continue;
             }
 
-            if (permissions[i].equals(PERMISSION_KEY_ROOT)) {
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.root_permission_title)
-                        .setMessage(R.string.root_permission_failed)
-                        .setNegativeButton(R.string.settings_button, (d, it) ->
-                                startActivity(new Intent(this, SettingsActivity.class)))
-                        .setNeutralButton(R.string.cancel_button, null)
-                        .show();
-                continue;
-            }
+            if (permissions[i].equals(PERMISSION_KEY_ROOT)) continue;
 
             deniedPermissions = true;
         }

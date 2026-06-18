@@ -95,7 +95,19 @@ public class PermissionRequirements {
                 }
 
                 int result = success ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED;
-                activity.runOnUiThread(() -> activity.onRequestPermissionsResult(69, new String[] {PERMISSION_KEY_ROOT}, new int[] {result}));
+                activity.runOnUiThread(() -> {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        new AlertDialog.Builder(activity)
+                                .setTitle(R.string.root_permission_title)
+                                .setMessage(R.string.root_permission_failed)
+                                .setNegativeButton(R.string.settings_button, (d, it) ->
+                                        activity.startActivity(new Intent(activity, SettingsActivity.class)))
+                                .setNeutralButton(R.string.cancel_button, null)
+                                .show();
+                    }
+
+                    activity.onRequestPermissionsResult(69, new String[] {PERMISSION_KEY_ROOT}, new int[] {result});
+                });
             }).start(),
             null
     );

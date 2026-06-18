@@ -26,11 +26,11 @@ public class SettingsManager {
     }
 
     public OperationalMode getOperationalMode() {
-        return OperationalMode.read(context, prefs);
+        return OperationalMode.parse(context, getString(R.string.key_operational_mode));
     }
 
     public PrivilegeMode getPrivilegeMode() {
-        return PrivilegeMode.read(context, prefs);
+        return PrivilegeMode.parse(context, getString(R.string.key_privilege_mode));
     }
 
     public boolean allowsStartProjectionWhenLocked() {
@@ -177,11 +177,9 @@ public class SettingsManager {
         return getRawBytes(context.getString(key));
     }
 
-    public static <T> T enumForPref(Context context, SharedPreferences prefs, @StringRes int key, @StringRes int defaultRes, List<Pair<Integer, T>> mapping) {
+    public static <T> T enumForPref(Context context, String value, @StringRes int key, @StringRes int defaultRes, List<Pair<Integer, T>> mapping) {
         String defaultValue = context.getString(defaultRes);
-        String value = prefs.getString(
-                context.getString(key),
-                defaultValue);
+        if (value == null) value = defaultValue;
 
         T defaultMapping = null;
         for (Pair<Integer, T> entry : mapping) {

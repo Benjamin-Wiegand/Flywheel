@@ -1,7 +1,6 @@
 package io.benwiegand.projection.geargrinder.settings;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Pair;
 
 import java.util.List;
@@ -13,9 +12,9 @@ public enum OperationalMode {
     SCREEN_MIRRORING,
     GEARGRINDER_PROJECTION;
 
-    public static OperationalMode read(Context context, SharedPreferences prefs) {
+    public static OperationalMode parse(Context context, String value) {
         return SettingsManager.enumForPref(
-                context, prefs,
+                context, value,
                 R.string.key_operational_mode,
                 R.string.operational_mode_default,
                 List.of(

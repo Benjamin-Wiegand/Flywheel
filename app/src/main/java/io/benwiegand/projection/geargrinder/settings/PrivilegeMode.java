@@ -1,7 +1,6 @@
 package io.benwiegand.projection.geargrinder.settings;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Pair;
 
 import java.util.List;
@@ -13,9 +12,9 @@ public enum PrivilegeMode {
     SHIZUKU,
     ROOT;
 
-    public static PrivilegeMode read(Context context, SharedPreferences prefs) {
+    public static PrivilegeMode parse(Context context, String value) {
         return SettingsManager.enumForPref(
-                context, prefs,
+                context, value,
                 R.string.key_privilege_mode,
                 R.string.privilege_mode_default,
                 List.of(

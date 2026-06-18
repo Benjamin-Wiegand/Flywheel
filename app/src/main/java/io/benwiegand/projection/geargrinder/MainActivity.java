@@ -1,11 +1,7 @@
 package io.benwiegand.projection.geargrinder;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -21,6 +17,10 @@ import androidx.core.view.WindowInsetsCompat;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import io.benwiegand.projection.geargrinder.permission.PermissionEntry;
+import io.benwiegand.projection.geargrinder.permission.PermissionRequirements;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -35,20 +35,21 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "requesting notification permission");
-            if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.post_notifications_permission_title)
-                        .setMessage(R.string.post_notifications_permission_rationale)
-                        .setPositiveButton(R.string.grant_permission_button, (d, i) ->
-                                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 69))
-                        .setNegativeButton(R.string.not_now_button, null)
-                        .setCancelable(false)
-                        .show();
-            } else {
-                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 69);
-            }
+        SettingsManager settingsManager = new SettingsManager(this);
+        for (PermissionEntry entry : PermissionRequirements.PERMISSION_ENTRIES) {
+            if (!entry.usedByConfiguration().apply(settingsManager)) continue;
+            if (!entry.requiredByConfiguration().apply(settingsManager)) continue;
+            if (entry.check() == null || entry.check().apply(this)) continue;
+
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.missing_required_permissions_dialog_title)
+                    .setMessage(R.string.missing_required_permissions_dialog_message)
+                    .setPositiveButton(R.string.manage_permissions_button, (d, i) ->
+                            startActivity(new Intent(this, PermissionGrantActivity.class)))
+                    .setNeutralButton(R.string.not_now_button, null)
+                    .show();
+
+            break;
         }
     }
 

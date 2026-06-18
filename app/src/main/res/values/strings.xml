@@ -79,6 +79,9 @@
 
     <string name="root_permission_failed">Failed to obtain root. Either your device isn\'t rooted or root access has been denied. Please grant access from your root manager or choose a different privilege mode.</string>
 
+    <string name="missing_required_permissions_dialog_title">Missing required permissions</string>
+    <string name="missing_required_permissions_dialog_message">One or more required permissions are missing. Flywheel may not work properly unless you grant them.</string>
+
     <string name="cellular_network_badge_5g_plus">5G+</string>
     <string name="cellular_network_badge_5g">5G</string>
     <string name="cellular_network_badge_5ge">5Ge</string>

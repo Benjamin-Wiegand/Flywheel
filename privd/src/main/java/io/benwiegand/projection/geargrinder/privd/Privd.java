@@ -93,6 +93,8 @@ public class Privd extends IPrivd.Stub {
         if (callingUid != appUid)
             throw new SecurityException("only for use by " + APP_PKG_NAME);
 
+        Binder.clearCallingIdentity();
+
         return super.onTransact(code, data, reply, flags);
     }
 

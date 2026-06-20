@@ -58,6 +58,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
 
     private VideoChannel videoChannel = null;
     private AudioChannel mediaAudioChannel = null;
+    private AudioChannel speechAudioChannel = null;
     private InputChannel inputChannel = null;
     private SensorChannel sensorChannel = null;
 
@@ -76,6 +77,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
     public void destroy() {
         if (videoChannel != null) videoChannel.destroy();
         if (mediaAudioChannel != null) mediaAudioChannel.destroy();
+        if (speechAudioChannel != null) speechAudioChannel.destroy();
         if (inputChannel != null) inputChannel.destroy();
         if (sensorChannel != null) sensorChannel.destroy();
         if (privdAudioService != null) privdAudioService.destroy();
@@ -119,6 +121,17 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
         };
     }
 
+    private AudioChannel.AudioCaptureProvider createPhoneAudioCaptureProvider() {
+        if (!settingsManager.allowCapturePhoneAudio()) {
+            Log.w(TAG, "phone audio capture is disabled");
+            return null;
+        }
+
+        Log.i(TAG, "using VOICE_CALL for phone audio capture");
+        setupPrivdAudioService();
+        return privdAudioService.getPhoneAudioCaptureProvider();
+    }
+
     private void startProjection() {
         controlListener.onCarNameDiscovered(serviceDiscoveryResponse.friendlyName());
 
@@ -139,28 +152,48 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
                 videoChannel.openChannel();
             }
             case AudioChannelMeta acm -> {
-                if (acm.audioType() != AudioChannelMeta.AudioType.MEDIA) {
-                    Log.w(TAG, "non-media audio channels aren't supported yet");
-                    Log.w(TAG, "not initializing: " + acm);
-                    continue;
-                }
+                switch (acm.audioType()) {
+                    case SPEECH -> {
+                        if (speechAudioChannel != null) {    // this probably won't happen
+                            Log.wtf(TAG, "multiple speech audio channels!");
+                            Log.w(TAG, "not initializing: " + acm);
+                            continue;
+                        }
 
-                if (mediaAudioChannel != null) {    // this probably won't happen
-                    Log.wtf(TAG, "multiple media audio channels!");
-                    Log.w(TAG, "not initializing: " + acm);
-                    continue;
-                }
+                        AudioChannel.AudioCaptureProvider audioCaptureProvider = createPhoneAudioCaptureProvider();
+                        if (audioCaptureProvider == null) {
+                            Log.w(TAG, "no phone audio capture provider for speech audio channel");
+                            Log.w(TAG, "not initializing: " + acm);
+                            continue;
+                        }
 
-                AudioChannel.AudioCaptureProvider audioCaptureProvider = createMediaAudioCaptureProvider();
-                if (audioCaptureProvider == null) {
-                    Log.w(TAG, "no audio capture provider for media audio channel");
-                    Log.w(TAG, "not initializing: " + acm);
-                    continue;
-                }
+                        Log.d(TAG, "init speech audio channel: " + acm);
+                        speechAudioChannel = new AudioChannel(mb, acm, audioCaptureProvider);
+                        speechAudioChannel.openChannel();
+                    }
+                    case MEDIA -> {
+                        if (mediaAudioChannel != null) {    // this probably won't happen
+                            Log.wtf(TAG, "multiple media audio channels!");
+                            Log.w(TAG, "not initializing: " + acm);
+                            continue;
+                        }
 
-                Log.d(TAG, "init media audio channel: " + acm);
-                mediaAudioChannel = new AudioChannel(mb, acm, audioCaptureProvider);
-                mediaAudioChannel.openChannel();
+                        AudioChannel.AudioCaptureProvider audioCaptureProvider = createMediaAudioCaptureProvider();
+                        if (audioCaptureProvider == null) {
+                            Log.w(TAG, "no audio capture provider for media audio channel");
+                            Log.w(TAG, "not initializing: " + acm);
+                            continue;
+                        }
+
+                        Log.d(TAG, "init media audio channel: " + acm);
+                        mediaAudioChannel = new AudioChannel(mb, acm, audioCaptureProvider);
+                        mediaAudioChannel.openChannel();
+                    }
+                    default -> {
+                        Log.w(TAG, "audio channel type not currently supported/handled: " + acm.audioType());
+                        Log.w(TAG, "not initializing: " + acm);
+                    }
+                }
             }
             case InputChannelMeta icm -> {
                 if (inputChannel != null) {

@@ -120,6 +120,14 @@
             app:useSimpleSummaryProvider="true"
             />
 
+        <SwitchPreferenceCompat
+            app:key="@string/key_phone_audio_capture"
+            app:iconSpaceReserved="false"
+            app:title="@string/phone_audio_capture_name"
+            app:defaultValue="@string/phone_audio_capture_default"
+            app:summary="@string/phone_audio_capture_summary"
+            />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

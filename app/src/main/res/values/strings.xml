@@ -174,5 +174,7 @@
 
     <string name="pref_category_audio">audio</string>
     <string name="media_audio_capture_mode_name">Media audio capture mode</string>
+    <string name="phone_audio_capture_name">Capture call audio (requires root or Shizuku)</string>
+    <string name="phone_audio_capture_summary">play phone call audio through your car</string>
 
 </resources>

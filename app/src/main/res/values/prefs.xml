@@ -111,6 +111,9 @@
     </string-array>
 
 
+    <string translatable="false" name="phone_audio_capture_default">true</string>
+
+
     <string translatable="false" name="start_projection_when_locked_default">false</string>
 
 
@@ -125,6 +128,7 @@
     <string translatable="false" name="key_video_frame_rate_optimization">video_frame_rate_optimization</string>
 
     <string translatable="false" name="key_media_audio_capture_mode">media_audio_capture_mode</string>
+    <string translatable="false" name="key_phone_audio_capture">phone_audio_capture</string>
 
     <string translatable="false" name="key_imported_phone_x509_certificate_chain">imported_phone_x509_certificate_chain</string>
     <string translatable="false" name="key_imported_phone_pkcs8_private_key">imported_phone_pkcs8_private_key</string>

@@ -57,6 +57,10 @@ public class SettingsManager {
         return MediaAudioCaptureMode.parse(context, getString(R.string.key_media_audio_capture_mode));
     }
 
+    public boolean allowCapturePhoneAudio() {
+        return getBool(R.string.key_phone_audio_capture, R.string.phone_audio_capture_default);
+    }
+
     public boolean useImportedPhoneKeys() {
         return getBool(R.string.key_use_imported_phone_keys, R.string.start_projection_when_locked_default);
     }

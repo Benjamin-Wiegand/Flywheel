@@ -20,6 +20,7 @@ public class PrivdAudioService implements GeargrinderServiceConnector.Connection
     private final GeargrinderServiceConnector connector;
 
     private final PrivdAudioCaptureProxy.PrivdProvider mediaAudioCaptureProvider = new PrivdAudioCaptureProxy.PrivdProvider(MediaRecorder.AudioSource.REMOTE_SUBMIX);
+    private final PrivdAudioCaptureProxy.PrivdProvider phoneAudioCaptureProvider = new PrivdAudioCaptureProxy.PrivdProvider(MediaRecorder.AudioSource.VOICE_CALL);
 
     private boolean dead = false;
 
@@ -38,6 +39,10 @@ public class PrivdAudioService implements GeargrinderServiceConnector.Connection
         return mediaAudioCaptureProvider;
     }
 
+    public PrivdAudioCaptureProxy.PrivdProvider getPhoneAudioCaptureProvider() {
+        return phoneAudioCaptureProvider;
+    }
+
     @Override
     public void onPrivdServiceConnected(PrivdService.ServiceBinder binder) {
         binder.requestDaemon(this);
@@ -49,6 +54,7 @@ public class PrivdAudioService implements GeargrinderServiceConnector.Connection
 
         Log.i(TAG, "privd connected");
         mediaAudioCaptureProvider.setPrivd(privd);
+        phoneAudioCaptureProvider.setPrivd(privd);
     }
 
     @Override

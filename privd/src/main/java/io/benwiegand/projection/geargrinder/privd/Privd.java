@@ -5,6 +5,7 @@ import static io.benwiegand.projection.libprivd.ipc.IPCConstants.APP_PKG_NAME;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.BIND_TIMEOUT;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.PING_TIMEOUT;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
+import android.media.AudioFormat;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -27,19 +29,26 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import io.benwiegand.projection.geargrinder.privd.audio.PrivilegedAudioRecordCapture;
 import io.benwiegand.projection.geargrinder.privd.reflected.ReflectedIActivityManager;
 import io.benwiegand.projection.geargrinder.privd.reflected.ReflectedInputEvent;
 import io.benwiegand.projection.geargrinder.privd.reflected.ReflectedInputManager;
 import io.benwiegand.projection.geargrinder.privd.reflection.ReflectionException;
 import io.benwiegand.projection.libprivd.IPrivd;
+import io.benwiegand.projection.libprivd.audio.AudioCapture;
+import io.benwiegand.projection.libprivd.audio.AudioCaptureResult;
 
 public class Privd extends IPrivd.Stub {
     private static final String TAG = Privd.class.getSimpleName();
-    private static final boolean LOG_DEBUG = true;
+    private static final boolean LOG_DEBUG = false;
 
+    private final Context context;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Map<Integer, VirtualDisplay> virtualDisplays = new ConcurrentHashMap<>();
+    private final Map<Integer, AudioCapture> audioCaptures = new ConcurrentHashMap<>();
+    private final AtomicInteger audioCaptureIdCounter = new AtomicInteger(0);
 
     private final int appUid;
     private final DisplayManager dm;
@@ -48,7 +57,9 @@ public class Privd extends IPrivd.Stub {
 
     private long lastPingAt = 0;
 
+    @SuppressLint("NotificationPermission")
     public Privd(Context context, int appUid) {
+        this.context = context;
         this.appUid = appUid;
 
         DisplayManager dm;
@@ -175,6 +186,12 @@ public class Privd extends IPrivd.Stub {
         return virtualDisplay;
     }
 
+    private AudioCapture getAudioCapture(int id) {
+        AudioCapture audioCapture = audioCaptures.get(id);
+        if (audioCapture == null) throw new NoSuchElementException("no AudioCapture exists with id " + id);
+        return audioCapture;
+    }
+
     @Override
     public int createVirtualDisplay(String name, int width, int height, int densityDpi, Surface surface, int flags) {
         Log.v(TAG, "creating virtual display: " + name);
@@ -215,5 +232,48 @@ public class Privd extends IPrivd.Stub {
 
         VirtualDisplay virtualDisplay = getVirtualDisplay(displayId);
         virtualDisplay.setSurface(surface);
+    }
+
+
+    @Override
+    public int createPrivilegedAudioRecordCapture(AudioFormat audioFormat, int bufferSize, int audioSource) throws RemoteException {
+        int id = audioCaptureIdCounter.getAndIncrement();
+        Log.v(TAG, "creating privileged audio record capture: " + id);
+
+        try {
+            // TODO: need foreground context on A11
+
+            PrivilegedAudioRecordCapture audioCapture = new PrivilegedAudioRecordCapture(context, audioFormat, bufferSize, audioSource);
+            audioCaptures.put(id, audioCapture);
+        } catch (Throwable t) {
+            Log.e(TAG, "failed to create privileged audio record capture", t);
+            throw new RemoteException("failed to create privileged audio record capture: " + t);
+        }
+
+        return id;
+    }
+
+    @Override
+    public void destroyAudioCapture(int id) {
+        Log.v(TAG, "destroying audio capture" + id);
+        AudioCapture audioCapture = audioCaptures.remove(id);
+        if (audioCapture == null) {
+            Log.w(TAG, "can't destroy audio capture " + id + " because it doesn't exist or was already destroyed");
+            return;
+        }
+
+        audioCapture.destroy();
+    }
+
+    @Override
+    public void audioCaptureBegin(int id) {
+        Log.v(TAG, "audio capture begin: " + id);
+        getAudioCapture(id).begin();
+    }
+
+    @Override
+    public void audioCaptureNextBuffer(int id, AudioCaptureResult result, byte[] buffer, int offset, int length) {
+        if (LOG_DEBUG) Log.d(TAG, "getting next buffer for audio capture: " + id);
+        getAudioCapture(id).nextBuffer(result, buffer, offset, length);
     }
 }

@@ -172,4 +172,7 @@
     <string name="bluetooth_connection_error_missing_permission">Missing Bluetooth permission.</string>
     <string name="bluetooth_connection_error_general_failure">Failed to establish Bluetooth connection.</string>
 
+    <string name="pref_category_audio">audio</string>
+    <string name="media_audio_capture_mode_name">Media audio capture mode</string>
+
 </resources>

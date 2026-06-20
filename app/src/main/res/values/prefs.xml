@@ -29,6 +29,12 @@
         <item>Constant quality</item>
     </string-array>
 
+    <string-array name="media_audio_capture_mode_entries">
+        <item>disabled</item>
+        <item>screen sharing (limited, requires Android 10 or later)</item>
+        <item>remote submix (requires root or Shizuku)</item>
+    </string-array>
+
 
     <string translatable="false" name="privilege_mode_no_root">no_root</string>
     <string translatable="false" name="privilege_mode_shizuku">shizuku</string>
@@ -88,7 +94,21 @@
 
 
     <string translatable="false" name="video_bitrate_custom_default">-1</string>
+
+
     <string translatable="false" name="video_frame_rate_optimization_default">true</string>
+
+
+    <string translatable="false" name="media_audio_capture_mode_disabled">disabled</string>
+    <string translatable="false" name="media_audio_capture_mode_media_projection">media_projection</string>
+    <string translatable="false" name="media_audio_capture_mode_remote_submix">remote_submix</string>
+    <string translatable="false" name="media_audio_capture_mode_default">@string/media_audio_capture_mode_remote_submix</string>
+
+    <string-array translatable="false" name="media_audio_capture_mode_values">
+        <item>@string/media_audio_capture_mode_disabled</item>
+        <item>@string/media_audio_capture_mode_media_projection</item>
+        <item>@string/media_audio_capture_mode_remote_submix</item>
+    </string-array>
 
 
     <string translatable="false" name="start_projection_when_locked_default">false</string>
@@ -103,6 +123,8 @@
     <string translatable="false" name="key_video_bitrate_mode">video_bitrate_mode</string>
     <string translatable="false" name="key_video_bitrate_custom">video_bitrate_custom</string>
     <string translatable="false" name="key_video_frame_rate_optimization">video_frame_rate_optimization</string>
+
+    <string translatable="false" name="key_media_audio_capture_mode">media_audio_capture_mode</string>
 
     <string translatable="false" name="key_imported_phone_x509_certificate_chain">imported_phone_x509_certificate_chain</string>
     <string translatable="false" name="key_imported_phone_pkcs8_private_key">imported_phone_pkcs8_private_key</string>

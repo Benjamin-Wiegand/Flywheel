@@ -19,6 +19,7 @@ import java.util.List;
 import io.benwiegand.projection.geargrinder.NotificationService;
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.SettingsActivity;
+import io.benwiegand.projection.geargrinder.settings.MediaAudioCaptureMode;
 import io.benwiegand.projection.geargrinder.settings.PrivilegeMode;
 import rikka.shizuku.Shizuku;
 
@@ -40,7 +41,8 @@ public class PermissionRequirements {
     public static final PermissionEntry RECORD_AUDIO_PERMISSION_ENTRY = PermissionEntry.createForManifestPermission(
             Manifest.permission.RECORD_AUDIO, Build.VERSION_CODES.Q, null,  // doesn't seem to be needed on newer android versions, but the docs still say otherwise
             R.string.record_audio_permission_title, R.string.record_audio_permission_rationale,
-            settingsManager -> true, settingsManager -> true);
+            settingsManager -> settingsManager.getMediaAudioCaptureMode() == MediaAudioCaptureMode.MEDIA_PROJECTION,
+            settingsManager -> true);
 
     public static final PermissionEntry READ_PHONE_STATE_PERMISSION_ENTRY = PermissionEntry.createForManifestPermission(
             Manifest.permission.READ_PHONE_STATE, Build.VERSION_CODES.Q, Build.VERSION_CODES.R,

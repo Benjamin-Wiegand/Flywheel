@@ -13,6 +13,7 @@ import android.util.Log;
 import javax.net.ssl.SSLException;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
+import io.benwiegand.projection.geargrinder.projection.PrivdAudioService;
 import io.benwiegand.projection.geargrinder.projection.audio.LocalAudioRecordCapture;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
@@ -38,6 +39,8 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
     private static final int VERSION_CODE_MAJOR = 1;
     private static final int VERSION_CODE_MINOR = 7;
 
+    private final Object lock = new Object();
+
     private final Context context;
     private final ConnectionService.ServiceBinder connectionServiceBinder;
     private final MessageBroker mb;
@@ -48,6 +51,8 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
     private final MessageBroker.MessageSendParameters encryptedParams;
 
     private final ControlListener controlListener;
+
+    private PrivdAudioService privdAudioService = null;
 
     private ServiceDiscoveryResponse serviceDiscoveryResponse = null;
 
@@ -73,21 +78,45 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
         if (mediaAudioChannel != null) mediaAudioChannel.destroy();
         if (inputChannel != null) inputChannel.destroy();
         if (sensorChannel != null) sensorChannel.destroy();
+        if (privdAudioService != null) privdAudioService.destroy();
     }
 
-    private AudioChannel.AudioCaptureProvider createAudioCaptureProvider(AudioChannelMeta acm) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            Log.e(TAG, "can't launch audio capture through MediaProjection: android version too old");
-            return null;
+    private void setupPrivdAudioService() {
+        synchronized (lock) {
+            if (privdAudioService != null) return;
+
+            Log.i(TAG, "setting up privd audio service");
+            privdAudioService = new PrivdAudioService(context);
         }
+    }
 
-        LocalAudioRecordCapture.MediaProjectionProvider captureProvider = new LocalAudioRecordCapture.MediaProjectionProvider(context);
-        connectionServiceBinder.requestMediaProjection(mediaProjection -> {
-            if (!mb.isAlive()) return;
-            captureProvider.setMediaProjection(mediaProjection);
-        });
+    private AudioChannel.AudioCaptureProvider createMediaAudioCaptureProvider() {
+        return switch (settingsManager.getMediaAudioCaptureMode()) {
+            case DISABLED -> {
+                Log.w(TAG, "media audio capture is disabled");
+                yield null;
+            }
+            case MEDIA_PROJECTION -> {
+                Log.i(TAG, "using media projection for media audio capture");
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    Log.e(TAG, "can't launch audio capture through MediaProjection: android version too old");
+                    yield null;
+                }
 
-        return captureProvider;
+                LocalAudioRecordCapture.MediaProjectionProvider captureProvider = new LocalAudioRecordCapture.MediaProjectionProvider(context);
+                connectionServiceBinder.requestMediaProjection(mediaProjection -> {
+                    if (!mb.isAlive()) return;
+                    captureProvider.setMediaProjection(mediaProjection);
+                });
+
+                yield captureProvider;
+            }
+            case REMOTE_SUBMIX -> {
+                Log.i(TAG, "using REMOTE_SUBMIX for media audio capture");
+                setupPrivdAudioService();
+                yield privdAudioService.getMediaAudioCaptureProvider();
+            }
+        };
     }
 
     private void startProjection() {
@@ -122,9 +151,9 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
                     continue;
                 }
 
-                AudioChannel.AudioCaptureProvider audioCaptureProvider = createAudioCaptureProvider(acm);
+                AudioChannel.AudioCaptureProvider audioCaptureProvider = createMediaAudioCaptureProvider();
                 if (audioCaptureProvider == null) {
-                    Log.e(TAG, "unable to create audio capture provider for media audio channel");
+                    Log.w(TAG, "no audio capture provider for media audio channel");
                     Log.w(TAG, "not initializing: " + acm);
                     continue;
                 }

@@ -1,5 +1,9 @@
 package io.benwiegand.projection.libprivd;
 
+import io.benwiegand.projection.libprivd.audio.AudioCaptureResult;
+
+parcelable AudioCaptureResult;
+
 interface IPrivd {
     void ping();
 
@@ -16,4 +20,12 @@ interface IPrivd {
     void virtualDisplayResize(int displayId, int width, int height, int densityDpi);
 
     void virtualDisplaySetSurface(int displayId, in Surface surface);
+
+    int createPrivilegedAudioRecordCapture(in AudioFormat audioFormat, int bufferSize, int audioSource);
+
+    void destroyAudioCapture(int id);
+
+    void audioCaptureBegin(int id);
+
+    void audioCaptureNextBuffer(int id, out AudioCaptureResult result, out byte[] buffer, int offset, int length);
 }

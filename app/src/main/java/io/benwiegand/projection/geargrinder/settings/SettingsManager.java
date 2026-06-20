@@ -53,6 +53,10 @@ public class SettingsManager {
         return getBool(R.string.key_video_frame_rate_optimization, R.string.video_frame_rate_optimization_default);
     }
 
+    public MediaAudioCaptureMode getMediaAudioCaptureMode() {
+        return MediaAudioCaptureMode.parse(context, getString(R.string.key_media_audio_capture_mode));
+    }
+
     public boolean useImportedPhoneKeys() {
         return getBool(R.string.key_use_imported_phone_keys, R.string.start_projection_when_locked_default);
     }

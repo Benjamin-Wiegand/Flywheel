@@ -36,6 +36,7 @@ public class AudioChannel extends AVChannel<AudioPreset> {
 
 
     public interface AudioCaptureProvider {
+        void registerReadyCallback(Runnable onReady);
         AudioCapture getInstance(AudioPreset audioPreset, int bufferSize);
     }
 
@@ -59,7 +60,7 @@ public class AudioChannel extends AVChannel<AudioPreset> {
     @Override
     protected void onAvSetupResponse(AVSetupResponse response) {
         super.onAvSetupResponse(response);
-        start();
+        audioCaptureProvider.registerReadyCallback(this::start);
     }
 
     @Override

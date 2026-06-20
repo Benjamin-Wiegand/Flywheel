@@ -1,6 +1,5 @@
 package io.benwiegand.projection.geargrinder.channel;
 
-import static android.media.AudioAttributes.USAGE_ALARM;
 import static io.benwiegand.projection.geargrinder.message.AAFrame.COMMAND_ID_LENGTH;
 import static io.benwiegand.projection.geargrinder.protocol.AAConstants.*;
 import static io.benwiegand.projection.geargrinder.util.ByteUtil.hexDump;
@@ -8,7 +7,6 @@ import static io.benwiegand.projection.geargrinder.util.ByteUtil.readUInt16;
 import static io.benwiegand.projection.geargrinder.util.ByteUtil.writeUInt16;
 
 import android.content.Context;
-import android.media.AudioPlaybackCaptureConfiguration;
 import android.os.Build;
 import android.util.Log;
 
@@ -77,6 +75,21 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
         if (sensorChannel != null) sensorChannel.destroy();
     }
 
+    private AudioChannel.AudioCaptureProvider createAudioCaptureProvider(AudioChannelMeta acm) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            Log.e(TAG, "can't launch audio capture through MediaProjection: android version too old");
+            return null;
+        }
+
+        LocalAudioRecordCapture.MediaProjectionProvider captureProvider = new LocalAudioRecordCapture.MediaProjectionProvider(context);
+        connectionServiceBinder.requestMediaProjection(mediaProjection -> {
+            if (!mb.isAlive()) return;
+            captureProvider.setMediaProjection(mediaProjection);
+        });
+
+        return captureProvider;
+    }
+
     private void startProjection() {
         controlListener.onCarNameDiscovered(serviceDiscoveryResponse.friendlyName());
 
@@ -109,31 +122,16 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
                     continue;
                 }
 
-                connectionServiceBinder.requestMediaProjection(mediaProjection -> {
-                    if (!mb.isAlive()) return;
+                AudioChannel.AudioCaptureProvider audioCaptureProvider = createAudioCaptureProvider(acm);
+                if (audioCaptureProvider == null) {
+                    Log.e(TAG, "unable to create audio capture provider for media audio channel");
+                    Log.w(TAG, "not initializing: " + acm);
+                    continue;
+                }
 
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                        Log.e(TAG, "can't launch audio capture through MediaProjection: android version too old");
-                        // TODO: error
-                        return;
-                    }
-
-                    try {
-                        Log.d(TAG, "init media audio channel: " + acm);
-                        mediaAudioChannel = new AudioChannel(mb, acm, (preset, bufferSize) -> new LocalAudioRecordCapture(
-                                new AudioPlaybackCaptureConfiguration.Builder(mediaProjection)
-                                        .excludeUsage(USAGE_ALARM)
-                                        .build(),
-                                preset, bufferSize
-                        ));
-                        // TODO: the audio channel should probably open first, then wait for mediaprojection
-                        new Thread(mediaAudioChannel::openChannel).start();
-//                    mediaAudioChannel.openChannel();
-                    } catch (SecurityException e) {
-                        Log.e(TAG, "can't launch audio capture: need explicit RECORD_AUDIO permission", e);
-                        // TODO: request
-                    }
-                });
+                Log.d(TAG, "init media audio channel: " + acm);
+                mediaAudioChannel = new AudioChannel(mb, acm, audioCaptureProvider);
+                mediaAudioChannel.openChannel();
             }
             case InputChannelMeta icm -> {
                 if (inputChannel != null) {

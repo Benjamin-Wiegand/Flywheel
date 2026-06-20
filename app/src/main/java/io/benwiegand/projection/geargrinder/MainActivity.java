@@ -34,23 +34,12 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
 
-        SettingsManager settingsManager = new SettingsManager(this);
-        for (PermissionEntry entry : PermissionRequirements.PERMISSION_ENTRIES) {
-            if (!entry.usedByConfiguration().apply(settingsManager)) continue;
-            if (!entry.requiredByConfiguration().apply(settingsManager)) continue;
-            if (entry.check() == null || entry.check().apply(this)) continue;
-
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.missing_required_permissions_dialog_title)
-                    .setMessage(R.string.missing_required_permissions_dialog_message)
-                    .setPositiveButton(R.string.manage_permissions_button, (d, i) ->
-                            startActivity(new Intent(this, PermissionGrantActivity.class)))
-                    .setNeutralButton(R.string.not_now_button, null)
-                    .show();
-
-            break;
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPermissions();
     }
 
     @Override
@@ -78,5 +67,24 @@ public class MainActivity extends AppCompatActivity {
         Supplier<Boolean> action = actionMap.getOrDefault(item.getItemId(), () -> super.onOptionsItemSelected(item));
         assert action != null;
         return action.get();
+    }
+
+    private void checkPermissions() {
+        SettingsManager settingsManager = new SettingsManager(this);
+        for (PermissionEntry entry : PermissionRequirements.PERMISSION_ENTRIES) {
+            if (!entry.usedByConfiguration().apply(settingsManager)) continue;
+            if (!entry.requiredByConfiguration().apply(settingsManager)) continue;
+            if (entry.check() == null || entry.check().apply(this)) continue;
+
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.missing_required_permissions_dialog_title)
+                    .setMessage(R.string.missing_required_permissions_dialog_message)
+                    .setPositiveButton(R.string.manage_permissions_button, (d, i) ->
+                            startActivity(new Intent(this, PermissionGrantActivity.class)))
+                    .setNeutralButton(R.string.not_now_button, null)
+                    .show();
+
+            break;
+        }
     }
 }

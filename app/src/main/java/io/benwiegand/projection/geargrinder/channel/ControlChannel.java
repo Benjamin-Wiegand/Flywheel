@@ -15,7 +15,7 @@ import android.util.Log;
 import javax.net.ssl.SSLException;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
-import io.benwiegand.projection.geargrinder.projection.audio.AudioRecordCapture;
+import io.benwiegand.projection.geargrinder.projection.audio.LocalAudioRecordCapture;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.callback.MessageListener;
@@ -120,7 +120,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
 
                     try {
                         Log.d(TAG, "init media audio channel: " + acm);
-                        mediaAudioChannel = new AudioChannel(mb, acm, (preset, bufferSize) -> new AudioRecordCapture(
+                        mediaAudioChannel = new AudioChannel(mb, acm, (preset, bufferSize) -> new LocalAudioRecordCapture(
                                 new AudioPlaybackCaptureConfiguration.Builder(mediaProjection)
                                         .excludeUsage(USAGE_ALARM)
                                         .build(),

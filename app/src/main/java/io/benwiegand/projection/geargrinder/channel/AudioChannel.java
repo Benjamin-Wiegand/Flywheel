@@ -11,13 +11,14 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 import io.benwiegand.projection.geargrinder.data.BufferReader;
-import io.benwiegand.projection.geargrinder.projection.audio.AudioCapture;
+import io.benwiegand.projection.libprivd.audio.AudioCapture;
 import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.AVSetupResponse;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.AudioChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.AudioPreset;
 import io.benwiegand.projection.geargrinder.proto.data.writable.av.AVSetupRequest;
 import io.benwiegand.projection.geargrinder.proto.data.writable.av.AVStartIndication;
+import io.benwiegand.projection.libprivd.audio.AudioCaptureResult;
 
 public class AudioChannel extends AVChannel<AudioPreset> {
     private static final String TAG = AudioChannel.class.getSimpleName();
@@ -108,7 +109,7 @@ public class AudioChannel extends AVChannel<AudioPreset> {
     protected void avLoop(Supplier<Boolean> runCondition) {
         Log.i(TAG, "audio loop start");
         int silence = 0;
-        AudioCapture.Result result = new AudioCapture.Result();
+        AudioCaptureResult result = new AudioCaptureResult();
 
         // find working preset
         AVPreset<AudioPreset> avPreset = null;

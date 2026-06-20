@@ -1,18 +1,15 @@
-package io.benwiegand.projection.geargrinder.projection.audio;
+package io.benwiegand.projection.libprivd.audio;
 
 import static android.media.AudioTimestamp.TIMEBASE_BOOTTIME;
 
-import android.Manifest;
-import android.media.AudioPlaybackCaptureConfiguration;
+import static io.benwiegand.projection.libprivd.audio.AudioCaptureError.END_OF_STREAM;
+import static io.benwiegand.projection.libprivd.audio.AudioCaptureError.FAILURE;
+import static io.benwiegand.projection.libprivd.audio.AudioCaptureError.NO_ERROR;
+import static io.benwiegand.projection.libprivd.audio.AudioCaptureError.TRY_AGAIN;
+
 import android.media.AudioRecord;
 import android.media.AudioTimestamp;
-import android.os.Build;
 import android.util.Log;
-
-import androidx.annotation.RequiresApi;
-import androidx.annotation.RequiresPermission;
-
-import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.AudioPreset;
 
 public class AudioRecordCapture implements AudioCapture {
     private static final String TAG = AudioRecordCapture.class.getSimpleName();
@@ -20,18 +17,9 @@ public class AudioRecordCapture implements AudioCapture {
     private final AudioRecord audioRecord;
     private final AudioTimestamp timestamp;
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    public AudioRecordCapture(AudioPlaybackCaptureConfiguration config, AudioPreset preset, int bufferSize) {
-
-        audioRecord = new AudioRecord.Builder()
-                .setAudioFormat(preset.createAudioFormat())
-                .setBufferSizeInBytes(bufferSize)
-                .setAudioPlaybackCaptureConfig(config)
-                .build();
-
+    public AudioRecordCapture(AudioRecord audioRecord) {
+        this.audioRecord = audioRecord;
         timestamp = new AudioTimestamp();
-
     }
 
     @Override
@@ -45,12 +33,12 @@ public class AudioRecordCapture implements AudioCapture {
     }
 
     @Override
-    public void nextBuffer(Result result, byte[] buffer, int offset, int length) {
+    public void nextBuffer(AudioCaptureResult result, byte[] buffer, int offset, int length) {
         int ret;
 
         if (audioRecord.getState() == AudioRecord.STATE_UNINITIALIZED) {
             Log.w(TAG, "not initialized yet");
-            result.error = Error.TRY_AGAIN;
+            result.error = TRY_AGAIN;
             return;
         }
 
@@ -59,12 +47,12 @@ public class AudioRecordCapture implements AudioCapture {
             case AudioRecord.SUCCESS -> {}
             case AudioRecord.ERROR_INVALID_OPERATION -> {
                 // not ready yet
-                result.error = Error.TRY_AGAIN;
+                result.error = TRY_AGAIN;
                 return;
             }
             default -> {
                 Log.wtf(TAG, "unexpected error code while getting timestamp: " + ret);
-                result.error = Error.TRY_AGAIN;
+                result.error = TRY_AGAIN;
                 return;
             }
         }
@@ -75,21 +63,21 @@ public class AudioRecordCapture implements AudioCapture {
             switch (ret) {
                 case AudioRecord.ERROR,
                      AudioRecord.ERROR_BAD_VALUE -> {
-                    result.error = Error.FAILURE;
+                    result.error = FAILURE;
                     return;
                 }
                 case AudioRecord.ERROR_INVALID_OPERATION -> {
-                    result.error = Error.TRY_AGAIN;
+                    result.error = TRY_AGAIN;
                     return;
                 }
                 case AudioRecord.ERROR_DEAD_OBJECT -> {
-                    result.error = Error.END_OF_STREAM;
+                    result.error = END_OF_STREAM;
                     return;
                 }
             }
         } else if (ret == 0) {
             Log.w(TAG, "empty buffer");
-            result.error = Error.TRY_AGAIN;
+            result.error = TRY_AGAIN;
             return;
         }
 
@@ -99,7 +87,7 @@ public class AudioRecordCapture implements AudioCapture {
             silent = false;
         }
 
-        result.error = Error.NO_ERROR;
+        result.error = NO_ERROR;
         result.length = ret;
         result.timestamp = timestamp.nanoTime;
         result.silent = silent;

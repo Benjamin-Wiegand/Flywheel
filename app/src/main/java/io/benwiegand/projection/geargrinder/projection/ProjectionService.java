@@ -255,10 +255,11 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
             try {
                 Log.d(TAG, "launching projection activity");
-                privd.launchActivity(
+                int ret = privd.launchActivity(
                         new ComponentName(context, ProjectionActivity.class),
                         virtualDisplay.getDisplayId()
                 );
+                if (ret == -1) throw new RuntimeException("activity launch failed with code -1");
             } catch (Throwable t) {
                 onFailureLocked("failed to launch projection activity on virtual display via privd", t);
                 return;

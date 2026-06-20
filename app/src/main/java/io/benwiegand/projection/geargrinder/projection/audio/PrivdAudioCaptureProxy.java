@@ -19,6 +19,7 @@ public class PrivdAudioCaptureProxy implements AudioCapture {
         this.privd = privd;
 
         id = privd.createPrivilegedAudioRecordCapture(preset.createAudioFormat(), bufferSize, audioSource);
+        if (id == -1) throw new RuntimeException("failed to create audio capture");
     }
 
     @Override

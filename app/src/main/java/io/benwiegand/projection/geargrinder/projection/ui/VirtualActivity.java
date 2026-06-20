@@ -170,6 +170,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
             try {
                 int result = privd.launchActivity(app.launchComponent(), getDisplayId());
                 Log.d(TAG, "launch result " + result + " for " + app.launchComponent().flattenToShortString());
+                if (result == -1) throw new RuntimeException("activity launch failed with code -1");
             } catch (DeadObjectException e) {
                 throw new ProjectedAppLaunchException(getContext(), R.string.projected_app_launch_error_privd_dead, e);
             } catch (Throwable t) {

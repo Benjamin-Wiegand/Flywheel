@@ -130,7 +130,7 @@ public class Privd extends IPrivd.Stub {
             return rim.injectInputEvent(event, ReflectedInputManager.INJECT_MODE_ASYNC);
         } catch (ReflectionException e) {
             Log.e(TAG, "reflection exception while injecting input event", e);
-            throw new RuntimeException("failed to inject input event", e);
+            return false;
         }
     }
 
@@ -143,7 +143,7 @@ public class Privd extends IPrivd.Stub {
             return injectInputEvent(event);
         } catch (ReflectionException e) {
             Log.e(TAG, "failed to set display id", e);
-            throw new RuntimeException("failed to set display id for input event", e);
+            return false;
         }
     }
 
@@ -173,10 +173,10 @@ public class Privd extends IPrivd.Stub {
                     .waitFor();
         } catch (IOException e) {
             Log.e(TAG, "IOException while starting activity via shell", e);
-            throw new RuntimeException("failed to launch activity");
+            return -1;
         } catch (InterruptedException e) {
             Log.e(TAG, "interrupted");
-            throw new RuntimeException("interrupted");
+            return -1;
         }
     }
 
@@ -197,7 +197,10 @@ public class Privd extends IPrivd.Stub {
         Log.v(TAG, "creating virtual display: " + name);
 
         VirtualDisplay virtualDisplay = dm.createVirtualDisplay(name, width, height, densityDpi, surface, flags);
-        if (virtualDisplay == null) throw new RuntimeException("createVirtualDisplay() returned null");
+        if (virtualDisplay == null) {
+            Log.e(TAG, "createVirtualDisplay() returned null", new RuntimeException());
+            return -1;
+        }
 
         int displayId = virtualDisplay.getDisplay().getDisplayId();
         Log.v(TAG, "created virtual display " + displayId + " with name: " + name);
@@ -247,7 +250,7 @@ public class Privd extends IPrivd.Stub {
             audioCaptures.put(id, audioCapture);
         } catch (Throwable t) {
             Log.e(TAG, "failed to create privileged audio record capture", t);
-            throw new RemoteException("failed to create privileged audio record capture: " + t);
+            return -1;
         }
 
         return id;

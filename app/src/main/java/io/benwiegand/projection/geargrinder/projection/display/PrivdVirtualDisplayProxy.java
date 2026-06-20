@@ -43,6 +43,7 @@ public class PrivdVirtualDisplayProxy implements VirtualDisplayController {
         this.flags = flags;
 
         displayId = privd.createVirtualDisplay(name, width, height, densityDpi, surface, flags);
+        if (displayId == -1) throw new RuntimeException("failed to create virtual display");
     }
 
     @Override

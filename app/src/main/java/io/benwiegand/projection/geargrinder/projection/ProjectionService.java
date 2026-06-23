@@ -56,7 +56,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private VideoPreset videoPreset;
     private Surface surface = null;
 
-    public GeargrinderServiceConnector connector;
+    private final GeargrinderServiceConnector connector;
     private IPrivd privd = null;
 
     private final Context context;

@@ -4,6 +4,8 @@ import static io.benwiegand.projection.geargrinder.protocol.AABTConstants.CMD_WI
 import static io.benwiegand.projection.geargrinder.protocol.AABTConstants.CMD_WIFI_INFO_RESPONSE;
 import static io.benwiegand.projection.geargrinder.protocol.AABTConstants.CMD_WIFI_START_REQUEST;
 import static io.benwiegand.projection.geargrinder.protocol.AABTConstants.CMD_WIFI_START_RESPONSE;
+import static io.benwiegand.projection.geargrinder.protocol.AABTConstants.CMD_WIFI_VERSION_REQUEST;
+import static io.benwiegand.projection.geargrinder.protocol.AABTConstants.CMD_WIFI_VERSION_RESPONSE;
 import static io.benwiegand.projection.geargrinder.util.ByteUtil.hexDump;
 
 import android.Manifest;
@@ -24,7 +26,9 @@ import io.benwiegand.projection.geargrinder.exception.BluetoothConnectionExcepti
 import io.benwiegand.projection.geargrinder.proto.ProtoParser;
 import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiInfoResponse;
 import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiStartRequest;
+import io.benwiegand.projection.geargrinder.proto.data.readable.bt.WifiVersionRequest;
 import io.benwiegand.projection.geargrinder.proto.data.writable.bt.WifiStartResponse;
+import io.benwiegand.projection.geargrinder.proto.data.writable.bt.WifiVersionResponse;
 import io.benwiegand.projection.geargrinder.transfer.BluetoothTransferInterface;
 
 public class BluetoothClient {
@@ -118,6 +122,18 @@ public class BluetoothClient {
                         }
 
                         listener.onStartWireless(connectionInfo, wifiInfo);
+                    }
+                    case CMD_WIFI_VERSION_REQUEST -> {
+                        WifiVersionRequest versionRequest = WifiVersionRequest.parse(frame.getBuffer(), AABTFrame.PAYLOAD_OFFSET, frame.getPayloadLength());
+                        Log.v(TAG, "wifi version request: " + versionRequest);
+                        ProtoParser.debugDumpRecursive(frame.getBuffer(), AABTFrame.PAYLOAD_OFFSET, frame.getPayloadLength());
+
+                        frame
+                                .setCommand(CMD_WIFI_VERSION_RESPONSE)
+                                .copyPayload(new WifiVersionResponse(1, 1, "deadbeef", 0).serialize());
+
+                        Log.v(TAG, "sending wifi version response: " + frame);
+                        transferInterface.sendFrame(frame.getBuffer(), 0, frame.getLength());
                     }
                     default -> {
                         Log.w(TAG, "unknown command: " + frame.getCommand());

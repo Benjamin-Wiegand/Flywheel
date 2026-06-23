@@ -1,8 +1,10 @@
 package io.benwiegand.projection.geargrinder.crypto;
 
 import android.annotation.SuppressLint;
+import android.util.Base64;
 import android.util.Log;
 
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
@@ -17,6 +19,14 @@ public class LGTMTrustManager implements X509TrustManager {
             Log.i(TAG, "chain: " + Arrays.deepToString(chain));
         } catch (Throwable t) {
             Log.e(TAG, "explosions while logging cert chain", t);
+        }
+
+        for (X509Certificate certificate : chain) {
+            try {
+                Log.i(TAG, "cert: " + Base64.encodeToString(certificate.getEncoded(), 0));
+            } catch (CertificateEncodingException e) {
+                Log.e(TAG, "failed to log encoded certificate", e);
+            }
         }
     }
 

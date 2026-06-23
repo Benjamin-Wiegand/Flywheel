@@ -3,6 +3,7 @@ package io.benwiegand.projection.geargrinder.privileged;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.ENV_TOKEN;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
@@ -14,6 +15,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 import io.benwiegand.projection.geargrinder.IShizukuUserService;
+import io.benwiegand.projection.geargrinder.PermissionGrantActivity;
+import io.benwiegand.projection.geargrinder.permission.PermissionRequirements;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
 import moe.shizuku.server.IShizukuService;
 import rikka.shizuku.Shizuku;
@@ -52,11 +55,29 @@ public class ShizukuPrivdLauncher extends PrivdLauncher implements GeargrinderSe
         connector.destroy();
     }
 
+    private void requestPermission() {
+        try {
+            context.startActivity(new Intent(context, PermissionGrantActivity.class)
+                    .setAction(PermissionGrantActivity.INTENT_ACTION_REQUEST_PERMISSION)
+                    .putExtra(PermissionGrantActivity.INTENT_EXTRA_PERMISSION_KEY, PermissionRequirements.PERMISSION_KEY_SHIZUKU)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (Throwable t) {
+            Log.e(TAG, "failed to request permission", t);
+        }
+    }
+
     private void onBinderReceived() {
         Log.i(TAG, "Shizuku binder received");
         checkShizukuPermission()
-                .filter(p -> p)
-                .ifPresent(permission -> connector.bindShizukuUserService());
+                .ifPresent(permission -> {
+                    if (!permission) {
+                        Log.w(TAG, "missing shizuku permission");
+                        requestPermission();
+                        return;
+                    }
+                    connector.bindShizukuUserService();
+                });
+
     }
 
     @Override

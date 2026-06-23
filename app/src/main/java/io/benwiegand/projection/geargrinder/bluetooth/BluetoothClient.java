@@ -88,7 +88,14 @@ public class BluetoothClient {
         Log.i(TAG, "connection thread init");
         try (BluetoothSocket socket = device.createRfcommSocketToServiceRecord(AA_SOCKET_UUID)) {
             BluetoothTransferInterface transferInterface = new BluetoothTransferInterface(socket);
-            socket.connect();
+
+            try {
+                socket.connect();
+            } catch (IOException e) {
+                 Log.e(TAG, "IOException while connecting bluetooth socket", e);
+                 listener.onBluetoothConnectionError(e);
+                 return;
+            }
 
             AABTFrame frame = new AABTFrame(new byte[BUFFER_SIZE]);
 
@@ -144,8 +151,7 @@ public class BluetoothClient {
             }
 
         } catch (IOException e) {
-            Log.e(TAG, "IOException during bluetooth connection", e);
-            listener.onBluetoothConnectionError(e);
+            Log.w(TAG, "IOException in bluetooth connection loop", e);
         } finally {
             Log.i(TAG, "connection thread death");
             listener.onBluetoothDisconnected();

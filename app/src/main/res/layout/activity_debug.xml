@@ -35,6 +35,15 @@
             android:text="log recording"
             />
 
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/auto_scroll_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:checked="true"
+            android:text="scroll"
+            />
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -55,6 +56,7 @@ public class DebugActivity extends AppCompatActivity {
     private static final boolean AUTOSTART_TCP_SERVER = false;
 
     private LogcatReader logcatReader;
+    private boolean autoScroll = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,6 +111,10 @@ public class DebugActivity extends AppCompatActivity {
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+        SwitchCompat autoScrollSwitch = findViewById(R.id.auto_scroll_switch);
+        autoScrollSwitch.setOnCheckedChangeListener((v, checked) -> autoScroll = checked);
+
         RecyclerView logRecyclerView = findViewById(R.id.log_recycler);
         LogUiAdapter logUiAdapter = new LogUiAdapter();
 
@@ -119,6 +125,7 @@ public class DebugActivity extends AppCompatActivity {
         logUiAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
+                if (!autoScroll) return;
                 logRecyclerView.scrollToPosition(positionStart + itemCount - 1);
             }
         });

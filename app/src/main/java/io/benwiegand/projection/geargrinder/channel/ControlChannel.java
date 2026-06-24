@@ -127,7 +127,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
             return null;
         }
 
-        Log.i(TAG, "using VOICE_CALL for phone audio capture");
+        Log.i(TAG, "using phone audio capture");
         setupPrivdAudioService();
         return privdAudioService.getPhoneAudioCaptureProvider();
     }

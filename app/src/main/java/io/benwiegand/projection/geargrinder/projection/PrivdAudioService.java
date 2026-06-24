@@ -20,7 +20,7 @@ public class PrivdAudioService implements GeargrinderServiceConnector.Connection
     private final GeargrinderServiceConnector connector;
 
     private final PrivdAudioCaptureProxy.PrivdProvider mediaAudioCaptureProvider = new PrivdAudioCaptureProxy.PrivdProvider(MediaRecorder.AudioSource.REMOTE_SUBMIX);
-    private final PrivdAudioCaptureProxy.PrivdProvider phoneAudioCaptureProvider = new PrivdAudioCaptureProxy.PrivdProvider(MediaRecorder.AudioSource.VOICE_CALL);
+    private final PrivdAudioCaptureProxy.PrivdProvider phoneAudioCaptureProvider = new PrivdAudioCaptureProxy.PrivdProvider(MediaRecorder.AudioSource.VOICE_DOWNLINK);
 
     private boolean dead = false;
 

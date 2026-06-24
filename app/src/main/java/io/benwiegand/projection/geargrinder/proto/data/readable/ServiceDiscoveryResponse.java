@@ -25,9 +25,9 @@ public record ServiceDiscoveryResponse(
     private static final Set<String> GENERIC_CAR_NAMES = Set.of("Universal", "Generic", "Unknown");
 
     public String friendlyName() {
-        String carName = carModel();
+        String carName = headunitName();
         if (carName == null || GENERIC_CAR_NAMES.contains(carName)) {
-            if (headunitName() != null) carName = headunitName();
+            if (carModel() != null) carName = carModel();
         }
         if (carName == null) carName = carSerial();
         if (carName == null) carName = "Unknown";

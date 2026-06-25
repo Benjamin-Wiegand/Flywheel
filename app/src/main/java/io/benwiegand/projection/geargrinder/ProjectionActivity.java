@@ -27,6 +27,7 @@ import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.BatteryIndicator;
 import io.benwiegand.projection.geargrinder.projection.ui.NotificationDisplay;
+import io.benwiegand.projection.geargrinder.projection.ui.PhoneCallDisplay;
 import io.benwiegand.projection.geargrinder.projection.ui.task.ProjectionTask;
 import io.benwiegand.projection.geargrinder.projection.ui.NetworkIndicators;
 import io.benwiegand.projection.geargrinder.projection.ui.task.ProjectionTaskManager;
@@ -55,6 +56,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private BatteryIndicator batteryIndicator;
     private NetworkIndicators networkIndicators;
     private NotificationDisplay notificationDisplay;
+    private PhoneCallDisplay phoneCallDisplay;
 
     private GeargrinderServiceConnector connector;
     private IPrivd privd = null;
@@ -114,6 +116,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
         networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
         notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay));
+        phoneCallDisplay = new PhoneCallDisplay(this, findViewById(R.id.popup_incoming_call_overlay));
 
         taskManager.registerListener(this);
 
@@ -155,6 +158,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         batteryIndicator.destroy();
         networkIndicators.destroy();
         notificationDisplay.destroy();
+        phoneCallDisplay.destroy();
     }
 
     private boolean focusSearch(int direction) {

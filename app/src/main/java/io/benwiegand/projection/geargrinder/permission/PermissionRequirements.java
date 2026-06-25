@@ -45,8 +45,23 @@ public class PermissionRequirements {
             settingsManager -> true);
 
     public static final PermissionEntry READ_PHONE_STATE_PERMISSION_ENTRY = PermissionEntry.createForManifestPermission(
-            Manifest.permission.READ_PHONE_STATE, Build.VERSION_CODES.Q, Build.VERSION_CODES.R,
+            Manifest.permission.READ_PHONE_STATE, null, null,
             R.string.read_phone_state_permission_title, R.string.read_phone_state_permission_rationale,
+            settingsManager -> true, settingsManager -> false);
+
+    public static final PermissionEntry ANSWER_PHONE_CALLS_PERMISSION_ENTRY = PermissionEntry.createForManifestPermission(
+            Manifest.permission.ANSWER_PHONE_CALLS, null, null,
+            R.string.answer_phone_calls_permission_title, R.string.answer_phone_calls_permission_rationale,
+            settingsManager -> true, settingsManager -> false);
+
+    public static final PermissionEntry READ_CALL_LOG_PERMISSION_ENTRY = PermissionEntry.createForManifestPermission(
+            Manifest.permission.READ_CALL_LOG, null, null,
+            R.string.read_call_log_permission_title, R.string.read_call_log_permission_rationale,
+            settingsManager -> true, settingsManager -> false);
+
+    public static final PermissionEntry READ_CONTACTS_PERMISSION_ENTRY = PermissionEntry.createForManifestPermission(
+            Manifest.permission.READ_CONTACTS, null, null,
+            R.string.read_contacts_permission_title, R.string.read_contacts_permission_rationale,
             settingsManager -> true, settingsManager -> false);
 
     @SuppressLint("InlinedApi")
@@ -161,8 +176,11 @@ public class PermissionRequirements {
             POST_NOTIFICATIONS_PERMISSION_ENTRY,
             RECORD_AUDIO_PERMISSION_ENTRY,
             NOTIFICATION_LISTENER_PERMISSION_ENTRY,
+            READ_PHONE_STATE_PERMISSION_ENTRY,
+            ANSWER_PHONE_CALLS_PERMISSION_ENTRY,
+            READ_CALL_LOG_PERMISSION_ENTRY,
+            READ_CONTACTS_PERMISSION_ENTRY,
             BLUETOOTH_CONNECT_PERMISSION_ENTRY,
-            ACCESS_FINE_LOCATION_PERMISSION_ENTRY,
-            READ_PHONE_STATE_PERMISSION_ENTRY
+            ACCESS_FINE_LOCATION_PERMISSION_ENTRY
     );
 }

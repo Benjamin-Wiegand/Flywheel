@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:background="@drawable/popup_floating_background"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:elevation="8dp"
+    android:clickable="true"
+    >
+
+    <ImageView
+        android:id="@+id/caller_id_image"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_weight="9"
+        android:importantForAccessibility="no"
+        tools:src="@android:drawable/ic_menu_gallery"
+        />
+
+    <TextView
+        android:id="@+id/caller_id_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:padding="12dp"
+        android:textAlignment="center"
+        android:ellipsize="end"
+        android:maxLines="2"
+        style="?textAppearanceHeadline5"
+        tools:text="some caller"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        >
+
+        <ImageButton
+            android:id="@+id/accept_call_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="0"
+            android:background="@drawable/circle"
+            android:backgroundTint="?colorAcceptCallButton"
+            android:src="@android:drawable/stat_sys_phone_call"
+            style="?imageButtonStyle"
+            />
+
+        <Space
+            android:layout_width="48dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+        <ImageButton
+            android:id="@+id/reject_call_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_weight="0"
+            android:background="@drawable/circle"
+            android:backgroundTint="?colorRejectCallButton"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            style="?imageButtonStyle"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/incoming_call_fallback_notice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:text="@string/incoming_call_fallback_notice"
+        android:visibility="gone"
+        style="?textAppearanceBody1"
+        tools:visibility="visible"
+        />
+
+
+</LinearLayout>

@@ -17,6 +17,9 @@
 
         <attr name="colorFocusIndicatorInactive" format="color" />
         <attr name="colorFocusIndicatorActive" format="color" />
+
+        <attr name="colorAcceptCallButton" format="color" />
+        <attr name="colorRejectCallButton" format="color" />
     </declare-styleable>
     
 </resources>

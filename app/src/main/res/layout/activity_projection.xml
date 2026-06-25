@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -139,7 +140,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:background="@drawable/popup_notification_overlay_background"
+        android:background="@drawable/popup_top_overlay_background"
         android:alpha="0"
         android:visibility="gone"
         >
@@ -159,5 +160,32 @@
             />
 
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/popup_incoming_call_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="48dp"
+        android:background="@drawable/popup_right_overlay_background"
+        android:alpha="0"
+        android:visibility="gone"
+        android:clickable="true"
+        >
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|bottom"
+            android:padding="12dp"
+            tools:ignore="RtlHardcoded"
+            >
+
+            <include
+                layout="@layout/layout_incoming_call_popup"
+                />
+
+        </FrameLayout>
+
+    </FrameLayout>
 
 </FrameLayout>

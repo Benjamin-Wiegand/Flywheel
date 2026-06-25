@@ -58,9 +58,15 @@
     <string name="post_notifications_permission_title">Post notifications</string>
     <string name="post_notifications_permission_rationale">Allows Flywheel to run in the background, communicate errors, and show connection status. Things may not work properly without this permission.</string>
     <string name="read_phone_state_permission_title">Read phone state</string>
-    <string name="read_phone_state_permission_rationale">Allows Flywheel to display more accurate telephone signal status on Android 11 and below.\n\nThis permission is optional.</string>
+    <string name="read_phone_state_permission_rationale">Allows Flywheel to display incoming calls on your car.\n\nOn Android 11 and below, it is also used to show more accurate cell signal status.</string>
     <string name="record_audio_permission_title">Record audio</string>
     <string name="record_audio_permission_rationale">Allows Flywheel to capture device audio via screen sharing for playback through your car.</string>
+    <string name="answer_phone_calls_permission_title">Answer phone calls</string>
+    <string name="answer_phone_calls_permission_rationale">Allows Flywheel to show a button to accept incoming calls.</string>
+    <string name="read_call_log_permission_title">Read call log</string>
+    <string name="read_call_log_permission_rationale">Allows Flywheel to show the phone number or name for incoming calls.</string>
+    <string name="read_contacts_permission_title">Read contacts</string>
+    <string name="read_contacts_permission_rationale">Allows Flywheel to show the contact photo and display name for incoming calls.</string>
     <string name="bluetooth_connect_permission_title">Bluetooth connection</string>
     <string name="bluetooth_connect_permission_rationale">Allows Flywheel to connect to your car over Bluetooth, which is needed to start a wireless connection.\n\nThis is permission only needed if you want to connect wirelessly.</string>
     <string name="access_fine_location_permission_title">Fine location</string>
@@ -176,5 +182,8 @@
     <string name="media_audio_capture_mode_name">Media audio capture mode</string>
     <string name="phone_audio_capture_name">Capture call audio (requires root or Shizuku)</string>
     <string name="phone_audio_capture_summary">play phone call audio through your car</string>
+
+    <string name="unknown_caller">Unknown</string>
+    <string name="incoming_call_fallback_notice">when it is safe, answer on your phone</string>
 
 </resources>

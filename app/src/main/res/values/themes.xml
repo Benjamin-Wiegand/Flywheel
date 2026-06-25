@@ -9,6 +9,9 @@
 
         <item name="colorAppModal">?attr/colorSurfaceContainer</item>
 
+        <item name="colorAcceptCallButton">#23A023</item>
+        <item name="colorRejectCallButton">#9E3434</item>
+
         <item name="dynamicColorThemeOverlay">@style/ThemeOverlay.Geargrinder.DynamicColors</item>
         <item name="actionBarStyle">@style/ThemeOverlay.Geargrinder.ActionBar</item>
         <item name="alertDialogTheme">@style/ThemeOverlay.Geargrinder.AlertDialog</item>

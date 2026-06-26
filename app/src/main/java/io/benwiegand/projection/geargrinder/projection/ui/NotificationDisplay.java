@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.service.notification.StatusBarNotification;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.util.StateSet;
 import android.view.LayoutInflater;
@@ -33,6 +34,8 @@ import io.benwiegand.projection.geargrinder.pm.AppRecord;
 
 public class NotificationDisplay implements NotificationService.NotificationListener {
     private static final String TAG = NotificationDisplay.class.getSimpleName();
+
+    private static final String TTS_INTERRUPTION_ID = TAG;
 
     private static final long TTS_ANNOUNCEMENT_PAUSE = 1500;    // milliseconds to pause between queued TTS messages
     private static final long POPUP_NOTIFICATION_ANIMATION_DURATION = 200;
@@ -66,6 +69,25 @@ public class NotificationDisplay implements NotificationService.NotificationList
         popupNotificationOverlay.setOnClickListener(v -> dismissTopNotification());
 
         tts = new TextToSpeech(context, this::onTTSInit);
+        tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+            @Override
+            public void onDone(String utteranceId) {
+                Log.d(TAG, "tts finished for utterance: " + utteranceId);
+                getNotificationServiceBinder().ifPresent(ns -> ns.endMediaInterruption(TTS_INTERRUPTION_ID));
+            }
+
+            @Override
+            public void onError(String utteranceId) {
+                Log.e(TAG, "tts error for utterance: " + utteranceId);
+                getNotificationServiceBinder().ifPresent(ns -> ns.endMediaInterruption(TTS_INTERRUPTION_ID));
+            }
+
+            @Override
+            public void onStart(String utteranceId) {
+                Log.d(TAG, "tts started for utterance: " + utteranceId);
+                getNotificationServiceBinder().ifPresent(ns -> ns.beginMediaInterruption(TTS_INTERRUPTION_ID));
+            }
+        });
     }
 
     public void destroy() {

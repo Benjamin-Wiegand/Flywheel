@@ -187,27 +187,41 @@ public class AppDock implements ProjectionTaskManager.Listener {
         }
     }
 
+    private int findDropIndexForCoordinates(ViewGroup itemsView, int x, int y) {
+        Rect bounds = new Rect();
+        getViewBoundsInDisplay(rootView, bounds);
+        int xOffset = bounds.left;
+
+        getViewBoundsInDisplay(itemsView, bounds);
+        if (x + xOffset < bounds.left) return 0;
+
+        for (int i = 0; i < itemsView.getChildCount(); i++) {
+            View item = itemsView.getChildAt(i);
+            getViewBoundsInDisplay(item, bounds);
+            if (item == dropPlaceholder) xOffset += dropPlaceholder.getWidth();
+            if (x + xOffset > bounds.right) continue;
+            return i;
+        }
+
+        return -1;
+    }
+
     private ItemLocation findDropLocationForCoordinates(int x, int y, boolean pinnedOnly) {
         Rect bounds = new Rect();
         getViewBoundsInDisplay(rootView, bounds);
         int xOffset = bounds.left;
 
-        getViewBoundsInDisplay(pinnedItemsView, bounds);
-        if (x + xOffset < bounds.left) return new ItemLocation(pinnedItemsView, 0);
-
-        for (int i = 0; i < pinnedItemsView.getChildCount(); i++) {
-            View item = pinnedItemsView.getChildAt(i);
-            getViewBoundsInDisplay(item, bounds);
-            if (item == dropPlaceholder) xOffset += dropPlaceholder.getWidth();
-            if (x + xOffset > bounds.right) continue;
-            return new ItemLocation(pinnedItemsView, i);
-        }
+        int index = findDropIndexForCoordinates(pinnedItemsView, x, y);
+        if (index >= 0) return new ItemLocation(pinnedItemsView, index);
 
         getViewBoundsInDisplay(openItemsView, bounds);
         if (pinnedOnly || x + xOffset < bounds.left)
             return new ItemLocation(pinnedItemsView, pinnedItemsView.getChildCount());
 
-        return new ItemLocation(openItemsView, 0);
+        index = findDropIndexForCoordinates(openItemsView, x, y);
+        if (index >= 0) return new ItemLocation(openItemsView, index);
+
+        return new ItemLocation(openItemsView, openItemsView.getChildCount());
     }
 
     private ItemLocation findDropPlaceholder() {
@@ -241,8 +255,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
     }
 
     private boolean onlyAllowPin(DragEvent event) {
-        ProjectionTask task = getProjectionTaskFromDragState(event);
-        return task == null || !taskManager.isPinned(task);
+        return getProjectionTaskFromDragState(event) == null;
     }
 
     private boolean onDragEvent(View view, DragEvent event) {
@@ -269,7 +282,7 @@ public class AppDock implements ProjectionTaskManager.Listener {
             }
             case DragEvent.ACTION_DRAG_ENTERED -> {
                 View itemView = getDockItemViewFromDragState(event);
-                if (itemView != null) itemView.setVisibility(View.INVISIBLE);
+                if (itemView != null) itemView.setVisibility(View.GONE);
                 yield true;
             }
             case DragEvent.ACTION_DRAG_EXITED -> {
@@ -300,10 +313,9 @@ public class AppDock implements ProjectionTaskManager.Listener {
                     if (!pinned && pin) {
                         taskManager.pinTask(dropLocation.index(), task);
                     } else if (pinned && !pin) {
-                        taskManager.unpinTask(task);
+                        taskManager.unpinTask(dropLocation.index(), task);
                     } else {
-                        assert pinned && pin;
-                        taskManager.movePinnedTask(dropLocation.index(), task);
+                        taskManager.moveTask(dropLocation.index(), task);
                     }
 
                     updateDividerVisibility();

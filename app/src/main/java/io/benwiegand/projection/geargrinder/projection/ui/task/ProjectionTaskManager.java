@@ -138,15 +138,25 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
         savePinned();
     }
 
-    public void movePinnedTask(int index, ProjectionTask task) {
-        int oldIndex = pinnedTasks.indexOf(task);
+    private List<ProjectionTask> findContainingTaskList(ProjectionTask task) {
+        return taskLists.stream()
+                .filter(taskList -> taskList.contains(task))
+                .findAny()
+                .orElse(null);
+    }
+
+    public void moveTask(int index, ProjectionTask task) {
+        List<ProjectionTask> taskList = findContainingTaskList(task);
+        boolean pinned = isPinned(task);
+
+        int oldIndex = taskList.indexOf(task);
         if (oldIndex < index) index--;  // will shift on removal
 
-        pinnedTasks.remove(task);
-        pinnedTasks.add(index, task);
+        taskList.remove(task);
+        taskList.add(index, task);
 
         int newIndex = index;
-        callListeners(l -> l.onTaskMoved(oldIndex, newIndex, task, true));
+        callListeners(l -> l.onTaskMoved(oldIndex, newIndex, task, pinned));
         savePinned();
     }
 
@@ -166,28 +176,16 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
         pinTask(pinnedTasks.size(), task);
     }
 
-    public void unpinTask(ProjectionTask task) {
+    public void unpinTask(int index, ProjectionTask task) {
         int oldIndex = pinnedTasks.indexOf(task);
         if (oldIndex < 0)
             throw new AssertionError("can't find provided task");
 
         pinnedTasks.remove(task);
-        openTasks.add(0, task);
+        openTasks.add(index, task);
 
-        callListeners(l -> l.onTaskUnpinned(oldIndex, 0, task));
+        callListeners(l -> l.onTaskUnpinned(oldIndex, index, task));
         savePinned();
-    }
-
-    private void moveToFront(ProjectionTask task) {
-        int oldIndex = openTasks.indexOf(task);
-        if (oldIndex == 0) return;
-        if (oldIndex < 0)
-            throw new AssertionError("can't find provided task");
-
-        openTasks.remove(task);
-        openTasks.add(0, task);
-
-        callListeners(l -> l.onTaskMoved(oldIndex, 0, task, false));
     }
 
     VirtualActivity getOrCreateVirtualActivity(AppRecord app) {
@@ -244,8 +242,8 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
 
     public ProjectionTask createNewTask(AppRecord app) {
         ProjectionTask task = createTask(app);
-        openTasks.add(0, task);
-        callListeners(l -> l.onTaskAdded(0, task, false));
+        openTasks.add(task);
+        callListeners(l -> l.onTaskAdded(openTasks.size() - 1, task, false));
         return task;
     }
 
@@ -262,7 +260,6 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
         activeTask = newTask;
         if (newTask != null) newTask.attach(contentFrame);
         callListeners(l -> l.onSwitchTask(oldTask, oldPinned, newTask, newPinned));
-        if (newTask != null && !newPinned) moveToFront(newTask);
 
         requestContentFocus();
     }

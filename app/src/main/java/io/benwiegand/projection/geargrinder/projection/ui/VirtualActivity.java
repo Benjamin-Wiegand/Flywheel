@@ -75,6 +75,8 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private boolean validFrame = false;
     private boolean launched = false;
 
+    public boolean initialLaunchAttempted = false;
+
     private final View rootView;
     private final SurfaceView surfaceView;
     private final VirtualActivitySplash splash;
@@ -106,8 +108,6 @@ public class VirtualActivity implements SurfaceHolder.Callback {
 
         // frame
         surfaceView.getViewTreeObserver().addOnDrawListener(this::onFrame);
-
-        tryLaunch();
     }
 
     public Context getContext() {
@@ -287,6 +287,11 @@ public class VirtualActivity implements SurfaceHolder.Callback {
                 virtualDisplay.resize(width, height, density);
                 invalidateFrame();
             }
+        }
+
+        if (!initialLaunchAttempted) {
+            initialLaunchAttempted = true;
+            tryLaunch();
         }
     }
 

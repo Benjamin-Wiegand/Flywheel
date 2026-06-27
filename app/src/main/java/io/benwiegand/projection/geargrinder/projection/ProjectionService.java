@@ -6,6 +6,8 @@ import static android.content.Context.BIND_IMPORTANT;
 import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
 import android.util.Log;
 import android.view.InputEvent;
 import android.view.Surface;
@@ -60,6 +62,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private IPrivd privd = null;
 
     private final Context context;
+    private final AudioManager audioManager;
 
     public interface Listener {
         void onProjectionStarted();
@@ -81,6 +84,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         this.context = context;
         this.projectionListener = projectionListener;
         this.videoPreset = videoPreset;
+        audioManager = context.getSystemService(AudioManager.class);
 
         CoordinateTranslator<TouchEvent.PointerLocation> coordinateTranslator = CoordinateTranslator.createTouchEvent(
                 x -> x + this.videoPreset.marginHorizontal() / 2,
@@ -104,6 +108,8 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         connector.destroy();
         if (virtualDisplay != null)
             virtualDisplay.release();
+
+        if (started) pauseMedia();  // already paused if projection is suspended
     }
 
     public Throwable getError() {
@@ -130,6 +136,12 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         projectionListener.onProjectionFailed(error);
     }
 
+    private void pauseMedia() {
+        Log.i(TAG, "pausing media");
+        audioManager.requestAudioFocus(new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .build());
+    }
+
     public void unsuspend(Listener projectionListener) {
         synchronized (lock) {
             Log.i(TAG, "unsuspending projection");
@@ -151,6 +163,8 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
             outputInit = false;
 
             if (virtualDisplay != null) virtualDisplay.setSurface(null);
+
+            pauseMedia();
         }
     }
 

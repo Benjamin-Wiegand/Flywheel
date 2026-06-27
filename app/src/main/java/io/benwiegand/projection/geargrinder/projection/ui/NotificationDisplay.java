@@ -4,6 +4,8 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Icon;
+import android.media.AudioFocusRequest;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -68,24 +70,28 @@ public class NotificationDisplay implements NotificationService.NotificationList
 
         popupNotificationOverlay.setOnClickListener(v -> dismissTopNotification());
 
+        AudioManager audioManager = context.getSystemService(AudioManager.class);
+        AudioFocusRequest ttsAudioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .build();
+
         tts = new TextToSpeech(context, this::onTTSInit);
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onDone(String utteranceId) {
                 Log.d(TAG, "tts finished for utterance: " + utteranceId);
-                getNotificationServiceBinder().ifPresent(ns -> ns.endMediaInterruption(TTS_INTERRUPTION_ID));
+                audioManager.abandonAudioFocusRequest(ttsAudioFocusRequest);
             }
 
             @Override
             public void onError(String utteranceId) {
                 Log.e(TAG, "tts error for utterance: " + utteranceId);
-                getNotificationServiceBinder().ifPresent(ns -> ns.endMediaInterruption(TTS_INTERRUPTION_ID));
+                audioManager.abandonAudioFocusRequest(ttsAudioFocusRequest);
             }
 
             @Override
             public void onStart(String utteranceId) {
                 Log.d(TAG, "tts started for utterance: " + utteranceId);
-                getNotificationServiceBinder().ifPresent(ns -> ns.beginMediaInterruption(TTS_INTERRUPTION_ID));
+                audioManager.requestAudioFocus(ttsAudioFocusRequest);
             }
         });
     }

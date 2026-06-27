@@ -186,13 +186,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
     @Override
     public void onAppSelected(AppRecord app) {
-        ProjectionTask activeTask = taskManager.getActiveTask();
-        if (activeTask != null && activeTask.contains(app)) {
-            taskManager.dynamicOpenSingle(app);
-            return;
-        }
-
-        taskManager.dynamicOpen(app);
+        taskManager.dynamicOpenSingle(app);
     }
 
     @Override

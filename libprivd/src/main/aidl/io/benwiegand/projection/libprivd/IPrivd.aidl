@@ -13,6 +13,8 @@ interface IPrivd {
 
     int launchActivity(in ComponentName component, int displayId);
 
+    int launchVirtualActivity(in ComponentName component, int displayId);
+
     int createVirtualDisplay(in String name, int width, int height, int densityDpi, in Surface surface, int flags);
 
     void releaseVirtualDisplay(int displayId);

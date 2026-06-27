@@ -4,6 +4,8 @@ import static io.benwiegand.projection.geargrinder.privd.reflection.ReflectionUt
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.APP_PKG_NAME;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.BIND_TIMEOUT;
 import static io.benwiegand.projection.libprivd.ipc.IPCConstants.PING_TIMEOUT;
+import static io.benwiegand.projection.libprivd.ipc.IPCConstants.VIRTUAL_ACTIVITY_LAUNCHER_ACTIVITY_COMPONENT;
+import static io.benwiegand.projection.libprivd.ipc.IPCConstants.VIRTUAL_ACTIVITY_LAUNCHER_INTENT_EXTRA_ACTIVITY;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
@@ -169,6 +171,44 @@ public class Privd extends IPrivd.Stub {
         Log.w(TAG, "falling back to shell command for activity launch");
         try {
             return new ProcessBuilder("am", "start-activity", "--display", String.valueOf(displayId), component.flattenToShortString())
+                    .start()
+                    .waitFor();
+        } catch (IOException e) {
+            Log.e(TAG, "IOException while starting activity via shell", e);
+            return -1;
+        } catch (InterruptedException e) {
+            Log.e(TAG, "interrupted");
+            return -1;
+        }
+    }
+
+    @Override
+    public int launchVirtualActivity(ComponentName component, int displayId) {
+        Log.v(TAG, "launching virtual activity launcher on display " + displayId + ": " + component.flattenToShortString());
+
+        if (ram != null) {
+            try {
+                Intent intent = new Intent()
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                        .putExtra(VIRTUAL_ACTIVITY_LAUNCHER_INTENT_EXTRA_ACTIVITY, component.flattenToString())
+                        .setComponent(VIRTUAL_ACTIVITY_LAUNCHER_ACTIVITY_COMPONENT);
+
+                ActivityOptions opts = ActivityOptions.makeBasic();
+                opts.setLaunchDisplayId(displayId);
+
+                return ram.startActivity(intent, opts.toBundle());
+            } catch (ReflectionException | SecurityException e) {
+                Log.w(TAG, "failed to launch activity via IActivityManager", e);
+            }
+        }
+
+        Log.w(TAG, "falling back to shell command for activity launch");
+        try {
+            return new ProcessBuilder("am", "start-activity",
+                    "--activity-multiple-task",
+                    "--es", VIRTUAL_ACTIVITY_LAUNCHER_INTENT_EXTRA_ACTIVITY, component.flattenToString(),
+                    "--display", String.valueOf(displayId),
+                    VIRTUAL_ACTIVITY_LAUNCHER_ACTIVITY_COMPONENT.flattenToShortString())
                     .start()
                     .waitFor();
         } catch (IOException e) {

@@ -99,6 +99,12 @@
             />
 
         <activity
+            android:name=".VirtualActivityLauncherActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Geargrinder.Projection"
+            />
+
+        <activity
             android:name=".PermissionGrantActivity"
             android:label="@string/permission_grant_activity_title"
             android:exported="false"

@@ -186,4 +186,8 @@
     <string name="unknown_caller">Unknown</string>
     <string name="incoming_call_fallback_notice">when it is safe, answer on your phone</string>
 
+    <string name="virtual_activity_launcher_status_launching">launching</string>
+    <string name="virtual_activity_launcher_status_failed">app launch failed</string>
+    <string name="virtual_activity_launcher_status_closed">app closed</string>
+
 </resources>

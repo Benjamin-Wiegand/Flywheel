@@ -1,5 +1,7 @@
 package io.benwiegand.projection.libprivd.ipc;
 
+import android.content.ComponentName;
+
 public class IPCConstants {
 
     public static final long PING_INTERVAL = 1000;
@@ -16,5 +18,8 @@ public class IPCConstants {
     public static final String INTENT_ACTION_BIND_PRIVD = "io.benwiegand.projection.geargrinder.BIND_PRIVD";
     public static final String INTENT_EXTRA_BINDER = "binder";
     public static final String INTENT_EXTRA_TOKEN = "token";
+
+    public static final ComponentName VIRTUAL_ACTIVITY_LAUNCHER_ACTIVITY_COMPONENT = ComponentName.createRelative(APP_PKG_NAME, ".VirtualActivityLauncherActivity");
+    public static final String VIRTUAL_ACTIVITY_LAUNCHER_INTENT_EXTRA_ACTIVITY = "activity";
 
 }

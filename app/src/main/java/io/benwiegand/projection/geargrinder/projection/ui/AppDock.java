@@ -66,8 +66,6 @@ public class AppDock implements ProjectionTaskManager.Listener {
         // drag to pin
         rootView.setOnDragListener(this::onDragEvent);
         dropPlaceholder = inflater.inflate(R.layout.layout_dock_item, rootView, false);
-        inflater.inflate(R.layout.layout_dock_icon, dropPlaceholder.findViewById(R.id.icons_layout), true);
-
 
         rootView.findViewById(R.id.app_drawer_button)
                 .setOnClickListener(v -> listener.onAppDrawerSelected());
@@ -79,6 +77,14 @@ public class AppDock implements ProjectionTaskManager.Listener {
 
     public View getRootView() {
         return rootView;
+    }
+
+    private void updateDropPlaceholder(int items) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        ViewGroup iconsLayout = dropPlaceholder.findViewById(R.id.icons_layout);
+        iconsLayout.removeAllViews();
+        for (int i = 0; i < items; i++)
+            inflater.inflate(R.layout.layout_dock_icon, iconsLayout, true);
     }
 
     private void updateDockItemView(ProjectionTask task, View itemView) {
@@ -260,8 +266,20 @@ public class AppDock implements ProjectionTaskManager.Listener {
 
     private boolean onDragEvent(View view, DragEvent event) {
         return switch (event.getAction()) {
-            case DragEvent.ACTION_DRAG_STARTED -> getProjectionTaskFromDragState(event) != null
-                    || getAppRecordFromDragState(event) != null;
+            case DragEvent.ACTION_DRAG_STARTED -> {
+                if (getAppRecordFromDragState(event) != null) {
+                    updateDropPlaceholder(1);
+                    yield true;
+                }
+
+                ProjectionTask task = getProjectionTaskFromDragState(event);
+                if (task != null) {
+                    updateDropPlaceholder(task.activityCount());
+                    yield true;
+                }
+
+                yield false;
+            }
 
             case DragEvent.ACTION_DRAG_LOCATION -> {
                 ItemLocation dropLocation = findDropLocationForCoordinates((int) event.getX(), (int) event.getY(), onlyAllowPin(event));

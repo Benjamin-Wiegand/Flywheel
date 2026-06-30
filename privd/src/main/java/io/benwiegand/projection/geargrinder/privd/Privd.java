@@ -135,6 +135,9 @@ public class Privd extends IPrivd.Stub {
         } catch (ReflectionException e) {
             Log.e(TAG, "reflection exception while injecting input event", e);
             return false;
+        } catch (Throwable t) {
+            Log.e(TAG, "failed to inject input event", t);
+            return false;
         }
     }
 

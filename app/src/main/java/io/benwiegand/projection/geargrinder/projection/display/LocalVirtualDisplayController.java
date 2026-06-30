@@ -7,8 +7,10 @@ import android.view.Surface;
 public class LocalVirtualDisplayController implements VirtualDisplayController {
 
     private final VirtualDisplay virtualDisplay;
+    private final int flags;
 
     public LocalVirtualDisplayController(DisplayManager dm, String name, int width, int height, int densityDpi, Surface surface, int flags) {
+        this.flags = flags;
         virtualDisplay = dm.createVirtualDisplay(name, width, height, densityDpi, surface, flags);
         if (virtualDisplay == null) throw new RuntimeException("createVirtualDisplay() returned null");
     }
@@ -16,6 +18,11 @@ public class LocalVirtualDisplayController implements VirtualDisplayController {
     @Override
     public void release() {
         virtualDisplay.release();
+    }
+
+    @Override
+    public int getFlags() {
+        return flags;
     }
 
     @Override

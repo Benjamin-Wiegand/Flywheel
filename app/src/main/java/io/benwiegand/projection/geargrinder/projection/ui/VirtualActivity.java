@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
+import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
@@ -51,6 +52,8 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private static final int[] PRIVD_VIRTUAL_DISPLAY_FLAGS = new int[] {
             PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS | DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE,
             PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS,
+            (PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS | DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) ^ PrivdVirtualDisplayProxy.FLAG_TRUSTED,
+            PRIVD_VIRTUAL_DISPLAY_BASE_FLAGS ^ PrivdVirtualDisplayProxy.FLAG_TRUSTED,
     };
 
     // this is all that really can be done without elevated privileges.
@@ -127,6 +130,8 @@ public class VirtualActivity implements SurfaceHolder.Callback {
                 launched = false;
             }
 
+            boolean canUseLauncher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
+
             if (virtualDisplay == null) {
                 Surface surface = surfaceView.getHolder().getSurface();
 
@@ -139,6 +144,9 @@ public class VirtualActivity implements SurfaceHolder.Callback {
                     );
 
                     localDisplayFallback = false;
+                    if ((virtualDisplay.getFlags() & PrivdVirtualDisplayProxy.FLAG_TRUSTED) == 0)
+                        canUseLauncher = false;
+
                 } catch (DeadObjectException e) {
                     throw new ProjectedAppLaunchException(getContext(), R.string.projected_app_launch_error_privd_dead, e);
                 } catch (Throwable t) {
@@ -155,6 +163,7 @@ public class VirtualActivity implements SurfaceHolder.Callback {
                         );
 
                         localDisplayFallback = true;
+                        canUseLauncher = false;
 
                     } catch (Throwable tt) {
                         throw new ProjectedAppLaunchException(getContext(), R.string.projected_app_launch_error_virtual_display, tt);
@@ -168,7 +177,14 @@ public class VirtualActivity implements SurfaceHolder.Callback {
 
             // launch
             try {
-                int result = privd.launchVirtualActivity(app.launchComponent(), getDisplayId());
+                int result;
+                if (canUseLauncher) {
+                    Log.i(TAG, "using launcher");
+                    result = privd.launchVirtualActivity(app.launchComponent(), getDisplayId());
+                } else {
+                    Log.w(TAG, "can't use launcher for current virtual display configuration");
+                    result = privd.launchActivity(app.launchComponent(), getDisplayId());
+                }
                 Log.d(TAG, "launch result " + result + " for " + app.launchComponent().flattenToShortString());
                 if (result == -1) throw new RuntimeException("activity launch failed with code -1");
             } catch (DeadObjectException e) {

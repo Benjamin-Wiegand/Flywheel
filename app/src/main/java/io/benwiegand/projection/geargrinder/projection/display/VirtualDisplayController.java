@@ -7,6 +7,8 @@ public interface VirtualDisplayController {
 
     void release();
 
+    int getFlags();
+
     void resize(int width, int height, int densityDpi);
 
     void setSurface(Surface surface);

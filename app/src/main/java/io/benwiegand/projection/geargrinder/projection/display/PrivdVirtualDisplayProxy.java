@@ -57,6 +57,11 @@ public class PrivdVirtualDisplayProxy implements VirtualDisplayController {
     }
 
     @Override
+    public int getFlags() {
+        return flags;
+    }
+
+    @Override
     public void resize(int width, int height, int densityDpi) {
         try {
             privd.virtualDisplayResize(displayId, width, height, densityDpi);

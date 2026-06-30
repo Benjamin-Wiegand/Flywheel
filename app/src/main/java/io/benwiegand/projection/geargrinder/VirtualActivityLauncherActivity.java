@@ -1,5 +1,6 @@
 package io.benwiegand.projection.geargrinder;
 
+import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Build;
@@ -16,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 
+import io.benwiegand.projection.geargrinder.util.UiUtil;
 import io.benwiegand.projection.libprivd.ipc.IPCConstants;
 
 public class VirtualActivityLauncherActivity extends AppCompatActivity {
@@ -126,7 +128,16 @@ public class VirtualActivityLauncherActivity extends AppCompatActivity {
         wasPaused = false;
         updateStatus(R.string.virtual_activity_launcher_status_launching);
         try {
-            startActivity(new Intent().setComponent(componentName));
+            int displayId = UiUtil.getDisplayId(this);
+            Log.d(TAG, "displayId = " + displayId);
+            ActivityOptions opts = ActivityOptions.makeBasic();
+            opts.setLaunchDisplayId(displayId);
+
+            Intent intent = new Intent(Intent.ACTION_MAIN)
+                    .setComponent(componentName)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+            startActivity(intent, opts.toBundle());
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         } catch (Throwable t) {
             Log.e(TAG, "activity launch failed", t);

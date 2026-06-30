@@ -129,7 +129,9 @@ public class Privd extends IPrivd.Stub {
     public boolean injectInputEvent(InputEvent event) {
         if (LOG_DEBUG) Log.d(TAG, "injecting input event: " + event);
         try {
-            return rim.injectInputEvent(event, ReflectedInputManager.INJECT_MODE_ASYNC);
+            synchronized (rim) {
+                return rim.injectInputEvent(event, ReflectedInputManager.INJECT_MODE_ASYNC);
+            }
         } catch (ReflectionException e) {
             Log.e(TAG, "reflection exception while injecting input event", e);
             return false;

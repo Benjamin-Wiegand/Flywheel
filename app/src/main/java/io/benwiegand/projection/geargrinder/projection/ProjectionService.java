@@ -14,8 +14,11 @@ import android.view.Surface;
 
 import io.benwiegand.projection.geargrinder.PrivdService;
 import io.benwiegand.projection.geargrinder.ProjectionActivity;
+import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.channel.InputChannel;
+import io.benwiegand.projection.geargrinder.exception.ProjectionException;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.projection.input.CoordinateTranslator;
 import io.benwiegand.projection.geargrinder.projection.input.InputEventConverter;
 import io.benwiegand.projection.geargrinder.projection.display.LocalVirtualDisplayController;
@@ -66,7 +69,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
     public interface Listener {
         void onProjectionStarted();
-        void onProjectionFailed(Throwable t);
+        void onProjectionFailed(UserFriendlyException e);
     }
 
     private Listener projectionListener;
@@ -77,7 +80,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private boolean virtualDisplayInit = false;
 
     private boolean dead = false;
-    private Throwable error = null;
+    private UserFriendlyException error = null;
 
 
     public ProjectionService(Context context, Listener projectionListener, VideoPreset videoPreset) {
@@ -125,14 +128,15 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         projectionListener.onProjectionStarted();
     }
 
-    private void onFailureLocked(String message, Throwable t) {
+    private void onFailureLocked(UserFriendlyException e) {
         if (dead) return;
+        e.fillInStackTrace();
         if (error != null) {
-            Log.w(TAG, "projection already failed, but another failure happened: " + message, t);
+            Log.w(TAG, "projection already failed, but another failure happened", e);
             return;
         }
-        Log.e(TAG, "projection failure: " + message, t);
-        error = new RuntimeException(message, t).fillInStackTrace();
+        Log.e(TAG, "projection failure: ", e);
+        error = e;
         projectionListener.onProjectionFailed(error);
     }
 
@@ -260,7 +264,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
                             surface, LOCAL_VIRTUAL_DISPLAY_FLAGS
                     );
                 } catch (Throwable tt) {
-                    onFailureLocked("unable to create virtual display through privd or locally", tt);
+                    onFailureLocked(new ProjectionException(context, R.string.projection_error_virtual_display_create_failure, t));
                     return;
                 }
             }
@@ -275,7 +279,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
                 );
                 if (ret == -1) throw new RuntimeException("activity launch failed with code -1");
             } catch (Throwable t) {
-                onFailureLocked("failed to launch projection activity on virtual display via privd", t);
+                onFailureLocked(new ProjectionException(context, R.string.projection_error_activity_launch_failure, t));
                 return;
             }
 
@@ -287,14 +291,14 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     @Override
     public void onPrivdDisconnected() {
         synchronized (lock) {
-            onFailureLocked("privd connection lost", null);
+            onFailureLocked(new ProjectionException(context, R.string.projection_error_privd_disconnected));
         }
     }
 
     @Override
-    public void onPrivdLaunchFailure(Throwable t) {
+    public void onPrivdLaunchFailure(UserFriendlyException e) {
         synchronized (lock) {
-            onFailureLocked("privd failed to launch", t);
+            onFailureLocked(new ProjectionException(context, R.string.projection_error_privd_launch_failure, e));
         }
     }
 

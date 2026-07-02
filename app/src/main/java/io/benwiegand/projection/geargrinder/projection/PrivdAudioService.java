@@ -10,6 +10,7 @@ import android.util.Log;
 import io.benwiegand.projection.geargrinder.PrivdService;
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.channel.AudioChannel;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.projection.audio.PrivdAudioCaptureProxy;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
 import io.benwiegand.projection.libprivd.IPrivd;
@@ -64,8 +65,8 @@ public class PrivdAudioService implements GeargrinderServiceConnector.Connection
     }
 
     @Override
-    public void onPrivdLaunchFailure(Throwable t) {
+    public void onPrivdLaunchFailure(UserFriendlyException e) {
         // TODO
-        Log.e(TAG, "privd failed to launch", t);
+        Log.e(TAG, "privd failed to launch", e);
     }
 }

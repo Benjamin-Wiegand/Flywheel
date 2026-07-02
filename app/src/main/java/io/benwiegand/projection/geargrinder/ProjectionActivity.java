@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import io.benwiegand.projection.geargrinder.callback.AppLauncherListener;
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBind;
 import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
@@ -230,8 +231,8 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     }
 
     @Override
-    public void onPrivdLaunchFailure(Throwable t) {
         // TODO: show error
+    public void onPrivdLaunchFailure(UserFriendlyException e) {
         onPrivdDisconnected();
     }
 

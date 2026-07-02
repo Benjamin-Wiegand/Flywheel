@@ -11,15 +11,20 @@ import static io.benwiegand.projection.geargrinder.message.AAFrame.HEADER_LENGTH
 import static io.benwiegand.projection.geargrinder.message.AAFrame.PAYLOAD_MAX_LENGTH;
 import static io.benwiegand.projection.geargrinder.util.ByteUtil.writeUInt16;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.callback.MessageListener;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
 import io.benwiegand.projection.geargrinder.data.BufferReader;
+import io.benwiegand.projection.geargrinder.exception.ConnectionError;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.transfer.AATransferInterface;
 import io.benwiegand.projection.geargrinder.util.ByteUtil;
 
@@ -41,8 +46,11 @@ public class MessageBroker {
 
     private final byte[] writeBuffer = new byte[AAFrame.MAX_LENGTH];
 
+    private final Context context;
     private final AATransferInterface transferInterface;
     private final TLSService tlsService;
+
+    private final Consumer<UserFriendlyException> errorListener;
 
     public record MessageSendParameters(
             int channelId,
@@ -56,9 +64,11 @@ public class MessageBroker {
     }
 
 
-    public MessageBroker(AATransferInterface transferInterface, TLSService tlsService) {
+    public MessageBroker(Context context, AATransferInterface transferInterface, TLSService tlsService, Consumer<UserFriendlyException> errorListener) {
+        this.context = context;
         this.transferInterface = transferInterface;
         this.tlsService = tlsService;
+        this.errorListener = errorListener;
     }
 
     public void destroy() {
@@ -76,6 +86,17 @@ public class MessageBroker {
         } catch (IOException e) {
             Log.w(TAG, "IOException while closing connection", e);
         }
+    }
+
+    public void connectionError(UserFriendlyException e) {
+        Log.e(TAG, "connection error", e);
+        errorListener.accept(e.fillInStackTrace());
+    }
+
+    public void connectionErrorFatal(UserFriendlyException e) {
+        Log.e(TAG, "fatal connection error");
+        connectionError(e);
+        closeConnection();
     }
 
     public boolean isAlive() {
@@ -341,7 +362,8 @@ public class MessageBroker {
             handler.onMessage(frame.getChannelId(), frame.getFlags(), readMessageBuffer, 0, messageLength);
         } catch (Throwable t) {
             Log.wtf(TAG, "exception in message handler", t);
-            closeConnection();  // this isn't supposed to happen
+            // this isn't supposed to happen
+            connectionErrorFatal(new ConnectionError(context, R.string.connection_error_unexpected, t));
         }
     }
 

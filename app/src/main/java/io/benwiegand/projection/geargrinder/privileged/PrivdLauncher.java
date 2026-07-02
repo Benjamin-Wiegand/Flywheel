@@ -34,7 +34,7 @@ public abstract class PrivdLauncher {
     private boolean init = false;
     protected byte[] token = null;
 
-    protected Consumer<Throwable> errorListener = null;
+    private Consumer<Throwable> errorListener = null;
 
     public PrivdLauncher(Context context, File daemonFile, File launchScriptFile, File tokenFile) {
         this.context = context;
@@ -53,7 +53,7 @@ public abstract class PrivdLauncher {
 
     protected void onError(Throwable throwable) {
         if (errorListener == null) return;
-        errorListener.accept(throwable);
+        errorListener.accept(throwable.fillInStackTrace());
     }
 
     protected void init() throws IOException {

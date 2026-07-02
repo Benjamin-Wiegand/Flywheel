@@ -63,7 +63,7 @@ public abstract class AAConnector {
 
     protected void connectionLoop(AATransferInterface transferInterface) throws CorruptedKeyException, CorruptedCertificateException {
         TLSService tlsService = createTlsService();
-        MessageBroker messageBroker = new MessageBroker(transferInterface, tlsService);
+        MessageBroker messageBroker = new MessageBroker(context, transferInterface, tlsService, listener::onConnectionError);
         ControlChannel controlChannel = new ControlChannel(context, messageBroker, tlsService, controlListener, settingsManager, connectionServiceBinder);
         try {
             messageBroker.registerForChannel(AAConstants.CHANNEL_CONTROL, controlChannel);

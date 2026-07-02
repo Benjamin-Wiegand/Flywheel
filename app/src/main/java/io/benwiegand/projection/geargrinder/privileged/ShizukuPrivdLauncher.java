@@ -16,6 +16,8 @@ import java.util.concurrent.TimeoutException;
 
 import io.benwiegand.projection.geargrinder.IShizukuUserService;
 import io.benwiegand.projection.geargrinder.PermissionGrantActivity;
+import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.exception.PrivdLaunchException;
 import io.benwiegand.projection.geargrinder.permission.PermissionRequirements;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
 import moe.shizuku.server.IShizukuService;
@@ -116,6 +118,9 @@ public class ShizukuPrivdLauncher extends PrivdLauncher implements GeargrinderSe
                 Log.d(TAG, "shizuku UID: " + Shizuku.getUid());
                 Log.d(TAG, "SELinux context: " + Shizuku.getSELinuxContext());
                 executeDaemon(userService);
+            } catch (TimeoutException e) {
+                Log.e(TAG, "shizuku privd launch timed out", e);
+                onError(new PrivdLaunchException(context, R.string.privd_launch_error_timed_out_shizuku, e));
             } catch (Throwable t) {
                 Log.e(TAG, "shizuku privd launch failed", t);
                 onError(t);

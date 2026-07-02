@@ -15,7 +15,12 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.RequiresPermission;
 import androidx.core.app.ActivityCompat;
 
+import java.util.function.Consumer;
+
+import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.channel.AudioChannel;
+import io.benwiegand.projection.geargrinder.exception.MissingPermissionException;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.AudioPreset;
 import io.benwiegand.projection.libprivd.audio.AudioCapture;
 import io.benwiegand.projection.libprivd.audio.AudioRecordCapture;
@@ -43,8 +48,11 @@ public class LocalAudioRecordCapture extends AudioRecordCapture {
         private Runnable onReady = null;
         private MediaProjection mediaProjection = null;
 
-        public MediaProjectionProvider(Context context) {
+        private final Consumer<UserFriendlyException> errorListener;
+
+        public MediaProjectionProvider(Context context, Consumer<UserFriendlyException> errorListener) {
             this.context = context;
+            this.errorListener = errorListener;
         }
 
         public void setMediaProjection(MediaProjection mediaProjection) {
@@ -86,8 +94,8 @@ public class LocalAudioRecordCapture extends AudioRecordCapture {
                 );
             } catch (SecurityException e) {
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: error message
                     Log.e(TAG, "failed to start audio capture for media projection. RECORD_AUDIO may need to be explicitly granted", e);
+                    errorListener.accept(new MissingPermissionException(context, R.string.missing_permission_error_media_projection_record_audio, e, Manifest.permission.RECORD_AUDIO));
                     return null;
                 } else {
                     throw e;

@@ -2,6 +2,7 @@ package io.benwiegand.projection.geargrinder.exception;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
@@ -54,5 +55,11 @@ public class UserFriendlyException extends Exception {
     @Override
     public String getLocalizedMessage() {
         return friendlyMessage;
+    }
+
+    @NonNull
+    @Override
+    public synchronized UserFriendlyException fillInStackTrace() {
+        return (UserFriendlyException) super.fillInStackTrace();
     }
 }

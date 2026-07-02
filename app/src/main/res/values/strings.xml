@@ -190,4 +190,24 @@
     <string name="virtual_activity_launcher_status_failed">app launch failed</string>
     <string name="virtual_activity_launcher_status_closed">app closed</string>
 
+    <string name="connection_error_title">Connection error</string>
+    <string name="connection_error_unexpected">unexpected error during connection</string>
+    <string name="connection_error_ssl_handshake">SSL handshake failed</string>
+    <string name="connection_error_failed_to_parse_service_discovery">failed to parse service discovery response</string>
+
+    <string name="projection_error_title">Projection error</string>
+    <string name="projection_error_privd_launch_failure">failed to launch privileged daemon</string>
+    <string name="projection_error_privd_disconnected">lost connection to privileged daemon</string>
+    <string name="projection_error_virtual_display_create_failure">failed to create virtual display</string>
+    <string name="projection_error_activity_launch_failure">failed to launch projection activity on virtual display</string>
+    <string name="projection_error_media_projection_audio_android_version_too_old">your Android version is too old to capture audio from a screen sharing session.</string>
+
+    <string name="privd_launch_error_title">Elevation failure</string>
+    <string name="privd_launch_error_timed_out">timed out waiting for privileged daemon connection</string>
+    <string name="privd_launch_error_timed_out_shizuku">timed out waiting for Shizuku</string>
+    <string name="privd_launch_error_unexpected">unexpected error while launching privileged daemon</string>
+
+    <string name="missing_permission_error_title">Missing permission</string>
+    <string name="missing_permission_error_media_projection_record_audio">unable to start capturing audio from screen sharing session, you may need to grant the RECORD_AUDIO permission.</string>
+
 </resources>

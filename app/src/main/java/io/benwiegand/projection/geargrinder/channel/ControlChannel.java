@@ -13,6 +13,10 @@ import android.util.Log;
 import javax.net.ssl.SSLException;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
+import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.exception.ConnectionError;
+import io.benwiegand.projection.geargrinder.exception.ProjectionException;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.projection.PrivdAudioService;
 import io.benwiegand.projection.geargrinder.projection.audio.LocalAudioRecordCapture;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
@@ -102,10 +106,11 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
                 Log.i(TAG, "using media projection for media audio capture");
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                     Log.e(TAG, "can't launch audio capture through MediaProjection: android version too old");
+                    mb.connectionError(new ProjectionException(context, R.string.projection_error_media_projection_audio_android_version_too_old));
                     yield null;
                 }
 
-                LocalAudioRecordCapture.MediaProjectionProvider captureProvider = new LocalAudioRecordCapture.MediaProjectionProvider(context);
+                LocalAudioRecordCapture.MediaProjectionProvider captureProvider = new LocalAudioRecordCapture.MediaProjectionProvider(context, mb::connectionError);
                 connectionServiceBinder.requestMediaProjection(mediaProjection -> {
                     if (!mb.isAlive()) return;
                     captureProvider.setMediaProjection(mediaProjection);
@@ -231,9 +236,9 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
     }
 
     @Override
-    public void onProjectionFailed(Throwable t) {
+    public void onProjectionFailed(UserFriendlyException e) {
         Log.e(TAG, "projection failed to launch, bailing");
-        mb.closeConnection();
+        mb.connectionErrorFatal(e);
     }
 
     @Override
@@ -293,7 +298,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
                     });
                 } catch (SSLException e) {
                     Log.e(TAG, "exception during SSL handshake", e);
-                    mb.closeConnection();
+                    mb.connectionErrorFatal(new ConnectionError(context, R.string.connection_error_ssl_handshake, e));
                 }
             }
 
@@ -302,8 +307,7 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
 
                 if (tlsService.needsHandshake()) {
                     Log.wtf(TAG, "auth complete before handshake completed?");
-                    mb.closeConnection();
-                    return;
+                    throw new AssertionError("received auth complete before SSL handshake");
                 }
 
                 Log.i(TAG, "sending service discovery request");
@@ -315,20 +319,18 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
 
                 if (tlsService.needsHandshake()) {
                     Log.wtf(TAG, "service discovery response before handshake completed?"); // a request shouldn't have been sent yet
-                    mb.closeConnection();
-                    return;
-                }
-
-                if (videoChannel != null) {
-                    Log.wtf(TAG, "service discovery response after video init?");
-                    mb.closeConnection();
-                    return;
+                    throw new AssertionError("got service discovery response before ssl handshake");
                 }
 
                 ServiceDiscoveryResponse response = ServiceDiscoveryResponse.parse(buffer, payloadOffset + COMMAND_ID_LENGTH, payloadLength - COMMAND_ID_LENGTH);
                 if (response == null) {
                     Log.e(TAG, "failed to parse service discovery response, bailing!");
-                    mb.closeConnection();
+                    mb.connectionErrorFatal(new ConnectionError(context, R.string.connection_error_failed_to_parse_service_discovery));
+                    return;
+                }
+
+                if (serviceDiscoveryResponse != null) {
+                    Log.wtf(TAG, "ignoring duplicate service discovery response: " + response);
                     return;
                 }
 

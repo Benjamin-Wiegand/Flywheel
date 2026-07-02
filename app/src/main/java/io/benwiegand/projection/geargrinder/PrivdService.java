@@ -18,10 +18,11 @@ import androidx.annotation.Nullable;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
+import io.benwiegand.projection.geargrinder.exception.PrivdLaunchException;
+import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.settings.PrivilegeMode;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.geargrinder.privileged.PrivdLauncher;
@@ -145,7 +146,11 @@ public class PrivdService extends Service {
                 synchronized (lock) {
                     if (isPrivdConnected() || !launchInProgress) return;
                     launchInProgress = false;
-                    onPrivdLaunchFailure(t);
+                    if (t instanceof UserFriendlyException e) {
+                        onPrivdLaunchFailure(e);
+                    } else {
+                        onPrivdLaunchFailure(new PrivdLaunchException(this, R.string.privd_launch_error_unexpected, t));
+                    }
                 }
             });
 
@@ -155,14 +160,17 @@ public class PrivdService extends Service {
                     if (isPrivdConnected() || !launchInProgress) return;
                     Log.e(TAG, "timed out waiting for privd to launch");
                     launchInProgress = false;
-                    onPrivdLaunchFailure(new TimeoutException("timed out waiting for binder"));
+                    onPrivdLaunchFailure(new PrivdLaunchException(this, R.string.privd_launch_error_timed_out));
                 }
             }, BIND_TIMEOUT);
 
             launchInProgress = true;
+        } catch (UserFriendlyException e) {
+            launchInProgress = false;
+            onPrivdLaunchFailure(e);
         } catch (Throwable t) {
             launchInProgress = false;
-            onPrivdLaunchFailure(t);
+            onPrivdLaunchFailure(new PrivdLaunchException(this, R.string.privd_launch_error_unexpected, t));
         }
     }
 
@@ -209,12 +217,13 @@ public class PrivdService extends Service {
         }
     }
 
-    private void onPrivdLaunchFailure(Throwable t) {
+    private void onPrivdLaunchFailure(UserFriendlyException e) {
         synchronized (lock) {
-            Log.e(TAG, "failed to launch daemon", t);
+            e.fillInStackTrace();
+            Log.e(TAG, "failed to launch daemon", e);
             privd = null;
 
-            callListenersLocked(l -> l.onPrivdLaunchFailure(t));
+            callListenersLocked(l -> l.onPrivdLaunchFailure(e));
             ipcConnectionListeners.clear();
             stopSelf();
         }

@@ -231,7 +231,6 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     }
 
     @Override
-        // TODO: show error
     public void onPrivdLaunchFailure(UserFriendlyException e) {
         onPrivdDisconnected();
     }

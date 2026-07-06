@@ -8,12 +8,14 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
+import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.callback.ControlListener;
 import io.benwiegand.projection.geargrinder.channel.ControlChannel;
 import io.benwiegand.projection.geargrinder.crypto.CryptoManager;
 import io.benwiegand.projection.geargrinder.crypto.KeystoreManager;
 import io.benwiegand.projection.geargrinder.crypto.LGTMTrustManager;
 import io.benwiegand.projection.geargrinder.crypto.TLSService;
+import io.benwiegand.projection.geargrinder.exception.ConnectionError;
 import io.benwiegand.projection.geargrinder.exception.CorruptedCertificateException;
 import io.benwiegand.projection.geargrinder.exception.CorruptedKeyException;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
@@ -61,13 +63,15 @@ public abstract class AAConnector {
         return new TLSService(trustManagers, keyManagers);
     }
 
-    protected void connectionLoop(AATransferInterface transferInterface) throws CorruptedKeyException, CorruptedCertificateException {
+    protected void connectionLoop(AATransferInterface transferInterface) throws CorruptedKeyException, CorruptedCertificateException, ConnectionError {
         TLSService tlsService = createTlsService();
         MessageBroker messageBroker = new MessageBroker(context, transferInterface, tlsService, listener::onConnectionError);
         ControlChannel controlChannel = new ControlChannel(context, messageBroker, tlsService, controlListener, settingsManager, connectionServiceBinder);
         try {
             messageBroker.registerForChannel(AAConstants.CHANNEL_CONTROL, controlChannel);
             messageBroker.loop();
+        } catch (Throwable t) {
+            throw new ConnectionError(context, R.string.connection_error_unexpected, t);
         } finally {
             controlChannel.destroy();
             messageBroker.destroy();

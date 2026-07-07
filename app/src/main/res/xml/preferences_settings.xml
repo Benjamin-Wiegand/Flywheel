@@ -43,6 +43,14 @@
             android:fragment="io.benwiegand.projection.geargrinder.settings.ui.fragment.KeysPreferenceFragment"
             />
 
+        <SwitchPreferenceCompat
+            app:key="@string/key_video_frame_rate_optimization"
+            app:iconSpaceReserved="false"
+            app:title="@string/video_frame_rate_optimization_name"
+            app:defaultValue="@string/video_frame_rate_optimization_default"
+            app:summary="@string/video_frame_rate_optimization_summary"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -75,14 +83,6 @@
         app:title="@string/pref_category_video"
         app:iconSpaceReserved="false"
         >
-
-        <SwitchPreferenceCompat
-            app:key="@string/key_video_frame_rate_optimization"
-            app:iconSpaceReserved="false"
-            app:title="@string/video_frame_rate_optimization_name"
-            app:defaultValue="@string/video_frame_rate_optimization_default"
-            app:summary="@string/video_frame_rate_optimization_summary"
-            />
 
         <ListPreference
             app:key="@string/key_video_bitrate_mode"

@@ -3,18 +3,25 @@ package io.benwiegand.projection.geargrinder.projection;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_IMPORTANT;
 
+import android.app.ActivityOptions;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.display.DisplayManager;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
+import android.os.PowerManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.InputEvent;
 import android.view.Surface;
 
 import io.benwiegand.projection.geargrinder.PrivdService;
 import io.benwiegand.projection.geargrinder.ProjectionActivity;
 import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.ScreenWakeActivity;
 import io.benwiegand.projection.geargrinder.callback.IPCConnectionListener;
 import io.benwiegand.projection.geargrinder.channel.InputChannel;
 import io.benwiegand.projection.geargrinder.exception.ProjectionException;
@@ -28,6 +35,7 @@ import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.VideoP
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.InputChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.event.TouchEvent;
 import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.libprivd.IPrivd;
 
 public class ProjectionService implements InputEventConverter.ConvertedInputEventListener, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener {
@@ -66,6 +74,8 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
     private final Context context;
     private final AudioManager audioManager;
+    private final PowerManager powerManager;
+    private final SettingsManager settingsManager;
 
     public interface Listener {
         void onProjectionStarted();
@@ -82,12 +92,24 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private boolean dead = false;
     private UserFriendlyException error = null;
 
+    private boolean screenWakeActivityStarted = false;
+
+    private final BroadcastReceiver screenOffReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!started) return;
+            startScreenWakeActivity();
+        }
+    };
+
 
     public ProjectionService(Context context, Listener projectionListener, VideoPreset videoPreset) {
         this.context = context;
         this.projectionListener = projectionListener;
         this.videoPreset = videoPreset;
         audioManager = context.getSystemService(AudioManager.class);
+        powerManager = context.getSystemService(PowerManager.class);
+        settingsManager = new SettingsManager(context);
 
         CoordinateTranslator<TouchEvent.PointerLocation> coordinateTranslator = CoordinateTranslator.createTouchEvent(
                 x -> x + this.videoPreset.marginHorizontal() / 2,
@@ -99,6 +121,8 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         connector.bindAccessibilityService();
         connector.bindProjectionActivity();
         connector.bindPrivdService(BIND_AUTO_CREATE | BIND_IMPORTANT);
+
+        context.registerReceiver(screenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
 
     public ProjectionService(Context context, Listener projectionListener) {
@@ -112,7 +136,9 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         if (virtualDisplay != null)
             virtualDisplay.release();
 
-        if (started) pauseMedia();  // already paused if projection is suspended
+        if (started) onProjectionStop();    // already paused if projection is suspended
+
+        context.unregisterReceiver(screenOffReceiver);
     }
 
     public Throwable getError() {
@@ -125,7 +151,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         started = true;
 
         Log.i(TAG, "init complete");
-        projectionListener.onProjectionStarted();
+        onProjectionStart();
     }
 
     private void onFailureLocked(UserFriendlyException e) {
@@ -140,10 +166,47 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         projectionListener.onProjectionFailed(error);
     }
 
+    private void onProjectionStart() {
+        Log.d(TAG, "projection start");
+        projectionListener.onProjectionStarted();
+        if (!powerManager.isInteractive()) startScreenWakeActivity();
+    }
+
+    private void onProjectionStop() {
+        Log.d(TAG, "projection stop");
+        pauseMedia();
+        stopScreenWakeActivity();
+    }
+
     private void pauseMedia() {
         Log.i(TAG, "pausing media");
         audioManager.requestAudioFocus(new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                 .build());
+    }
+
+    private void startScreenWakeActivity() {
+        if (!settingsManager.isKeepScreenAwakeEnabled()) return;
+        Log.i(TAG, "starting screen wake activity");
+        context.startActivity(
+                new Intent(context, ScreenWakeActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS),
+                ActivityOptions.makeBasic()
+                        .setLaunchDisplayId(Display.DEFAULT_DISPLAY)
+                        .toBundle()
+        );
+        screenWakeActivityStarted = true;
+    }
+
+    private void stopScreenWakeActivity() {
+        if (!screenWakeActivityStarted) return;
+        Log.i(TAG, "stopping screen wake activity");
+        try {
+            context.startActivity(new Intent(context, ScreenWakeActivity.class)
+                    .setAction(ScreenWakeActivity.INTENT_ACTION_FINISH)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            screenWakeActivityStarted = false;
+        } catch (Throwable ignored) {}
     }
 
     public void unsuspend(Listener projectionListener) {
@@ -154,7 +217,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
             this.projectionListener = projectionListener;
             if (error != null) projectionListener.onProjectionFailed(error);
-            else if (started) projectionListener.onProjectionStarted();
+            else if (started) onProjectionStart();
         }
     }
 
@@ -168,7 +231,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
 
             if (virtualDisplay != null) virtualDisplay.setSurface(null);
 
-            pauseMedia();
+            onProjectionStop();
         }
     }
 

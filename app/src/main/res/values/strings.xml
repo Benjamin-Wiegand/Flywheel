@@ -149,6 +149,9 @@
     <string name="self_signed_phone_pkcs8_private_key_pref_name">Private key status</string>
     <string name="certificates_and_keys_pref_screen_button">Certificates and keys</string>
 
+    <string name="keep_screen_awake_pref_name">Prevent display sleep while connected</string>
+    <string name="keep_screen_awake_summary">avoids issues with touch input and display output</string>
+
     <string name="corrupted_item_pref_summary_format" formatted="true">corrupted: %s</string>
     <string name="no_item_pref_summary">none</string>
     <string name="certificate_line_pref_summary_format" formatted="true">%d: %s</string>
@@ -189,6 +192,10 @@
     <string name="virtual_activity_launcher_status_launching">launching</string>
     <string name="virtual_activity_launcher_status_failed">app launch failed</string>
     <string name="virtual_activity_launcher_status_closed">app closed</string>
+
+    <string name="minimal_date_format">E, MMM d</string>
+    <string name="minimal_time_format_12_hour">h:mm</string>
+    <string name="minimal_time_format_24_hour">H:mm</string>
 
     <string name="connection_error_title">Connection error</string>
     <string name="connection_error_unexpected">unexpected error during connection</string>

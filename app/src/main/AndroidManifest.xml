@@ -110,6 +110,15 @@
             android:exported="false"
             />
 
+        <activity
+            android:name=".ScreenWakeActivity"
+            android:exported="false"
+            android:taskAffinity="io.benwiegand.projection.geargrinder.ScreenWakeActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Geargrinder.ScreenWakeActivity"
+            />
+
         <service
             android:name=".ConnectionService"
             android:exported="false"

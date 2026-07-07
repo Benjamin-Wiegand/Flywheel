@@ -43,6 +43,13 @@
     <style name="ThemeOverlay.Geargrinder.DynamicColors" parent="Base.ThemeOverlay.Geargrinder.DynamicColors" />
 
 
+    <style name="Theme.Geargrinder.ScreenWakeActivity" parent="Theme.Geargrinder">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:navigationBarColor">@color/black</item>
+        <item name="android:statusBarColor">@color/black</item>
+    </style>
+
     <style name="Theme.Geargrinder.Projection" parent="Theme.Geargrinder">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

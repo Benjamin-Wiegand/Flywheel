@@ -117,6 +117,9 @@
     <string translatable="false" name="start_projection_when_locked_default">false</string>
 
 
+    <string translatable="false" name="keep_screen_awake_default">true</string>
+
+
     <string translatable="false" name="key_privilege_mode">privilege_mode</string>
     <string translatable="false" name="key_operational_mode">operational_mode</string>
 
@@ -135,6 +138,8 @@
     <string translatable="false" name="key_self_signed_phone_x509_certificate_chain">self_signed_phone_x509_certificate_chain</string>
     <string translatable="false" name="key_self_signed_phone_pkcs8_private_key">self_signed_phone_pkcs8_private_key</string>
     <string translatable="false" name="key_use_imported_phone_keys">use_imported_phone_keys</string>
+
+    <string translatable="false" name="key_keep_screen_awake">keep_screen_awake</string>
 
 
     <string translatable="false" name="key_dock_pinned">dock_pinned</string>

@@ -51,6 +51,14 @@
             app:summary="@string/video_frame_rate_optimization_summary"
             />
 
+        <SwitchPreferenceCompat
+            app:key="@string/key_keep_screen_awake"
+            app:iconSpaceReserved="false"
+            app:title="@string/keep_screen_awake_pref_name"
+            app:defaultValue="@string/keep_screen_awake_default"
+            app:summary="@string/keep_screen_awake_summary"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory

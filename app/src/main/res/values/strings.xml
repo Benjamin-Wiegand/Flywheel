@@ -196,6 +196,8 @@
     <string name="minimal_date_format">E, MMM d</string>
     <string name="minimal_time_format_12_hour">h:mm</string>
     <string name="minimal_time_format_24_hour">H:mm</string>
+    <string name="detailed_date_time_format_12_hour">MMM d, yyyy - h:mm:ss a</string>
+    <string name="detailed_date_time_format_24_hour">MMM d, yyyy - H:mm:ss</string>
 
     <string name="connection_error_title">Connection error</string>
     <string name="connection_error_unexpected">unexpected error during connection</string>
@@ -227,5 +229,21 @@
 
     <string name="log_recording_started_toast">recording started</string>
     <string name="log_recording_stopped_toast">recording stopped</string>
+
+    <string name="log_recordings_button">Log recordings</string>
+    <string name="log_recordings_activity_title">Log recordings</string>
+    <string name="log_recording_delete_dialog_title">Delete log recording</string>
+    <string name="log_recording_delete_dialog_message">Are you sure you want to delete this log?</string>
+
+    <string name="log_export_finished_toast">export finished</string>
+
+    <string name="open_button_external">open…</string>
+    <string name="export_button">export</string>
+    <string name="delete_button">delete</string>
+
+    <string name="log_export_error_title">Export failed</string>
+    <string name="log_export_error_io">encountered an io error</string>
+    <string name="log_export_error_unexpected">encountered an unexpected error</string>
+
 
 </resources>

@@ -40,7 +40,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Date;
 import java.time.Instant;
 import java.util.List;
@@ -336,6 +335,10 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Map<Integer, Supplier<Boolean>> actionMap = Map.of(
+                R.id.log_recordings_button, () -> {
+                    startActivity(new Intent(this, LogRecordingsActivity.class));
+                    return true;
+                },
                 R.id.pair_bluetooth_button, () -> {
                     selectCompanionDevice();
                     return true;

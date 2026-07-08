@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/open_button"
+        android:title="@string/open_button_external"
+        />
+
+    <item
+        android:id="@+id/export_button"
+        android:title="@string/export_button"
+        />
+
+    <item
+        android:id="@+id/delete_button"
+        android:title="@string/delete_button"
+        />
+
+</menu>

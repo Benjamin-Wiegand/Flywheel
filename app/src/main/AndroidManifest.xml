@@ -119,6 +119,12 @@
             android:theme="@style/Theme.Geargrinder.ScreenWakeActivity"
             />
 
+        <activity
+            android:name=".LogRecordingsActivity"
+            android:label="@string/log_recordings_activity_title"
+            android:exported="false"
+            />
+
         <service
             android:name=".ConnectionService"
             android:exported="false"
@@ -203,6 +209,19 @@
             android:exported="true"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"
             />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="io.benwiegand.projection.geargrinder"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            >
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"
+                />
+        </provider>
 
     </application>
 

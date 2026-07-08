@@ -4,6 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/log_recordings_button"
+        android:title="@string/log_recordings_button"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
         android:id="@+id/pair_bluetooth_button"
         android:title="setup bluetooth auto-connect (experimental)"
         tools:ignore="HardcodedText"

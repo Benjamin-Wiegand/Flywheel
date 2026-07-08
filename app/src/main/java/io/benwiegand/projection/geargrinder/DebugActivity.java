@@ -93,13 +93,27 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
                     .setView(et)
                     .setPositiveButton(R.string.start_log_recording_button, (d, i) -> {
                         String name = et.getText() + ".log";
-                        Log.d(TAG, "starting log recording to: " + name);
-                        File logFile = getFilesDir().toPath().resolve(name).toFile();
                         try {
+                            File filesDir = getExternalFilesDir(null);
+                            if (filesDir == null) {
+                                Log.e(TAG, "failed to get external files dir!");
+                                filesDir = getFilesDir();
+                            }
+
+                            File logDir = filesDir.toPath().resolve("logs").toFile();
+                            if (!logDir.isDirectory() && !logDir.mkdir())
+                                Log.w(TAG, "failed to create log dir: " + logDir);
+
+                            File logFile = logDir.toPath().resolve(name).toFile();
+
+                            Log.d(TAG, "starting log recording to: " + logFile);
+                            if (!logDir.equals(logFile.getParentFile()))
+                                throw new AssertionError("log file is not a child of the log directory, avoid \"..\" and \"/\" in your log file name.");
+
                             logcatReader.startRecording(logFile);
-                        } catch (IOException e) {
-                            Log.e(TAG, "failed to start recording", e);
-                            onRecordingError(e);
+                        } catch (Throwable t) {
+                            Log.e(TAG, "failed to start recording", t);
+                            onRecordingError(t);
                         }
                     })
                     .setNegativeButton(R.string.cancel_button, null)

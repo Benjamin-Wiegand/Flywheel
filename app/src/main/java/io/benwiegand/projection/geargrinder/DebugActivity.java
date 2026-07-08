@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +41,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,6 +86,8 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
             }
 
             EditText et = new EditText(this);
+            CharSequence placeholder = DateFormat.format("yyyyMMdd-HHmmss", Date.from(Instant.now()));
+            et.setText(placeholder);
             new AlertDialog.Builder(this)
                     .setTitle(R.string.log_recording_start_dialog_title)
                     .setView(et)

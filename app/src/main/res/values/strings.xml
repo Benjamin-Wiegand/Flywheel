@@ -217,4 +217,15 @@
     <string name="missing_permission_error_title">Missing permission</string>
     <string name="missing_permission_error_media_projection_record_audio">unable to start capturing audio from screen sharing session, you may need to grant the RECORD_AUDIO permission.</string>
 
+    <string name="add_log_marker_button">add marker</string>
+    <string name="start_log_recording_button">start recording</string>
+    <string name="stop_log_recording_button">stop recording</string>
+    <string name="log_autoscroll_switch">scroll</string>
+
+    <string name="log_recording_start_dialog_title">Record log</string>
+    <string name="log_recording_error_dialog_title">Log recording error</string>
+
+    <string name="log_recording_started_toast">recording started</string>
+    <string name="log_recording_stopped_toast">recording stopped</string>
+
 </resources>

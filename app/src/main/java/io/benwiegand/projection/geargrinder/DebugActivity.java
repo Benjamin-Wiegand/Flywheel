@@ -84,9 +84,9 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
 
             EditText et = new EditText(this);
             new AlertDialog.Builder(this)
-                    .setTitle("recording name")
+                    .setTitle(R.string.log_recording_start_dialog_title)
                     .setView(et)
-                    .setPositiveButton("start", (d, i) -> {
+                    .setPositiveButton(R.string.start_log_recording_button, (d, i) -> {
                         String name = et.getText() + ".log";
                         Log.d(TAG, "starting log recording to: " + name);
                         File logFile = getFilesDir().toPath().resolve(name).toFile();
@@ -97,7 +97,7 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
                             onRecordingError(e);
                         }
                     })
-                    .setNegativeButton("cancel", null)
+                    .setNegativeButton(R.string.cancel_button, null)
                     .setCancelable(false)
                     .show();
         }));
@@ -146,7 +146,7 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
 
     public void updateRecordingStatus(boolean recording) {
         Button toggleRecordingButton = findViewById(R.id.toggle_recording_button);
-        toggleRecordingButton.setText(recording ? "stop recording" : "start recording");
+        toggleRecordingButton.setText(recording ? R.string.stop_log_recording_button : R.string.start_log_recording_button);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
     public void onRecordingStart(File file) {
         runOnUiThread(() -> {
             updateRecordingStatus(true);
-            Toast.makeText(this, "recording started", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.log_recording_started_toast, Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -171,9 +171,9 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
         runOnUiThread(() -> {
             Log.e(TAG, "error during recording", t);
             new AlertDialog.Builder(this)
-                    .setTitle("Log recording error")
+                    .setTitle(R.string.log_recording_error_dialog_title)
                     .setMessage("an error happened during the recording:\n\n" + t.getClass().getSimpleName() + ": " + t.getMessage())
-                    .setPositiveButton("close", null)
+                    .setPositiveButton(R.string.close_button, null)
                     .setCancelable(false)
                     .show();
         });
@@ -183,7 +183,7 @@ public class DebugActivity extends AppCompatActivity implements GeargrinderServi
     public void onRecordingStop() {
         runOnUiThread(() -> {
             updateRecordingStatus(false);
-            Toast.makeText(this, "recording stopped", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.log_recording_stopped_toast, Toast.LENGTH_SHORT).show();
         });
     }
 

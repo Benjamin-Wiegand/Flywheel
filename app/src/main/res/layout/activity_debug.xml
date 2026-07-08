@@ -25,7 +25,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:enabled="false"
-            android:text="log marker"
+            android:text="@string/add_log_marker_button"
             />
 
         <Button
@@ -34,7 +34,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:enabled="false"
-            android:text="start recording"
+            android:text="@string/start_log_recording_button"
             />
 
         <androidx.appcompat.widget.SwitchCompat
@@ -43,7 +43,7 @@
             android:layout_height="match_parent"
             android:layout_weight="0"
             android:checked="true"
-            android:text="scroll"
+            android:text="@string/log_autoscroll_switch"
             />
 
     </LinearLayout>

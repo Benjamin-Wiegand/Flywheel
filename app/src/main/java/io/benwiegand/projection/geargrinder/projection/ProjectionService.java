@@ -187,15 +187,19 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private void startScreenWakeActivity() {
         if (!settingsManager.isKeepScreenAwakeEnabled()) return;
         Log.i(TAG, "starting screen wake activity");
-        context.startActivity(
-                new Intent(context, ScreenWakeActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS),
-                ActivityOptions.makeBasic()
-                        .setLaunchDisplayId(Display.DEFAULT_DISPLAY)
-                        .toBundle()
-        );
-        screenWakeActivityStarted = true;
+        try {
+            context.startActivity(
+                    new Intent(context, ScreenWakeActivity.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            .addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS),
+                    ActivityOptions.makeBasic()
+                            .setLaunchDisplayId(Display.DEFAULT_DISPLAY)
+                            .toBundle()
+            );
+            screenWakeActivityStarted = true;
+        } catch (Throwable t) {
+            Log.wtf(TAG, "failed to launch screen wake activity", t);
+        }
     }
 
     private void stopScreenWakeActivity() {

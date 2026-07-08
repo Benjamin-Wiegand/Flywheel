@@ -13,6 +13,7 @@ import java.util.Optional;
 import io.benwiegand.projection.geargrinder.AccessibilityInputService;
 import io.benwiegand.projection.geargrinder.ConnectionService;
 import io.benwiegand.projection.geargrinder.IShizukuUserService;
+import io.benwiegand.projection.geargrinder.LogService;
 import io.benwiegand.projection.geargrinder.NotificationService;
 import io.benwiegand.projection.geargrinder.PackageService;
 import io.benwiegand.projection.geargrinder.PrivdService;
@@ -31,6 +32,7 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
     private static final ComponentName CONNECTION_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, ConnectionService.class.getName());
     private static final ComponentName SHIZUKU_USER_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, ShizukuUserService.class.getName());
     private static final ComponentName NOTIFICATION_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, NotificationService.class.getName());
+    private static final ComponentName LOG_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, LogService.class.getName());
 
     private static final Shizuku.UserServiceArgs SHIZUKU_ARGS = new Shizuku.UserServiceArgs(SHIZUKU_USER_SERVICE_COMPONENT)
             .tag("geargrinder-shizuku-service")
@@ -53,6 +55,7 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
         default void onConnectionServiceConnected(ConnectionService.ServiceBinder binder) {}
         default void onShizukuUserServiceConnected(IShizukuUserService service) {}
         default void onNotificationServiceConnected(NotificationService.ServiceBinder binder) {}
+        default void onLogServiceConnected(LogService.ServiceBinder binder) {}
     }
 
     public GeargrinderServiceConnector(String tag, Context context, ConnectionListener listener) {
@@ -147,6 +150,15 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
                 .map(b -> (NotificationService.ServiceBinder) b);
     }
 
+    public void bindLogService(int flags) {
+        realBind(LOG_SERVICE_COMPONENT, flags);
+    }
+
+    public Optional<LogService.ServiceBinder> getLogBinder() {
+        return getBinder(LOG_SERVICE_COMPONENT)
+                .map(b -> (LogService.ServiceBinder) b);
+    }
+
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -166,6 +178,8 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
             listener.onShizukuUserServiceConnected(IShizukuUserService.Stub.asInterface(service));
         } else if (name.equals(NOTIFICATION_SERVICE_COMPONENT)) {
             listener.onNotificationServiceConnected((NotificationService.ServiceBinder) service);
+        } else if (name.equals(LOG_SERVICE_COMPONENT)) {
+            listener.onLogServiceConnected((LogService.ServiceBinder) service);
         } else {
             Log.wtf(tag, "unhandled component: " + name);
             assert false;

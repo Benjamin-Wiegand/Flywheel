@@ -20,6 +20,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -48,14 +50,16 @@ import java.util.function.Supplier;
 import io.benwiegand.projection.geargrinder.exception.BluetoothConnectionException;
 import io.benwiegand.projection.geargrinder.logs.LogUiAdapter;
 import io.benwiegand.projection.geargrinder.logs.LogcatReader;
+import io.benwiegand.projection.geargrinder.service.GeargrinderServiceConnector;
 
-public class DebugActivity extends AppCompatActivity {
+public class DebugActivity extends AppCompatActivity implements GeargrinderServiceConnector.ConnectionListener, LogcatReader.UiLogListener {
     private static final String TAG = DebugActivity.class.getSimpleName();
 
     // useful for debugging
     private static final boolean AUTOSTART_TCP_SERVER = false;
 
-    private LogcatReader logcatReader;
+    private GeargrinderServiceConnector connector;
+    private final LogUiAdapter logUiAdapter = new LogUiAdapter();
     private boolean autoScroll = true;
 
     @Override
@@ -69,21 +73,12 @@ public class DebugActivity extends AppCompatActivity {
             return insets;
         });
 
-        findViewById(R.id.log_marker_button).setOnClickListener(v -> logcatReader.addMarker());
+        findViewById(R.id.log_marker_button).setOnClickListener(v -> getLogcatReader().ifPresent(LogcatReader::addMarker));
 
-        findViewById(R.id.toggle_recording_button).setOnClickListener(v -> {
+        findViewById(R.id.toggle_recording_button).setOnClickListener(v -> getLogcatReader().ifPresent(logcatReader -> {
             if (logcatReader.isRecording()) {
                 Throwable error = logcatReader.stopRecording();
-                if (error == null) {
-                    Toast.makeText(this, "recording stopped", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Log.e(TAG, "error during recording", error);
-                new AlertDialog.Builder(this)
-                        .setTitle("Log recording error")
-                        .setMessage("an error happened during the recording:\n\n" + error.getClass().getSimpleName() + ": " + error.getMessage())
-                        .setPositiveButton("close", null)
-                        .show();
+                if (error != null) onRecordingError(error);
                 return;
             }
 
@@ -97,16 +92,15 @@ public class DebugActivity extends AppCompatActivity {
                         File logFile = getFilesDir().toPath().resolve(name).toFile();
                         try {
                             logcatReader.startRecording(logFile);
-                            Toast.makeText(this, "recording started", Toast.LENGTH_SHORT).show();
                         } catch (IOException e) {
                             Log.e(TAG, "failed to start recording", e);
+                            onRecordingError(e);
                         }
                     })
                     .setNegativeButton("cancel", null)
                     .setCancelable(false)
                     .show();
-
-        });
+        }));
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -116,8 +110,6 @@ public class DebugActivity extends AppCompatActivity {
         autoScrollSwitch.setOnCheckedChangeListener((v, checked) -> autoScroll = checked);
 
         RecyclerView logRecyclerView = findViewById(R.id.log_recycler);
-        LogUiAdapter logUiAdapter = new LogUiAdapter();
-
         logRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         logRecyclerView.setAdapter(logUiAdapter);
         logRecyclerView.setItemAnimator(null);  // does not work with fast-paced logs
@@ -130,8 +122,10 @@ public class DebugActivity extends AppCompatActivity {
             }
         });
 
-        logcatReader = new LogcatReader(logUiAdapter);
-        logcatReader.start();
+        logUiAdapter.onLog(null, "connecting to log service...");
+
+        connector = new GeargrinderServiceConnector(TAG, this, this);
+        connector.bindLogService(BIND_AUTO_CREATE | BIND_IMPORTANT);
 
         if (AUTOSTART_TCP_SERVER)
             startService(new Intent(this, ConnectionService.class)
@@ -141,7 +135,56 @@ public class DebugActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        logcatReader.destroy();
+        getLogcatReader().ifPresent(logcatReader -> logcatReader.unregisterUiListener(logUiAdapter));
+        connector.destroy();
+    }
+
+    private Optional<LogcatReader> getLogcatReader() {
+        return connector.getLogBinder()
+                .map(LogService.ServiceBinder::getLogcatReader);
+    }
+
+    public void updateRecordingStatus(boolean recording) {
+        Button toggleRecordingButton = findViewById(R.id.toggle_recording_button);
+        toggleRecordingButton.setText(recording ? "stop recording" : "start recording");
+    }
+
+    @Override
+    public void onLogServiceConnected(LogService.ServiceBinder binder) {
+        binder.getLogcatReader().registerUiListener(logUiAdapter);
+        binder.getLogcatReader().registerUiListener(this);
+        findViewById(R.id.log_marker_button).setEnabled(true);
+        findViewById(R.id.toggle_recording_button).setEnabled(true);
+        updateRecordingStatus(binder.getLogcatReader().isRecording());
+    }
+
+    @Override
+    public void onRecordingStart(File file) {
+        runOnUiThread(() -> {
+            updateRecordingStatus(true);
+            Toast.makeText(this, "recording started", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    @Override
+    public void onRecordingError(Throwable t) {
+        runOnUiThread(() -> {
+            Log.e(TAG, "error during recording", t);
+            new AlertDialog.Builder(this)
+                    .setTitle("Log recording error")
+                    .setMessage("an error happened during the recording:\n\n" + t.getClass().getSimpleName() + ": " + t.getMessage())
+                    .setPositiveButton("close", null)
+                    .setCancelable(false)
+                    .show();
+        });
+    }
+
+    @Override
+    public void onRecordingStop() {
+        runOnUiThread(() -> {
+            updateRecordingStatus(false);
+            Toast.makeText(this, "recording stopped", Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override

@@ -162,6 +162,11 @@
             />
 
         <service
+            android:name=".LogService"
+            android:exported="false"
+            />
+
+        <service
             android:name=".NotificationService"
             android:exported="false"
             android:label="@string/notification_service_permission_rationale"

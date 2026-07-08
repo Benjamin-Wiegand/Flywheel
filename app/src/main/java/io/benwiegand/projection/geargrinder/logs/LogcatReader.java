@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,18 +23,17 @@ public class LogcatReader {
     private static final Pattern LOGCAT_REGEX = Pattern.compile("^(?<date>[0-9]+-[0-9]+) +(?<time>[0-9]+:[0-9]+:[0-9]+.[0-9]+) +(?<pid>[0-9]+) +(?<tid>[0-9]+) +(?<level>[FEWIVD]) +(?<tag>[^:]+): ?(?<msg>.*)$");
 
     public interface UiLogListener {
-        void onLog(String level, String text);
+        default void onLog(String level, String text) {}
+        default void onRecordingStart(File file) {}
+        default void onRecordingStop() {}
+        default void onRecordingError(Throwable t) {}
     }
 
     private final Thread readThread = new Thread(this::readLoop);
     private boolean alive = true;
 
-    private final UiLogListener uiListener;
+    private final Queue<UiLogListener> uiListeners = new ArrayDeque<>();
     private Recording activeRecording = null;
-
-    public LogcatReader(UiLogListener uiListener) {
-        this.uiListener = uiListener;
-    }
 
     public void start() {
         readThread.start();
@@ -39,6 +42,36 @@ public class LogcatReader {
     public void destroy() {
         alive = false;
         stopRecording();
+    }
+
+    public void registerUiListener(UiLogListener listener) {
+        synchronized (uiListeners) {
+            uiListeners.add(listener);
+        }
+    }
+
+    public void unregisterUiListener(UiLogListener listener) {
+        synchronized (uiListeners) {
+            uiListeners.remove(listener);
+        }
+    }
+
+    private void callListeners(Consumer<UiLogListener> consumer) {
+        synchronized (uiListeners) {
+            LinkedList<UiLogListener> deadListeners = new LinkedList<>();
+            for (UiLogListener listener : uiListeners) {
+                try {
+                    consumer.accept(listener);
+                } catch (Throwable t) {
+                    Log.wtf(TAG, "ui listener threw", t);
+                    deadListeners.add(listener);    // avoid spamming the logs exponentially
+                }
+            }
+
+            if (deadListeners.isEmpty()) return;
+            Log.w(TAG, "removing " + deadListeners.size() + " dead listeners");
+            uiListeners.removeAll(deadListeners);
+        }
     }
 
     private void onLine(String rawText) {
@@ -65,9 +98,10 @@ public class LogcatReader {
                 tag = String.valueOf(tagBuilder);
             }
 
-            uiListener.onLog(level, time + " " + tag + " " + level + ": " + msg);
+            String text = time + " " + tag + " " + level + ": " + msg;
+            callListeners(l -> l.onLog(level, text));
         } else {
-            uiListener.onLog(null, rawText);
+            callListeners(l -> l.onLog(null, rawText));
         }
 
     }
@@ -117,9 +151,11 @@ public class LogcatReader {
 
     private static class Recording {
         private final Writer writer;
+        private final Consumer<Throwable> onError;
         private Throwable error = null;
-        private Recording(Writer writer) {
+        private Recording(Writer writer, Consumer<Throwable> onError) {
             this.writer = writer;
+            this.onError = onError;
         }
 
         private void onLine(String line) {
@@ -131,6 +167,7 @@ public class LogcatReader {
             } catch (Throwable t) {
                 Log.e(TAG, "failed to write line", t);
                 error = t;
+                onError.accept(t);
             }
         }
 
@@ -139,7 +176,14 @@ public class LogcatReader {
 
     public void startRecording(File file) throws IOException {
         if (activeRecording != null) throw new IllegalStateException("recording already active");
-        activeRecording = new Recording(new FileWriter(file));
+
+        Recording recording = new Recording(
+                new FileWriter(file),
+                t -> callListeners(l -> l.onRecordingError(t))
+        );
+
+        callListeners(l -> l.onRecordingStart(file));
+        activeRecording = recording;
     }
 
     public boolean isRecording() {
@@ -149,7 +193,7 @@ public class LogcatReader {
     public Throwable stopRecording() {
         if (activeRecording == null) return null;
         Throwable error = activeRecording.error;
-        if (error != null) {
+        if (error == null) {
             try {
                 activeRecording.writer.flush();
                 activeRecording.writer.close();
@@ -157,6 +201,7 @@ public class LogcatReader {
                 error = e;
             }
         }
+        callListeners(UiLogListener::onRecordingStop);
         activeRecording = null;
         return error;
     }

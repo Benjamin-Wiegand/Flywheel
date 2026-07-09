@@ -43,7 +43,7 @@
             android:text="@string/start_log_recording_button"
             />
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/auto_scroll_switch"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

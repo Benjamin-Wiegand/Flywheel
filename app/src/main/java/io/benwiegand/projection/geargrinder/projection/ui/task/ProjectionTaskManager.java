@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -39,7 +40,7 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
         default void onTaskRemoved(int index, ProjectionTask task, boolean pinned) {};
         default void onTaskUpdated(ProjectionTask task, boolean pinned) {};
         default void onSwitchTask(ProjectionTask oldTask, boolean oldPinned, ProjectionTask newTask, boolean newPinned) {};
-        default void onContentFocus() {};
+        default boolean onContentFocus() { return false; };
     }
 
     private final ViewGroup contentFrame;
@@ -247,8 +248,17 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
         return task;
     }
 
-    public void requestContentFocus() {
-        callListeners(Listener::onContentFocus);
+    /**
+     * requests to focus the content area (the current task)
+     * @return true if the ui changed as a result, false otherwise
+     */
+    public boolean requestContentFocus() {
+        AtomicBoolean changes = new AtomicBoolean(false);
+        callListeners(l -> {
+            if (l.onContentFocus()) changes.set(true);
+        });
+
+        return changes.get();
     }
 
     public void switchToTask(ProjectionTask newTask) {

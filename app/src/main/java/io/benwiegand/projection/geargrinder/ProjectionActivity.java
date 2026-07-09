@@ -191,8 +191,10 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     }
 
     @Override
-    public void onContentFocus() {
+    public boolean onContentFocus() {
+        if (!appDrawer.isOpen()) return false;
         appDrawer.close();
+        return true;
     }
 
     @Override

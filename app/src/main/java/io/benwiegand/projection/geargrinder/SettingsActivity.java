@@ -25,6 +25,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_settings);
+        setSupportActionBar(findViewById(R.id.action_bar));
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -36,7 +37,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.root, new MainPreferenceFragment())
+                .replace(R.id.settings_frame, new MainPreferenceFragment())
                 .commit();
     }
 
@@ -65,7 +66,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 .beginTransaction()
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .addToBackStack(null)
-                .replace(R.id.root, fragment)
+                .replace(R.id.settings_frame, fragment)
                 .commit();
         return true;
     }

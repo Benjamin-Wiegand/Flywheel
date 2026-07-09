@@ -1,50 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     >
 
-    <LinearLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/action_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_height="?attr/actionBarSize"
+        />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="12dp"
-            android:textColor="?colorPrimary"
-            android:text="@string/required_permissions_section_header"
-            style="?textAppearanceLabelLargeEmphasized"
-            />
-
         <LinearLayout
-            android:id="@+id/required_permission_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            />
+            >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="12dp"
-            android:textColor="?colorPrimary"
-            android:text="@string/optional_permissions_section_header"
-            style="?textAppearanceLabelLargeEmphasized"
-            />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp"
+                android:textColor="?colorPrimary"
+                android:text="@string/required_permissions_section_header"
+                style="?textAppearanceLabelLargeEmphasized"
+                />
 
-        <LinearLayout
-            android:id="@+id/optional_permission_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            />
+            <LinearLayout
+                android:id="@+id/required_permission_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                />
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp"
+                android:textColor="?colorPrimary"
+                android:text="@string/optional_permissions_section_header"
+                style="?textAppearanceLabelLargeEmphasized"
+                />
 
-</ScrollView>
+            <LinearLayout
+                android:id="@+id/optional_permission_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

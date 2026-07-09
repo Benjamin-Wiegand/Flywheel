@@ -63,6 +63,8 @@ public class ProjectionTask {
             activity.registerFocusTracker(focusTracker);
         }
 
+        rootView.findViewById(R.id.cancel_button).setOnClickListener(v -> splash.hide());
+
         updateContextButtons();
         updateFocusIndicators();
     }

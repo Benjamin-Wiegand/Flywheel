@@ -6,21 +6,41 @@
     android:background="?colorAppModalBackground"
     >
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_task_title"
+            style="?textAppearanceHeadline4"
+            />
 
         <LinearLayout
             android:id="@+id/projection_task_context_buttons"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_weight="1"
             android:orientation="horizontal"
+            android:gravity="end"
+            android:paddingHorizontal="8dp"
             />
 
-    </FrameLayout>
+        <ImageButton
+            android:id="@+id/cancel_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/cancel_button"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            style="?actionButtonStyle"
+            />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/projection_task_virtual_activity_splash_layout"

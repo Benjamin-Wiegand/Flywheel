@@ -6,7 +6,7 @@
         app:iconSpaceReserved="false"
         >
 
-        <SwitchPreferenceCompat
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
             app:key="@string/key_use_imported_phone_keys"
             app:title="@string/use_imported_phone_keys_pref_name"
             app:iconSpaceReserved="false"

@@ -10,7 +10,8 @@
         <attr name="colorDockForeground" format="color" />
         <attr name="colorDockBackground" format="color" />
 
-        <attr name="colorAppModal" format="color" />
+        <attr name="colorAppModalForeground" format="color" />
+        <attr name="colorAppModalBackground" format="color" />
 
         <attr name="colorDockItemInactive" format="color" />
         <attr name="colorDockItemActive" format="color" />

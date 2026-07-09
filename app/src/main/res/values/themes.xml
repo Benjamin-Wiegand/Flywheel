@@ -7,7 +7,8 @@
         <item name="colorFocusIndicatorInactive">#333333</item>
         <item name="colorFocusIndicatorActive">?attr/colorPrimary</item>
 
-        <item name="colorAppModal">?attr/colorSurfaceContainer</item>
+        <item name="colorAppModalForeground">?android:windowBackground</item>
+        <item name="colorAppModalBackground">?attr/colorSurfaceContainer</item>
 
         <item name="colorAcceptCallButton">#23A023</item>
         <item name="colorRejectCallButton">#9E3434</item>
@@ -25,7 +26,8 @@
         <item name="colorFocusIndicatorInactive">@color/material_dynamic_neutral20</item>
         <item name="colorFocusIndicatorActive">@color/material_dynamic_primary70</item>
 
-        <item name="colorAppModal">@color/material_dynamic_neutral_variant70</item>
+        <item name="colorAppModalForeground">@color/material_dynamic_neutral99</item>
+        <item name="colorAppModalBackground">@color/material_dynamic_neutral90</item>
 
     </style>
 

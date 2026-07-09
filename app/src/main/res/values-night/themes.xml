@@ -1,8 +1,11 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.Geargrinder" parent="Base.Theme.Geargrinder">
+        <item name="colorAppModalBackground">?android:windowBackground</item>
+        <item name="colorAppModalForeground">?attr/colorSurfaceContainer</item>
     </style>
 
     <style name="ThemeOverlay.Geargrinder.DynamicColors" parent="@style/Base.ThemeOverlay.Geargrinder.DynamicColors">
-        <item name="colorAppModal">#0AFFFFFF</item>
+        <item name="colorAppModalForeground">#0AFFFFFF</item>
+        <item name="colorAppModalBackground">?android:windowBackground</item>
     </style>
 </resources>

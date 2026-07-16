@@ -50,7 +50,7 @@ public class ProjectionTask {
         splash = new ProjectionTaskSplash(rootView.findViewById(R.id.projection_task_splash));
 
         splash.setVirtualActivityContextButtonGenerator(activity -> new ButtonPreset[] {
-                new ButtonPreset(R.string.close_button, android.R.drawable.ic_menu_close_clear_cancel, v -> {
+                new ButtonPreset(R.string.close_button, R.drawable.small_x, v -> {
                     removeActivity(activity);
                     splash.hide();
                 }),
@@ -97,7 +97,7 @@ public class ProjectionTask {
     }
 
     private void updateContextButtons() {
-        ButtonPreset addSplitScreenButton = new ButtonPreset(R.string.launch_split_screen, android.R.drawable.ic_input_add, v -> createAddSplitScreenDialog().show());
+        ButtonPreset addSplitScreenButton = new ButtonPreset(R.string.launch_split_screen, R.drawable.small_plus, v -> createAddSplitScreenDialog().show());
         if (activityCount() >= MAX_SPLIT_SCREEN) {
             splash.inflateButtons();
         } else {

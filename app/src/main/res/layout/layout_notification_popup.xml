@@ -120,7 +120,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="@string/clear_button"
-            android:drawableLeft="@android:drawable/ic_menu_close_clear_cancel"
+            android:drawableLeft="@drawable/small_x"
             android:textColor="?android:attr/colorForeground"
             tools:ignore="RtlHardcoded"
             style="?attr/borderlessButtonStyle"

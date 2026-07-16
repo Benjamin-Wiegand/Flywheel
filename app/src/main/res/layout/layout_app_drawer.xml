@@ -14,8 +14,8 @@
         android:layout_height="48dp"
         android:layout_gravity="end"
         android:contentDescription="@string/close_button"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:background="@android:color/transparent"
+        android:src="@drawable/small_x"
+        style="?actionButtonStyle"
         />
 
     <com.google.android.material.tabs.TabLayout

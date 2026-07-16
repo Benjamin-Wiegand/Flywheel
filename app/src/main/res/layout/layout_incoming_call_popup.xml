@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:padding="12dp"
@@ -8,8 +9,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:elevation="8dp"
-    android:clickable="true"
-    >
+    android:clickable="true">
 
     <ImageView
         android:id="@+id/caller_id_image"
@@ -65,7 +65,8 @@
             android:layout_weight="0"
             android:background="@drawable/circle"
             android:backgroundTint="?colorRejectCallButton"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:src="@drawable/small_x"
+            app:tint="@color/white"
             style="?imageButtonStyle"
             />
 

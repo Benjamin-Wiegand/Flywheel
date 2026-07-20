@@ -1,5 +1,7 @@
 package io.benwiegand.projection.geargrinder.permission;
 
+import static io.benwiegand.projection.geargrinder.util.ActivityUtil.SHIZUKU_DOWNLOAD_LINK;
+import static io.benwiegand.projection.geargrinder.util.ActivityUtil.openLink;
 import static io.benwiegand.projection.geargrinder.util.ActivityUtil.tryLaunchIntents;
 
 import android.Manifest;
@@ -147,9 +149,13 @@ public class PermissionRequirements {
                         .setNegativeButton(R.string.settings_button, (d, i) ->
                                 activity.startActivity(new Intent(activity, SettingsActivity.class)));
 
-                if (shizukuLaunchIntent != null)
+                if (shizukuLaunchIntent != null) {
                     errorDialog.setPositiveButton(R.string.launch_shizuku_button, (d, i) ->
                             activity.startActivity(shizukuLaunchIntent));
+                } else {
+                    errorDialog.setPositiveButton(R.string.download_shizuku_button, (d, i) ->
+                            openLink(activity, SHIZUKU_DOWNLOAD_LINK));
+                }
 
                 if (Shizuku.isPreV11()) {
                     errorDialog

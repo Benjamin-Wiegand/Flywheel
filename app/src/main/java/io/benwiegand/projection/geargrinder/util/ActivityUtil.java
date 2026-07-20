@@ -14,6 +14,8 @@ public class ActivityUtil {
     public static final String ISSUE_TRACKER_LINK = "https://github.com/Benjamin-Wiegand/Flywheel/issues";
     public static final String CERTIFICATES_AND_KEYS_INFO_LINK = "https://github.com/Benjamin-Wiegand/Flywheel/wiki/Certificates-and-Keys";
 
+    public static final String SHIZUKU_DOWNLOAD_LINK = "https://github.com/RikkaApps/Shizuku/releases/latest";
+
     public static void tryLaunchIntents(Activity activity, Intent... intents) {
         for (Intent intent : intents) {
             if (intent == null) continue;

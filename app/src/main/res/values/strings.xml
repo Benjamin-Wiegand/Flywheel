@@ -80,6 +80,7 @@
     <string name="root_permission_rationale">Root is used to access system APIs for a better user experience. Currently, it\'s used for embedding apps within Flywheel so they can be shown on your headunit display.</string>
 
     <string name="launch_shizuku_button">launch Shizuku</string>
+    <string name="download_shizuku_button">download Shizuku</string>
     <string name="shizuku_too_old">Your Shizuku manager is too old to work with Flywheel. Please update it or choose a different privilege mode.</string>
     <string name="shizuku_not_installed">Unable to find Shizuku. Please install and start Shizuku or choose a different privilege mode.</string>
     <string name="shizuku_not_running">Unable to connect to Shizuku. Please start Shizuku or choose a different privilege mode.</string>

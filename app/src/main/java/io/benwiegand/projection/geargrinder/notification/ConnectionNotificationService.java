@@ -17,8 +17,10 @@ import androidx.annotation.StringRes;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
 import io.benwiegand.projection.geargrinder.DebugActivity;
+import io.benwiegand.projection.geargrinder.MainActivity;
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
+import io.benwiegand.projection.geargrinder.exception.interfaces.ErrorActionIntent;
 
 public class ConnectionNotificationService {
     private static final String TAG = ConnectionNotificationService.class.getSimpleName();
@@ -97,12 +99,18 @@ public class ConnectionNotificationService {
         nm.cancel(ERROR_NOTIFICATION_ID);
     }
 
-    private void postError(String title, String content) {
+    private void postError(String title, String content, Intent actionIntent) {
         initErrorNotificationChannel();
 
-        // TODO: error activity
-        Intent intent = new Intent(context, DebugActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        // TODO: exception viewer activity
+        Intent intent;
+        if (actionIntent != null) {
+            intent = actionIntent;
+        } else {
+            intent = new Intent(context, MainActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        }
+
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new Notification.Builder(context, ERROR_NOTIFICATION_CHANNEL)
@@ -117,13 +125,17 @@ public class ConnectionNotificationService {
     }
 
     public void postError(@StringRes int title, @StringRes int content) {
-        postError(context.getString(title), context.getString(content));
+        postError(context.getString(title), context.getString(content), null);
     }
 
     public void postError(UserFriendlyException e) {
         String title = e.getFriendlyTitle();
         if (title == null) title = context.getString(R.string.default_error_title);
-        postError(title, e.getFriendlyMessage());
+
+        Intent actionIntent = null;
+        if (e instanceof ErrorActionIntent withIntent) actionIntent = withIntent.getActionIntent();
+
+        postError(title, e.getFriendlyMessage(), actionIntent);
     }
 
     private void updateForegroundNotification() {

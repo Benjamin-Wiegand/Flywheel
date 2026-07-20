@@ -28,6 +28,7 @@ import io.benwiegand.projection.geargrinder.connector.AATcpConnector;
 import io.benwiegand.projection.geargrinder.connector.AAUsbConnector;
 import io.benwiegand.projection.geargrinder.connector.AAWirelessConnector;
 import io.benwiegand.projection.geargrinder.exception.BluetoothConnectionException;
+import io.benwiegand.projection.geargrinder.exception.LiabilityAgreementOutdatedException;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.notification.ConnectionNotificationService;
 import io.benwiegand.projection.geargrinder.projection.ProjectionService;
@@ -102,6 +103,15 @@ public class ConnectionService extends Service implements ControlListener, AACon
         }
 
         Log.d(TAG, "start intent: " + intent);
+
+        int liabilityVersion = settingsManager.getLiabilityAgreementVersion();
+        if (liabilityVersion != SettingsManager.LIABILITY_AGREEMENT_VERSION_CURRENT) {
+            Log.w(TAG, "liability agreement version (" + liabilityVersion + ") != current (" + SettingsManager.LIABILITY_AGREEMENT_VERSION_CURRENT + "), cancelling service start");
+            notificationService.postError(new LiabilityAgreementOutdatedException(this).fillInStackTrace());
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         switch (intent.getAction()) {
             case INTENT_ACTION_CONNECT_USB -> connectUsb();
             case INTENT_ACTION_START_TCP -> startTcpServer();

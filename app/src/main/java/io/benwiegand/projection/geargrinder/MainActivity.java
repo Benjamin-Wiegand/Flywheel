@@ -19,7 +19,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 import io.benwiegand.projection.geargrinder.permission.PermissionEntry;
 import io.benwiegand.projection.geargrinder.permission.PermissionRequirements;
@@ -79,27 +78,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        Map<Integer, Supplier<Boolean>> actionMap = Map.of(
-                R.id.manage_permissions_button, () -> {
-                    startActivity(new Intent(this, PermissionGrantActivity.class));
-                    return true;
-                },
-                R.id.settings_button, () -> {
-                    startActivity(new Intent(this, SettingsActivity.class));
-                    return false;
-                },
-                R.id.liability_agreement_button, () -> {
-                    startActivity(new Intent(this, LiabilityDisclaimerActivity.class));
-                    return false;
-                },
-                R.id.debug_button, () -> {
-                    startActivity(new Intent(this, DebugActivity.class));
-                    return true;
-                }
+        Map<Integer, Runnable> actionMap = Map.of(
+                R.id.manage_permissions_button, () ->
+                        startActivity(new Intent(this, PermissionGrantActivity.class)),
+                R.id.settings_button, () ->
+                        startActivity(new Intent(this, SettingsActivity.class)),
+                R.id.liability_agreement_button, () ->
+                        startActivity(new Intent(this, LiabilityDisclaimerActivity.class)),
+                R.id.debug_button, () ->
+                        startActivity(new Intent(this, DebugActivity.class))
         );
-        Supplier<Boolean> action = actionMap.getOrDefault(item.getItemId(), () -> super.onOptionsItemSelected(item));
-        assert action != null;
-        return action.get();
+        Runnable action = actionMap.get(item.getItemId());
+        if (action == null) return false;
+        action.run();
+        return true;
     }
 
     private void checkPermissions() {

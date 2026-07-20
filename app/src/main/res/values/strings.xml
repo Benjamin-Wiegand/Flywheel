@@ -273,6 +273,9 @@
     <string name="liability_disclaimer_agree_button">@string/liability_disclaimer_agree_checkbox</string>
     <string name="liability_disclaimer_disagreement_instructions">By using this app, you acknowledge that you use it at your own risk and accept the terms of this disclaimer. If you do not agree, you must discontinue use of this app.</string>
 
+    <string name="liability_disclaimer_updated_dialog_message">The disclaimer of liability has been updated. Please review the new terms.</string>
+    <string name="view_disclaimer_button">view disclaimer</string>
+
     <string name="setup_start_button">start</string>
     <string name="setup_back_button">back</string>
     <string name="setup_next_button">next</string>

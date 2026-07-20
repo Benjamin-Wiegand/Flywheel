@@ -1,5 +1,6 @@
 package io.benwiegand.projection.geargrinder;
 
+import static io.benwiegand.projection.geargrinder.settings.SettingsManager.LIABILITY_AGREEMENT_VERSION_CURRENT;
 import static io.benwiegand.projection.geargrinder.settings.SettingsManager.SETUP_VERSION_CURRENT;
 
 import android.content.Intent;
@@ -53,6 +54,18 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, SetupActivity.class));
             finish();
             return;
+        }
+
+        int liabilityVersion = settingsManager.getLiabilityAgreementVersion();
+        if (liabilityVersion != LIABILITY_AGREEMENT_VERSION_CURRENT) {
+            Log.i(TAG, "liability agreement version (" + setupVersion + ") != current (" + SETUP_VERSION_CURRENT + ")");
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.liability_disclaimer_title)
+                    .setMessage(R.string.liability_disclaimer_updated_dialog_message)
+                    .setPositiveButton(R.string.view_disclaimer_button, (d, i) ->
+                            startActivity(new Intent(this, LiabilityDisclaimerActivity.class)))
+                    .setCancelable(false)
+                    .show();
         }
 
         checkPermissions();

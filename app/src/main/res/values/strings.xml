@@ -249,6 +249,8 @@
     <string name="log_export_error_io">encountered an io error</string>
     <string name="log_export_error_unexpected">encountered an unexpected error</string>
 
+    <string name="liability_disclaimer_button">Liability Disclaimer</string>
+
     <string name="liability_disclaimer_title">Disclaimer of liability</string>
     <string name="liability_disclaimer_experimental_software_header">Experimental Software</string>
     <string name="liability_disclaimer_experimental_software_body">This app is experimental software provided for testing, evaluation, research, or development purposes. It may contain bugs, incomplete features, security vulnerabilities, unexpected behavior, or compatibility issues.</string>
@@ -266,7 +268,10 @@
     <string name="liability_disclaimer_limitation_body_1">To the maximum extent permitted by applicable law, the developers of this app are not liable for any direct, indirect, incidental, consequential, or special damages arising from or relating to the installation, use, misuse, or inability to use this app, including but not limited to vehicle damage, hardware damage, data loss, loss of use, or other resulting losses.</string>
     <string name="liability_disclaimer_limitation_body_2">Because this app is provided free of charge, you acknowledge that you use it entirely at your own discretion and risk.</string>
     <string name="liability_disclaimer_limitation_body_3">Nothing in this disclaimer excludes or limits liability where such exclusion or limitation is prohibited by applicable law.</string>
+
     <string name="liability_disclaimer_agree_checkbox">I have read and agree to the above disclaimer</string>
+    <string name="liability_disclaimer_agree_button">@string/liability_disclaimer_agree_checkbox</string>
+    <string name="liability_disclaimer_disagreement_instructions">By using this app, you acknowledge that you use it at your own risk and accept the terms of this disclaimer. If you do not agree, you must discontinue use of this app.</string>
 
     <string name="setup_start_button">start</string>
     <string name="setup_back_button">back</string>

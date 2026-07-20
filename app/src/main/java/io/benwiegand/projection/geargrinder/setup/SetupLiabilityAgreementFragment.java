@@ -1,5 +1,7 @@
 package io.benwiegand.projection.geargrinder.setup;
 
+import static io.benwiegand.projection.geargrinder.LiabilityDisclaimerActivity.DISCLAIMER_AGREE_COOLDOWN_DELAY;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,8 +16,6 @@ import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
 public class SetupLiabilityAgreementFragment extends SetupFragment {
-
-    private static final long DISCLAIMER_AGREE_COOLDOWN_DELAY = 3000;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
 

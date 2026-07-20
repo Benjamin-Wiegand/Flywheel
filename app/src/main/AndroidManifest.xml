@@ -64,6 +64,13 @@
             />
 
         <activity
+            android:name=".LiabilityDisclaimerActivity"
+            android:label="@string/liability_disclaimer_title"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            />
+
+        <activity
             android:name=".SettingsActivity"
             android:label="@string/settings_title"
             android:exported="false"

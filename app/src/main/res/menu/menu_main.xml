@@ -15,6 +15,12 @@
         />
 
     <item
+        android:id="@+id/liability_agreement_button"
+        android:title="@string/liability_disclaimer_button"
+        app:showAsAction="never"
+        />
+
+    <item
         android:id="@+id/debug_button"
         android:title="@string/debug_button"
         app:showAsAction="never"

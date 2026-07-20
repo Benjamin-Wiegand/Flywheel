@@ -57,6 +57,13 @@
         </activity>
 
         <activity
+            android:name=".SetupActivity"
+            android:label="@string/debug_title"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            />
+
+        <activity
             android:name=".SettingsActivity"
             android:label="@string/settings_title"
             android:exported="false"

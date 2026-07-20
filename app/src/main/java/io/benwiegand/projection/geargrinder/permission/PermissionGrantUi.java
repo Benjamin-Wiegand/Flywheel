@@ -105,6 +105,16 @@ public class PermissionGrantUi implements ActivityCompat.OnRequestPermissionsRes
 
     }
 
+    public boolean checkRequired() {
+        for (PermissionEntryHolder holder: permissionEntryMap.values()) {
+            if (!holder.entry.requiredByConfiguration().apply(settingsManager)) continue;
+            if (holder.granted) continue;
+            Log.i(TAG, "missing: " + holder.entry);
+            return false;
+        }
+        return true;
+    }
+
     private void onPermissionGranted(String key) {
         Log.i(TAG, "permission granted: " + key);
         PermissionEntryHolder holder = permissionEntryMap.get(key);

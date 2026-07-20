@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="48dp"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp"
+                style="?textAppearanceHeadline4"
+                android:text="@string/setup_privilege_level_title"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="12dp"
+                style="?textAppearanceBody1"
+                android:text="@string/setup_privilege_level_body_1"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="12dp"
+                style="?textAppearanceBody1"
+                android:text="@string/setup_privilege_level_body_2"
+                />
+
+            <RadioGroup
+                android:id="@+id/privilege_level_selection_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+
+                <io.benwiegand.projection.geargrinder.setup.view.PrivilegeLevelOptionView
+                    android:id="@+id/root_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="12dp"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center"
+                    app:icon="@mipmap/ic_launcher"
+                    app:text="@string/root_superuser_mode"
+                    />
+
+                <io.benwiegand.projection.geargrinder.setup.view.PrivilegeLevelOptionView
+                    android:id="@+id/shizuku_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_margin="12dp"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+                    android:gravity="center"
+                    app:icon="@mipmap/ic_launcher"
+                    app:text="@string/adb_shizuku_mode"
+                    />
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="24dp"
+        >
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            style="?borderlessButtonStyle"
+            android:text="@string/setup_back_button"
+            />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            />
+
+        <Button
+            android:id="@+id/next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            style="?materialButtonStyle"
+            android:text="@string/setup_next_button"
+            android:enabled="false"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,7 +1,10 @@
 package io.benwiegand.projection.geargrinder;
 
+import static io.benwiegand.projection.geargrinder.settings.SettingsManager.SETUP_VERSION_CURRENT;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -24,6 +27,8 @@ import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private SettingsManager settingsManager;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,11 +40,21 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        settingsManager = new SettingsManager(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        int setupVersion = settingsManager.getSetupVersion();
+        if (setupVersion != SETUP_VERSION_CURRENT) {
+            Log.i(TAG, "setup version (" + setupVersion + ") != current (" + SETUP_VERSION_CURRENT + "), running setup");
+            startActivity(new Intent(this, SetupActivity.class));
+            finish();
+            return;
+        }
+
         checkPermissions();
     }
 

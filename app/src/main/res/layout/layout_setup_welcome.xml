@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="48dp"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp"
+                style="?textAppearanceHeadline4"
+                android:text="@string/setup_welcome_title"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="24dp"
+                style="?textAppearanceBody1"
+                android:text="@string/setup_welcome_body"
+                />
+
+            <Button
+                android:id="@+id/source_code_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart"
+                style="?borderlessButtonStyle"
+                android:text="@string/source_code_link_button"
+                />
+
+            <Button
+                android:id="@+id/wiki_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart"
+                style="?borderlessButtonStyle"
+                android:text="@string/wiki_link_button"
+                />
+
+            <Button
+                android:id="@+id/license_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart"
+                style="?borderlessButtonStyle"
+                android:text="@string/license_link_button"
+                />
+
+            <Button
+                android:id="@+id/issue_tracker_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="viewStart"
+                style="?borderlessButtonStyle"
+                android:text="@string/issue_tracker_link_button"
+                />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="24dp"
+        >
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            />
+
+        <Button
+            android:id="@+id/next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            style="?materialButtonStyle"
+            android:text="@string/setup_start_button"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

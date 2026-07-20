@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        style="?textAppearanceHeadline6"
+        android:text="@string/liability_disclaimer_experimental_software_header"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_experimental_software_body"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        style="?textAppearanceHeadline6"
+        android:text="@string/liability_disclaimer_safety_critical_header"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_safety_critical_body_1"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_safety_critical_body_2"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        style="?textAppearanceHeadline6"
+        android:text="@string/liability_disclaimer_own_risk_header"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_own_risk_body"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        style="?textAppearanceHeadline6"
+        android:text="@string/liability_disclaimer_third_party_integration_header"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_third_party_integration_body_1"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_third_party_integration_body_2"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        style="?textAppearanceHeadline6"
+        android:text="@string/liability_disclaimer_warranty_header"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_warranty_body"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="12dp"
+        style="?textAppearanceHeadline6"
+        android:text="@string/liability_disclaimer_limitation_header"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_limitation_body_1"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_limitation_body_2"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingVertical="6dp"
+        style="?textAppearanceBody1"
+        android:text="@string/liability_disclaimer_limitation_body_3"
+        />
+
+</LinearLayout>

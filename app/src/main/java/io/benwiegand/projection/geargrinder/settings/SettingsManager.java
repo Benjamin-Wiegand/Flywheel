@@ -17,6 +17,12 @@ public class SettingsManager {
     private static final String PREFERENCE_NAME = "io.benwiegand.projection.geargrinder_preferences";
     private static final String RAW_BYTES_MULTI_SEPARATOR = ",";
 
+    public static final int LIABILITY_AGREEMENT_VERSION_CURRENT = 1;
+    public static final int LIABILITY_AGREEMENT_VERSION_NONE = 0;
+
+    public static final int SETUP_VERSION_CURRENT = 1;
+    public static final int SETUP_VERSION_NONE = 0;
+
     private final Context context;
     private final SharedPreferences prefs;
 
@@ -31,6 +37,10 @@ public class SettingsManager {
 
     public PrivilegeMode getPrivilegeMode() {
         return PrivilegeMode.parse(context, getString(R.string.key_privilege_mode));
+    }
+
+    public boolean savePrivilegeMode(PrivilegeMode privilegeMode) {
+        return saveString(R.string.key_privilege_mode, context.getString(privilegeMode.preferenceValueRes()));
     }
 
     public boolean allowsStartProjectionWhenLocked() {
@@ -117,6 +127,22 @@ public class SettingsManager {
         return getString(R.string.key_dock_pinned);
     }
 
+    public boolean saveLiabilityAgreementVersion(int version) {
+        return saveInt(R.string.key_liability_agreement_version, version);
+    }
+
+    public int getLiabilityAgreementVersion() {
+        return getInt(R.string.key_liability_agreement_version, LIABILITY_AGREEMENT_VERSION_NONE);
+    }
+
+    public boolean saveSetupVersion(int version) {
+        return saveInt(R.string.key_setup_version, version);
+    }
+
+    public int getSetupVersion() {
+        return getInt(R.string.key_setup_version, SETUP_VERSION_NONE);
+    }
+
 
     private int castInt(@StringRes int key, @StringRes int defaultRes) {
         String stringValue = prefs.getString(context.getString(key), null);
@@ -150,6 +176,16 @@ public class SettingsManager {
 
     private String getString(@StringRes int key) {
         return prefs.getString(context.getString(key), null);
+    }
+
+    private boolean saveInt(@StringRes int key, int value) {
+        return prefs.edit()
+                .putInt(context.getString(key), value)
+                .commit();
+    }
+
+    private int getInt(@StringRes int key, int defaultValue) {
+        return prefs.getInt(context.getString(key), defaultValue);
     }
 
     private boolean saveRawBytes(@StringRes int key, byte[]... multiData) {

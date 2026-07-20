@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Flywheel</string>
+    <string name="app_subtitle">A free and open source re-implementation of Android Auto</string>
 
     <string name="connection_foreground_notification_channel_name">Active Connection</string>
     <string name="connection_error_notification_channel_name">Connection Error</string>
@@ -246,6 +247,60 @@
     <string name="log_export_error_title">Export failed</string>
     <string name="log_export_error_io">encountered an io error</string>
     <string name="log_export_error_unexpected">encountered an unexpected error</string>
+
+    <string name="liability_disclaimer_title">Disclaimer of liability</string>
+    <string name="liability_disclaimer_experimental_software_header">Experimental Software</string>
+    <string name="liability_disclaimer_experimental_software_body">This app is experimental software provided for testing, evaluation, research, or development purposes. It may contain bugs, incomplete features, security vulnerabilities, unexpected behavior, or compatibility issues.</string>
+    <string name="liability_disclaimer_safety_critical_header">Not a Safety-Critical System</string>
+    <string name="liability_disclaimer_safety_critical_body_1">This app is not intended to control, replace, or interfere with any safety-critical vehicle functions. It must not be relied upon for vehicle operation, navigation, emergency response, driver awareness, or any function where failure could result in injury, death, or property damage.</string>
+    <string name="liability_disclaimer_safety_critical_body_2">The driver remains solely responsible for the safe and lawful operation of the vehicle at all times.</string>
+    <string name="liability_disclaimer_own_risk_header">Use at Your Own Risk</string>
+    <string name="liability_disclaimer_own_risk_body">You are solely responsible for installing, configuring, and using this app and any hardware it interacts with. If the app behaves unexpectedly, discontinue its use as soon as it is safe to do so.</string>
+    <string name="liability_disclaimer_third_party_integration_header">Third-Party Hardware and Software</string>
+    <string name="liability_disclaimer_third_party_integration_body_1">This app integrates with third-party hardware and software that the developers of this app do not manufacture or control. The developers provide no guarantees regarding compatibility, reliability, or continued operation with any particular device, vehicle, or software version.</string>
+    <string name="liability_disclaimer_third_party_integration_body_2">You are responsible for ensuring that this app is compatible with your vehicle and any hardware or software it is used with.</string>
+    <string name="liability_disclaimer_warranty_header">Warranty</string>
+    <string name="liability_disclaimer_warranty_body">This app is distributed under the GNU General Public License v3.0 (GPLv3). The warranty disclaimer contained in the GPLv3 applies to this software.</string>
+    <string name="liability_disclaimer_limitation_header">Limitation of Liability</string>
+    <string name="liability_disclaimer_limitation_body_1">To the maximum extent permitted by applicable law, the developers of this app are not liable for any direct, indirect, incidental, consequential, or special damages arising from or relating to the installation, use, misuse, or inability to use this app, including but not limited to vehicle damage, hardware damage, data loss, loss of use, or other resulting losses.</string>
+    <string name="liability_disclaimer_limitation_body_2">Because this app is provided free of charge, you acknowledge that you use it entirely at your own discretion and risk.</string>
+    <string name="liability_disclaimer_limitation_body_3">Nothing in this disclaimer excludes or limits liability where such exclusion or limitation is prohibited by applicable law.</string>
+    <string name="liability_disclaimer_agree_checkbox">I have read and agree to the above disclaimer</string>
+
+    <string name="setup_start_button">start</string>
+    <string name="setup_back_button">back</string>
+    <string name="setup_next_button">next</string>
+    <string name="setup_finish_button">finish</string>
+
+    <string name="setup_welcome_title">@string/app_name</string>
+    <string name="setup_welcome_body">@string/app_subtitle</string>
+    <string name="source_code_link_button">Source Code</string>
+    <string name="wiki_link_button">Wiki</string>
+    <string name="license_link_button">License</string>
+    <string name="issue_tracker_link_button">Issue tracker</string>
+    <string name="setup_privilege_level_title">Privilege elevation</string>
+    <string name="setup_privilege_level_body_1">Flywheel currently requires privilege elevation to launch apps on your car screen.</string>
+    <string name="setup_privilege_level_body_2">If you don\'t know what root is, pick Shizuku.</string>
+    <string name="setup_permissions_title">Permissions</string>
+    <string name="setup_permissions_body">Please grant the required permissions. Optional permissions are only needed if you want to use the associated features.</string>
+    <string name="setup_permissions_notice">You can grant or manage optional permissions at any time from the \'Permissions\' menu.</string>
+    <string name="setup_keys_title">Certificates and Keys</string>
+    <string name="setup_keys_body_1">Official Android Auto headunits usually require Google-endorsed certificates and keys extracted from the Android Auto app.</string>
+    <string name="setup_keys_body_2">If you don\'t have keys, you can try using Flywheel\'s self-signed keys.</string>
+    <string name="setup_keys_notice"><![CDATA[You can manage this at any time in Settings > Certificates and Keys]]></string>
+    <string name="setup_finish_title">Thanks!</string>
+    <string name="setup_finish_body_1">Thank you for taking the time to try Flywheel!</string>
+    <string name="setup_finish_body_2">Please don\'t hesitate to report any bugs or issues so they can be addressed.</string>
+
+    <string name="missing_required_permissions_title">Missing required permissions</string>
+    <string name="missing_required_permissions_message">Things may not work as expected without granting these permissions. Are you sure you want to proceed?</string>
+
+    <string name="proceed_anyway_button">proceed anyway</string>
+    <string name="learn_more_link_button">learn more</string>
+    <string name="root_superuser_mode">root/Superuser</string>
+    <string name="adb_shizuku_mode">adb/Shizuku</string>
+    <string name="use_self_signed_key">Use self-signed certificate and key</string>
+    <string name="import_pem_bundle">Import PEM bundle…</string>
 
 
 </resources>

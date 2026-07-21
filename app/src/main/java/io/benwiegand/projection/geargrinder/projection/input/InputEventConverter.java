@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.benwiegand.projection.geargrinder.callback.InputEventListener;
+import io.benwiegand.projection.geargrinder.projection.lock.ProjectionKeyguardTracker;
 import io.benwiegand.projection.geargrinder.proto.data.constants.SpecialKeyCodes;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.InputChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.event.ButtonEvent;
@@ -55,14 +56,19 @@ public class InputEventConverter implements InputEventListener {
 
     private final Map<Integer, Long> keyDownTimes = new HashMap<>();
 
+    private boolean keyguardLocked = true;
 
-    public InputEventConverter(InputChannelMeta inputMeta, ConvertedInputEventListener listener, CoordinateTranslator<TouchEvent.PointerLocation> coordinateTranslator, int targetDisplayId, int displayWidth, int displayHeight) {
+
+    public InputEventConverter(InputChannelMeta inputMeta, ConvertedInputEventListener listener, CoordinateTranslator<TouchEvent.PointerLocation> coordinateTranslator, int targetDisplayId, int displayWidth, int displayHeight, ProjectionKeyguardTracker keyguardTracker) {
         this.inputMeta = inputMeta;
         this.listener = listener;
         this.coordinateTranslator = coordinateTranslator;
         this.targetDisplayId = targetDisplayId;
         this.displayWidth = displayWidth;
         this.displayHeight = displayHeight;
+
+        // disallow inputs, some keycodes can launch apps
+        keyguardTracker.registerUnlockCallback(() -> keyguardLocked = false);
 
         updateTouchPrecision();
     }
@@ -95,6 +101,7 @@ public class InputEventConverter implements InputEventListener {
 
     @Override
     public void onTouchEvent(TouchEvent event) {
+        if (keyguardLocked) return;
         long timestamp = SystemClock.uptimeMillis();
 
         if (event.action() == TouchEvent.Action.DOWN) {
@@ -173,6 +180,7 @@ public class InputEventConverter implements InputEventListener {
 
     @Override
     public void onButtonEvent(ButtonEvent event) {
+        if (keyguardLocked) return;
         long timestamp = SystemClock.uptimeMillis();
 
         long downTime;
@@ -198,6 +206,7 @@ public class InputEventConverter implements InputEventListener {
 
     @Override
     public void onRelativeEvent(RelativeEvent event) {
+        if (keyguardLocked) return;
         if (event.code() == SpecialKeyCodes.KEYCODE_ROTARY_INPUT) {
             if (event.delta() == 0) return; // no input
 

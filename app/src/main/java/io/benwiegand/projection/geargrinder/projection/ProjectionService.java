@@ -31,6 +31,7 @@ import io.benwiegand.projection.geargrinder.projection.input.InputEventConverter
 import io.benwiegand.projection.geargrinder.projection.display.LocalVirtualDisplayController;
 import io.benwiegand.projection.geargrinder.projection.display.PrivdVirtualDisplayProxy;
 import io.benwiegand.projection.geargrinder.projection.display.VirtualDisplayController;
+import io.benwiegand.projection.geargrinder.projection.lock.ProjectionKeyguardTracker;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.preset.VideoPreset;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.InputChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.input.event.TouchEvent;
@@ -77,6 +78,8 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     private final PowerManager powerManager;
     private final SettingsManager settingsManager;
 
+    private final ProjectionKeyguardTracker keyguardTracker;
+
     public interface Listener {
         void onProjectionStarted();
         void onProjectionFailed(UserFriendlyException e);
@@ -111,11 +114,14 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         powerManager = context.getSystemService(PowerManager.class);
         settingsManager = new SettingsManager(context);
 
+        keyguardTracker = new ProjectionKeyguardTracker(context);
+        keyguardTracker.start();
+
         CoordinateTranslator<TouchEvent.PointerLocation> coordinateTranslator = CoordinateTranslator.createTouchEvent(
                 x -> x + this.videoPreset.marginHorizontal() / 2,
                 y -> y + this.videoPreset.marginVertical() / 2
         );
-        inputEventConverter = new InputEventConverter(InputChannelMeta.getDefault(), this, coordinateTranslator, 0, videoPreset.width(), videoPreset.height());
+        inputEventConverter = new InputEventConverter(InputChannelMeta.getDefault(), this, coordinateTranslator, 0, videoPreset.width(), videoPreset.height(), keyguardTracker);
 
         connector = new GeargrinderServiceConnector(TAG, context, this);
         connector.bindAccessibilityService();
@@ -133,6 +139,7 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         if (dead) return;
         dead = true;
         connector.destroy();
+        keyguardTracker.destroy();
         if (virtualDisplay != null)
             virtualDisplay.release();
 
@@ -291,6 +298,8 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
     public void onProjectionActivityConnected(ProjectionActivity.ActivityBinder binder) {
         synchronized (lock) {
             binder.setMargins(videoPreset.marginHorizontal(), videoPreset.marginVertical());
+
+            keyguardTracker.registerUnlockCallback(binder::onScreenUnlocked);
 
             uiInit = true;
             onInitAdvancedLocked();

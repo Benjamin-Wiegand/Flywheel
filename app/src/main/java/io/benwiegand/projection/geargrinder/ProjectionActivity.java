@@ -2,14 +2,11 @@ package io.benwiegand.projection.geargrinder;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
-import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -42,11 +39,6 @@ import io.benwiegand.projection.libprivd.IPrivd;
 public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener, AppDock.Listener, AppLauncherListener, ProjectionTaskManager.Listener {
     private static final String TAG = ProjectionActivity.class.getSimpleName();
 
-    // only happens while device is initially locked
-    private static final long KEYGUARD_LOCK_STATE_POLL_INTERVAL = 1000;
-
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
     private final ActivityBinder binder = new ActivityBinder();
     private MakeshiftBind makeshiftBind;
 
@@ -58,6 +50,8 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private NetworkIndicators networkIndicators;
     private NotificationDisplay notificationDisplay;
     private PhoneCallDisplay phoneCallDisplay;
+
+    private ProjectionModal keyguardModal;
 
     private GeargrinderServiceConnector connector;
     private IPrivd privd = null;
@@ -73,42 +67,15 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         windowInsetsController.hide(WindowInsetsCompat.Type.displayCutout());
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
 
-        // screen lock
-        // only do this on init so the device can be re-locked (like AA)
-        KeyguardManager km = getSystemService(KeyguardManager.class);
-        if (km.isKeyguardLocked()) {
-            Log.i(TAG, "device is locked, restricting projection");
-
-            ProjectionModal keyguardModal = new ProjectionModal(findViewById(R.id.root), true)
-                    .setTitle(R.string.keyguard_modal_title)
-                    .setMessage(R.string.keyguard_modal_instructions);
-
-            // for extra security
-            View projectionRoot = findViewById(R.id.projection_root);
-            projectionRoot.setVisibility(View.GONE);
-
-            // can't use callback without SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE
-            Runnable pollKeyguardLockState = new Runnable() {
-                @Override
-                public void run() {
-                    if (!km.isKeyguardLocked()) {
-                        Log.i(TAG, "device unlocked");
-                        keyguardModal.close();
-                        projectionRoot.setVisibility(View.VISIBLE);
-                        return;
-                    }
-
-                    handler.postDelayed(this, KEYGUARD_LOCK_STATE_POLL_INTERVAL);
-                }
-            };
-
-            pollKeyguardLockState.run();
-
-        }
-
         findViewById(R.id.soft_back_button).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         settingsManager = new SettingsManager(this);
+
+        // screen lock
+        findViewById(R.id.projection_root).setVisibility(View.GONE);
+        keyguardModal = new ProjectionModal(findViewById(R.id.root), true)
+                .setTitle(R.string.keyguard_modal_title)
+                .setMessage(R.string.keyguard_modal_instructions);
 
         // components
         taskManager = new ProjectionTaskManager(findViewById(R.id.content_frame), settingsManager);
@@ -253,6 +220,13 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
                         horizontal - horizontal / 2,
                         vertical - vertical / 2
                 );
+            });
+        }
+
+        public void onScreenUnlocked() {
+            runOnUiThread(() -> {
+                findViewById(R.id.projection_root).setVisibility(View.VISIBLE);
+                keyguardModal.close();
             });
         }
 

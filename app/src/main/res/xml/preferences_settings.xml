@@ -71,8 +71,7 @@
             app:iconSpaceReserved="false"
             app:title="@string/start_projection_when_locked_pref_name"
             app:defaultValue="@string/start_projection_when_locked_default"
-            app:summaryOn="@string/start_projection_when_locked_pref_summary_on"
-            app:summaryOff="@string/start_projection_when_locked_pref_summary_off"
+            app:summary="@string/start_projection_when_locked_pref_summary"
             />
 
         <ListPreference

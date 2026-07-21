@@ -32,6 +32,7 @@ import io.benwiegand.projection.geargrinder.projection.display.LocalVirtualDispl
 import io.benwiegand.projection.geargrinder.projection.display.PrivdVirtualDisplayProxy;
 import io.benwiegand.projection.geargrinder.projection.display.VirtualDisplayController;
 import io.benwiegand.projection.geargrinder.projection.ui.task.FocusTracker;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.libprivd.IPrivd;
 
 public class VirtualActivity implements SurfaceHolder.Callback {
@@ -84,12 +85,15 @@ public class VirtualActivity implements SurfaceHolder.Callback {
     private final SurfaceView surfaceView;
     private final VirtualActivitySplash splash;
 
+    private final SettingsManager settingsManager;
+
     private final Queue<FocusTracker> focusTrackers = new LinkedList<>();
 
     @SuppressLint("ClickableViewAccessibility")
-    public VirtualActivity(IPrivd privd, AppRecord app, ViewGroup parent) {
+    public VirtualActivity(IPrivd privd, AppRecord app, ViewGroup parent, SettingsManager settingsManager) {
         this.privd = privd;
         this.app = app;
+        this.settingsManager = settingsManager;
         width = 800;
         height = 600;
         density = parent.getResources().getDisplayMetrics().densityDpi;
@@ -131,6 +135,11 @@ public class VirtualActivity implements SurfaceHolder.Callback {
             }
 
             boolean canUseLauncher = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
+
+            if (!settingsManager.allowVirtualActivityLauncher()) {
+                Log.i(TAG, "virtual activity launcher explicitly disabled");
+                canUseLauncher = false;
+            }
 
             if (virtualDisplay == null) {
                 Surface surface = surfaceView.getHolder().getSurface();

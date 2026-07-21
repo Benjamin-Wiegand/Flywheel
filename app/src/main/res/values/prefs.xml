@@ -120,6 +120,9 @@
     <string translatable="false" name="keep_screen_awake_default">true</string>
 
 
+    <string translatable="false" name="allow_virtual_activity_launcher_default">true</string>
+
+
     <string translatable="false" name="key_privilege_mode">privilege_mode</string>
     <string translatable="false" name="key_operational_mode">operational_mode</string>
 
@@ -140,6 +143,8 @@
     <string translatable="false" name="key_use_imported_phone_keys">use_imported_phone_keys</string>
 
     <string translatable="false" name="key_keep_screen_awake">keep_screen_awake</string>
+
+    <string translatable="false" name="key_allow_virtual_activity_launcher">allow_virtual_activity_launcher</string>
 
 
     <!-- not in user settings -->

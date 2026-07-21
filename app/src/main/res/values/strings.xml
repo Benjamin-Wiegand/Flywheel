@@ -153,6 +153,9 @@
     <string name="keep_screen_awake_pref_name">Prevent display sleep while connected</string>
     <string name="keep_screen_awake_summary">avoids issues with touch input and display output</string>
 
+    <string name="allow_virtual_activity_launcher_pref_name">Allow virtual activity launcher</string>
+    <string name="allow_virtual_activity_launcher_summary">disable this if apps fail to launch</string>
+
     <string name="corrupted_item_pref_summary_format" formatted="true">corrupted: %s</string>
     <string name="no_item_pref_summary">none</string>
     <string name="certificate_line_pref_summary_format" formatted="true">%d: %s</string>

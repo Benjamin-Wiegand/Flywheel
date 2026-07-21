@@ -196,7 +196,7 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
         try {
             Log.i(TAG, "launching virtual activity: " + app);
 
-            VirtualActivity virtualActivity = new VirtualActivity(privd, app, contentFrame);
+            VirtualActivity virtualActivity = new VirtualActivity(privd, app, contentFrame, settingsManager);
             virtualActivities.put(app.launchComponent(), virtualActivity);
             return virtualActivity;
 

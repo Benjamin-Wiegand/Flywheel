@@ -59,6 +59,14 @@
             app:summary="@string/keep_screen_awake_summary"
             />
 
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
+            app:key="@string/key_allow_virtual_activity_launcher"
+            app:iconSpaceReserved="false"
+            app:title="@string/allow_virtual_activity_launcher_pref_name"
+            app:defaultValue="@string/allow_virtual_activity_launcher_default"
+            app:summary="@string/allow_virtual_activity_launcher_summary"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory

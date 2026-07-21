@@ -63,6 +63,10 @@ public class SettingsManager {
         return getBool(R.string.key_video_frame_rate_optimization, R.string.video_frame_rate_optimization_default);
     }
 
+    public boolean allowVirtualActivityLauncher() {
+        return getBool(R.string.key_allow_virtual_activity_launcher, R.string.allow_virtual_activity_launcher_default);
+    }
+
     public boolean isKeepScreenAwakeEnabled() {
         return getBool(R.string.key_keep_screen_awake, R.string.keep_screen_awake_default);
     }

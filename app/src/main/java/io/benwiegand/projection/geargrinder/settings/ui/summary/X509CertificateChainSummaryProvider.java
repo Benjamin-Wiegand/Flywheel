@@ -115,7 +115,7 @@ public class X509CertificateChainSummaryProvider implements Preference.SummaryPr
         }
 
         int colorError;
-        try (TypedArray colorAttributes = context.obtainStyledAttributes(new int[] {androidx.constraintlayout.widget.R.attr.colorError})) {
+        try (TypedArray colorAttributes = context.obtainStyledAttributes(new int[] {android.R.attr.colorError})) {
             colorError = colorAttributes.getColor(0, Color.RED);
         }
 

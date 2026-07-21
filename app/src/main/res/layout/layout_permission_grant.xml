@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:paddingVertical="8dp"
         android:paddingHorizontal="12dp"
-        android:textColor="?colorPrimary"
+        android:textColor="?colorSecondary"
         android:text="@string/required_permissions_section_header"
         style="?textAppearanceLabelLargeEmphasized"
         />
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:paddingVertical="8dp"
         android:paddingHorizontal="12dp"
-        android:textColor="?colorPrimary"
+        android:textColor="?colorSecondary"
         android:text="@string/optional_permissions_section_header"
         style="?textAppearanceLabelLargeEmphasized"
         />

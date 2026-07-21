@@ -114,7 +114,7 @@
     <string translatable="false" name="phone_audio_capture_default">true</string>
 
 
-    <string translatable="false" name="start_projection_when_locked_default">false</string>
+    <string translatable="false" name="start_projection_when_locked_default">true</string>
 
 
     <string translatable="false" name="keep_screen_awake_default">true</string>

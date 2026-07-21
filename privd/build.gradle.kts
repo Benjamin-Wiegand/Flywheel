@@ -1,7 +1,44 @@
+import javax.inject.Inject
+import org.gradle.process.ExecOperations
 import java.nio.file.Files
 
 plugins {
     alias(libs.plugins.android.application)
+}
+
+abstract class CreatePrivdJarTask @Inject constructor(
+    private val execOperations: ExecOperations
+) : DefaultTask() {
+
+    @get:InputFiles
+    abstract val classDirs: ConfigurableFileCollection
+
+    @get:InputFile
+    abstract val androidJar: RegularFileProperty
+
+    @get:InputFile
+    abstract val d8Executable: RegularFileProperty
+
+    @get:OutputFile
+    abstract val outputJar: RegularFileProperty
+
+    @TaskAction
+    fun create() {
+        val classFiles = classDirs
+            .flatMap { Files.walk(it.toPath()).toList() }
+            .filter(Files::isRegularFile)
+            .toTypedArray();
+
+        execOperations.exec {
+            commandLine(
+                d8Executable.get().asFile.absolutePath,
+                "--release",
+                "--output", outputJar.get().asFile.absolutePath,
+                "--classpath", androidJar.get().asFile.absolutePath,
+                *classFiles
+            )
+        }
+    }
 }
 
 android {
@@ -20,32 +57,25 @@ android {
 androidComponents {
     onVariants { variant ->
         val buildType = variant.name;
-        val buildTypeUpper = variant.name.replaceFirstChar { it.uppercase() }
+        val buildTypeUpper = buildType.replaceFirstChar { it.uppercase() }
 
-        tasks.register<Exec>("create${buildTypeUpper}PrivdJar") {
-            group = "build"
+        tasks.register<CreatePrivdJarTask>("create${buildTypeUpper}PrivdJar") {
             description = "privileged daemon jar asset"
-            dependsOn(tasks.build)
-            dependsOn(":libprivd:build")
+            dependsOn(":libprivd:compile${buildTypeUpper}JavaWithJavac")
+            dependsOn("compile${buildTypeUpper}JavaWithJavac")
 
-            val outputJar = rootProject.projectDir.resolve("app/src/main/assets/privd.jar")
-            val androidJar = "${android.sdkDirectory.path}/platforms/android-${android.defaultConfig.targetSdk}/android.jar"
-            val classesDir = layout.buildDirectory.dir("intermediates/javac/${buildType}/compile${buildTypeUpper}JavaWithJavac/classes")
-            val libClassesDir = rootProject.projectDir.resolve("libprivd/build/intermediates/javac/${buildType}/compile${buildTypeUpper}JavaWithJavac/classes")
-            val classFiles = Files.walk(file(classesDir).toPath())
-                .filter { it.toFile().isFile() }
-                .toArray()
-            val libClassFiles = Files.walk(file(libClassesDir).toPath())
-                .filter { it.toFile().isFile() }
-                .toArray()
+            var intermediatesClassesRelative = "intermediates/javac/${buildType}/compile${buildTypeUpper}JavaWithJavac/classes";
 
-            commandLine(
-                "${android.sdkDirectory}/build-tools/${android.buildToolsVersion}/d8",
-                "--release",
-                "--output", outputJar,
-                "--classpath", androidJar,
-                *classFiles, *libClassFiles
-            )
+            classDirs.from(
+                layout.buildDirectory.dir(intermediatesClassesRelative),
+                project(":libprivd").layout.buildDirectory.dir(intermediatesClassesRelative))
+
+            d8Executable.set(file("${android.sdkDirectory.path}/build-tools/${android.buildToolsVersion}/d8"))
+
+            androidJar.set(file("${android.sdkDirectory.path}/platforms/android-${android.defaultConfig.targetSdk}/android.jar"))
+
+            outputJar.set(rootProject.layout.projectDirectory.file("app/src/main/assets/privd.jar"))
+
         }
     }
 }

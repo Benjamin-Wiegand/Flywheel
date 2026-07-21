@@ -78,6 +78,13 @@
             />
 
         <activity
+            android:name=".AboutActivity"
+            android:label="@string/about_title"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            />
+
+        <activity
             android:name=".DebugActivity"
             android:label="@string/debug_title"
             android:exported="true"

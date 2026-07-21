@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(new Intent(this, SettingsActivity.class)),
                 R.id.liability_agreement_button, () ->
                         startActivity(new Intent(this, LiabilityDisclaimerActivity.class)),
+                R.id.about_button, () ->
+                        startActivity(new Intent(this, AboutActivity.class)),
                 R.id.debug_button, () ->
                         startActivity(new Intent(this, DebugActivity.class))
         );

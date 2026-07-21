@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -23,17 +31,25 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingVertical="12dp"
+                android:layout_gravity="center_horizontal"
+                android:padding="24dp"
+                android:drawablePadding="12dp"
+                android:textAlignment="center"
+                android:maxLines="1"
+                android:ellipsize="end"
                 style="?textAppearanceHeadline4"
-                android:text="@string/setup_welcome_title"
+                android:text="@string/app_name"
+                app:drawableTopCompat="@mipmap/ic_launcher"
                 />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingBottom="24dp"
-                style="?textAppearanceBody1"
-                android:text="@string/setup_welcome_body"
+                android:layout_gravity="center_horizontal"
+                android:textAlignment="center"
+                android:ellipsize="end"
+                style="?textAppearanceSubtitle1"
+                android:text="@string/app_subtitle"
                 />
 
             <include
@@ -43,30 +59,5 @@
         </LinearLayout>
 
     </ScrollView>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingVertical="12dp"
-        android:paddingHorizontal="24dp"
-        >
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
-
-        <Button
-            android:id="@+id/next_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            style="?materialButtonStyle"
-            android:text="@string/setup_start_button"
-            />
-
-    </LinearLayout>
 
 </LinearLayout>

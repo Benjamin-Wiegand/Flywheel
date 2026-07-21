@@ -311,5 +311,9 @@
     <string name="use_self_signed_key">Use self-signed certificate and key</string>
     <string name="import_pem_bundle">Import PEM bundle…</string>
 
+    <string name="about_title">About</string>
+    <string name="links_header">links</string>
+    <string name="about_button">About</string>
+
 
 </resources>

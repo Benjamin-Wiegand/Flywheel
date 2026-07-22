@@ -12,9 +12,12 @@ import android.util.Log;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.exception.CorruptedCertificateException;
+import io.benwiegand.projection.geargrinder.exception.CorruptedCertificateKeyBundleException;
 import io.benwiegand.projection.geargrinder.exception.CorruptedKeyException;
 import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
@@ -140,7 +143,33 @@ public class CryptoManager {
                 && settingsManager.saveImportedPhoneX509CertificateChain(chain);
     }
 
-    public boolean testImportedKeys() throws CorruptedKeyException, CorruptedCertificateException {
+    public boolean testImportedKeys() throws CorruptedKeyException, CorruptedCertificateException, CorruptedCertificateKeyBundleException {
+        KeyWithChain<PrivateKey, X509Certificate> keys = getImportedPhoneKeys();
+        if (keys == null) return false;
+
+        if (keys.certChain().length < 1) throw new AssertionError("missing certificate");
+        X509Certificate primaryCert = keys.certChain()[0];
+
+        if (!keys.key().getAlgorithm().equals(primaryCert.getPublicKey().getAlgorithm())) {
+            Log.e(TAG, "mismatching key algorithms");
+            Log.e(TAG, "public = " + primaryCert.getPublicKey().getAlgorithm());
+            Log.e(TAG, "private = " + keys.key().getAlgorithm());
+            throw new CorruptedCertificateKeyBundleException(context, R.string.corrupted_cert_key_bundle_error_mismatching_keys);
+        }
+
+        if (keys.key() instanceof RSAPrivateKey privateKey) {
+            if (primaryCert.getPublicKey() instanceof RSAPublicKey publicKey) {
+                if (!publicKey.getModulus().equals(privateKey.getModulus())) {
+                    Log.e(TAG, "key modulus do not match");
+                    throw new CorruptedCertificateKeyBundleException(context, R.string.corrupted_cert_key_bundle_error_mismatching_keys);
+                }
+            } else {
+                Log.wtf(TAG, "failed to parse public key as rsa: " + primaryCert.getPublicKey());
+            }
+        } else {
+            Log.w(TAG, "unknown key type: " + keys.key().getAlgorithm());
+        }
+
         return getKeystoreForImportedPhoneKeys() != null;
     }
 }

@@ -141,6 +141,8 @@
     <string name="corrupted_cert_error_title">Failed to load SSL/TLS certificate</string>
     <string name="corrupted_cert_error_imported_phone">The imported phone certificate may be corrupted.</string>
     <string name="corrupted_cert_error_self_signed_phone">The stored self-signed phone certificate may be corrupted.</string>
+    <string name="corrupted_cert_key_bundle_error_title">Failed to load SSL/TLS certificate key bundle</string>
+    <string name="corrupted_cert_key_bundle_error_mismatching_keys">The public and private keys do not match.</string>
 
     <string name="import_key_and_cert_first">import a private key and certificate first</string>
 

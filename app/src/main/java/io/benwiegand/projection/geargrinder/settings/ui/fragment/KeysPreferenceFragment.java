@@ -79,14 +79,15 @@ public class KeysPreferenceFragment extends PreferenceFragmentCompat {
             useImportedKeysPref.setSummary(e.getFriendlyMessage());
         }
 
-        if (!importedKeysValid && useImportedKeysValue) {
+        if (!importedKeysValid) {
             useImportedKeysPref.setIconSpaceReserved(true);
             useImportedKeysPref.setIcon(android.R.drawable.stat_notify_error);
-            useImportedKeysPref.setEnabled(true);
+            useImportedKeysPref.setEnabled(false);
+            useImportedKeysPref.setChecked(false);
         } else {
             useImportedKeysPref.setIconSpaceReserved(false);
             useImportedKeysPref.setIcon(null);
-            useImportedKeysPref.setEnabled(importedKeysValid);
+            useImportedKeysPref.setEnabled(true);
         }
     }
 
@@ -112,6 +113,8 @@ public class KeysPreferenceFragment extends PreferenceFragmentCompat {
             } catch (Throwable t) {
                 throw new FileImportException(requireContext(), R.string.file_import_error_unexpected, t);
             }
+
+            useImportedKeysPref.setChecked(true);
 
             preference.notifyChanged();
         } catch (UserFriendlyException e) {

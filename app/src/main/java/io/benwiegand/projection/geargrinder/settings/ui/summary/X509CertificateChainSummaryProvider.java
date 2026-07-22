@@ -133,7 +133,11 @@ public class X509CertificateChainSummaryProvider implements Preference.SummaryPr
             if (i == 0) checks = Stream.concat(primaryCertChecks.stream(), checks);
             checks.forEach(check -> {
                 CheckResult result = check.apply(cert);
-                if (result.passed()) return;
+                if (result.passed()) {
+                    String line = context.getString(R.string.certificate_check_failure_line_pref_summary_format, result.summary(context));
+                    ssb.append("\n").append(line);
+                    return;
+                }
                 String line = context.getString(R.string.certificate_check_failure_line_pref_summary_format, result.summary(context));
                 ssb.append("\n").append(line, new ForegroundColorSpan(colorError), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             });

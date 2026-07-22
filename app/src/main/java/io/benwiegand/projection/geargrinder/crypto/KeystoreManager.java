@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.KeyManager;
@@ -114,7 +116,7 @@ public class KeystoreManager {
      * @param alias the alias to store the key as (must be unique)
      * @param keyWithChain the private key and certificate chain as a KeyWithChain
      */
-    public void importKey(String alias, KeyWithChain keyWithChain) {
+    public void importKey(String alias, KeyWithChain<PrivateKey, ? extends Certificate> keyWithChain) {
         try {
             if (hasKey(alias)) throw new AssertionError("key already present for alias: " + alias);
             Log.i(TAG, "importing keys: \n" + keyWithChain.certChainInfoToString());

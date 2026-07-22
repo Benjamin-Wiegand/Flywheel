@@ -12,18 +12,10 @@
             app:iconSpaceReserved="false"
             />
 
-        <io.benwiegand.projection.geargrinder.settings.ui.preference.X509CertificateChainImportPreference
+        <io.benwiegand.projection.geargrinder.settings.ui.preference.PemCertificateKeyBundleImportPreference
             app:key="@string/key_imported_phone_x509_certificate_chain"
             app:iconSpaceReserved="false"
-            app:title="@string/imported_phone_x509_certificate_chain_pref_name"
-            app:maxFileSize="500000"
-            />
-
-        <io.benwiegand.projection.geargrinder.settings.ui.preference.PKCS8PrivateKeyImportPreference
-            app:key="@string/key_imported_phone_pkcs8_private_key"
-            app:iconSpaceReserved="false"
-            app:title="@string/imported_phone_pkcs8_private_key_pref_name"
-            app:maxFileSize="500000"
+            app:title="@string/import_pem_certificate_key_bundle_pref_name"
             />
 
     </PreferenceCategory>
@@ -35,13 +27,7 @@
 
         <Preference
             app:key="@string/key_self_signed_phone_x509_certificate_chain"
-            app:title="@string/self_signed_phone_x509_certificate_chain_pref_name"
-            app:iconSpaceReserved="false"
-            />
-
-        <Preference
-            app:key="@string/key_self_signed_phone_pkcs8_private_key"
-            app:title="@string/self_signed_phone_pkcs8_private_key_pref_name"
+            app:title="@string/self_signed_certificate_key_status_pref_name"
             app:iconSpaceReserved="false"
             />
 

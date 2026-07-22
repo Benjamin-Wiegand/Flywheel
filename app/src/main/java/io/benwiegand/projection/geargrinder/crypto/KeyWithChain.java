@@ -8,7 +8,7 @@ import android.util.Base64;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 
-public record KeyWithChain(PrivateKey key, Certificate... certChain) {
+public record KeyWithChain<K extends PrivateKey, C extends Certificate>(K key, C[] certChain) {
 
     private String certChainDumpToString() {
         StringBuilder sb = new StringBuilder();

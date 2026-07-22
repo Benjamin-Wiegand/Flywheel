@@ -48,11 +48,11 @@ public class CryptoManager {
         }
     }
 
-    public KeyWithChain getImportedPhoneKeys() throws CorruptedKeyException, CorruptedCertificateException {
+    public KeyWithChain<PrivateKey, X509Certificate> getImportedPhoneKeys() throws CorruptedKeyException, CorruptedCertificateException {
         PrivateKey privateKey = getImportedPhonePKCS8PrivateKey();
         X509Certificate[] certChain = getImportedPhoneX509CertificateChain();
         if (privateKey == null || certChain == null) return null;
-        return new KeyWithChain(privateKey, certChain);
+        return new KeyWithChain<>(privateKey, certChain);
     }
 
     public PrivateKey getSelfSignedPhonePKCS8PrivateKey() throws CorruptedKeyException {
@@ -71,15 +71,15 @@ public class CryptoManager {
         }
     }
 
-    public KeyWithChain getSelfSignedPhoneKeys() throws CorruptedCertificateException, CorruptedKeyException {
+    public KeyWithChain<PrivateKey, X509Certificate> getSelfSignedPhoneKeys() throws CorruptedCertificateException, CorruptedKeyException {
         PrivateKey privateKey = getSelfSignedPhonePKCS8PrivateKey();
         X509Certificate[] certChain = getSelfSignedPhoneX509CertificateChain();
         if (privateKey == null || certChain == null) return null;
-        return new KeyWithChain(privateKey, certChain);
+        return new KeyWithChain<>(privateKey, certChain);
     }
 
-    public KeyWithChain getOrGenerateSelfSignedPhoneKeys() {
-        KeyWithChain keys = null;
+    public KeyWithChain<PrivateKey, X509Certificate> getOrGenerateSelfSignedPhoneKeys() {
+        KeyWithChain<PrivateKey, X509Certificate> keys = null;
         try {
             keys = getSelfSignedPhoneKeys();
         } catch (CorruptedKeyException | CorruptedCertificateException e) {
@@ -101,7 +101,7 @@ public class CryptoManager {
     }
 
     public KeystoreManager getKeystoreForImportedPhoneKeys() throws CorruptedKeyException, CorruptedCertificateException {
-        KeyWithChain keys = getImportedPhoneKeys();
+        KeyWithChain<PrivateKey, X509Certificate> keys = getImportedPhoneKeys();
         if (keys == null) return null;
         KeystoreManager km = new KeystoreManager();
         km.importKey(PHONE_KEY_ALIAS, keys);
@@ -109,7 +109,7 @@ public class CryptoManager {
     }
 
     public KeystoreManager getKeystoreForSelfSignedPhoneKeys() {
-        KeyWithChain keys = getOrGenerateSelfSignedPhoneKeys();
+        KeyWithChain<PrivateKey, X509Certificate> keys = getOrGenerateSelfSignedPhoneKeys();
         KeystoreManager km = new KeystoreManager();
         km.importKey(PHONE_KEY_ALIAS, keys);
         return km;
@@ -131,6 +131,13 @@ public class CryptoManager {
 
     public boolean importPhoneX509CertificateChain(X509Certificate[] certChain) throws CertificateEncodingException {
         return settingsManager.saveImportedPhoneX509CertificateChain(encodeCertChain(certChain));
+    }
+
+    public boolean importPhoneX509CertificatePKCS8KeyBundle(KeyWithChain<PrivateKey, X509Certificate> keyWithChain) throws CertificateEncodingException {
+        byte[] key = encodePrivateKey(keyWithChain.key());
+        byte[][] chain = encodeCertChain(keyWithChain.certChain());
+        return settingsManager.saveImportedPhonePKCS8PrivateKey(key)
+                && settingsManager.saveImportedPhoneX509CertificateChain(chain);
     }
 
     public boolean testImportedKeys() throws CorruptedKeyException, CorruptedCertificateException {

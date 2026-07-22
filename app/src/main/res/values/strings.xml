@@ -124,11 +124,15 @@
     <string name="video_frame_rate_optimization_summary">breaks compatibility with some emulators</string>
 
     <string name="file_import_error_title">Failed to import file</string>
-    <string name="file_import_error_invalid_cert">Not a supported certificate format</string>
-    <string name="file_import_error_invalid_key">Not a supported private key format</string>
+    <string name="file_import_error_invalid_cert">Not a supported certificate format (requires X509)</string>
+    <string name="file_import_error_invalid_key">Not a supported RSA private key format (requires PKCS#8)</string>
     <string name="file_import_error_too_large">File larger than expected</string>
     <string name="file_import_error_io_error">Failed to read file</string>
     <string name="file_import_error_unexpected">Unexpected error</string>
+    <string name="file_import_error_invalid_pem">File is not valid PEM format</string>
+    <string name="file_import_error_bundle_missing_key">PEM bundle has no private key</string>
+    <string name="file_import_error_bundle_multiple_keys">PEM bundle has too many private keys (expected 1)</string>
+    <string name="file_import_error_bundle_missing_certificate">PEM bundle has no certificates</string>
 
     <string name="default_error_title">An error has occurred</string>
     <string name="corrupted_key_error_title">Failed to load SSL/TLS private key</string>
@@ -140,15 +144,14 @@
 
     <string name="import_key_and_cert_first">import a private key and certificate first</string>
 
+    <string name="pref_category_compatibility">compatibility</string>
+
+    <string name="certificates_and_keys_pref_screen_button">Certificates and keys</string>
     <string name="pref_category_imported_keys">imported keys</string>
     <string name="pref_category_self_signed_keys">self-signed keys</string>
-    <string name="pref_category_compatibility">compatibility</string>
     <string name="use_imported_phone_keys_pref_name">Use imported keys</string>
-    <string name="imported_phone_x509_certificate_chain_pref_name">Import X509 certificate or chain</string>
-    <string name="imported_phone_pkcs8_private_key_pref_name">Import PKCS#8 private key</string>
-    <string name="self_signed_phone_x509_certificate_chain_pref_name">Certificate status</string>
-    <string name="self_signed_phone_pkcs8_private_key_pref_name">Private key status</string>
-    <string name="certificates_and_keys_pref_screen_button">Certificates and keys</string>
+    <string name="import_pem_certificate_key_bundle_pref_name">Import PEM certificate/key bundle</string>
+    <string name="self_signed_certificate_key_status_pref_name">Self-signed keys status</string>
 
     <string name="keep_screen_awake_pref_name">Prevent display sleep while connected</string>
     <string name="keep_screen_awake_summary">avoids issues with touch input and display output</string>

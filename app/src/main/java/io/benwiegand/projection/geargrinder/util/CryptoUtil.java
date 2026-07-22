@@ -1,5 +1,6 @@
 package io.benwiegand.projection.geargrinder.util;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.bouncycastle.asn1.x509.X509Name;
@@ -8,6 +9,7 @@ import org.bouncycastle.x509.X509V1CertificateGenerator;
 import org.bouncycastle.x509.util.StreamParsingException;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -18,13 +20,21 @@ import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.crypto.KeyWithChain;
+import io.benwiegand.projection.geargrinder.crypto.PemParser;
+import io.benwiegand.projection.geargrinder.exception.FileImportException;
+import io.benwiegand.projection.geargrinder.exception.PemParseException;
 
 public class CryptoUtil {
     private static final String TAG = CryptoUtil.class.getSimpleName();
@@ -50,7 +60,7 @@ public class CryptoUtil {
         }
     }
 
-    public static Certificate selfSignPhoneKeypair(KeyPair keypair) {
+    public static X509Certificate selfSignPhoneKeypair(KeyPair keypair) {
         try {
             Log.d(TAG, "self-signing keypair with X509 / SSLv1");
             X509V1CertificateGenerator certgen = new X509V1CertificateGenerator();
@@ -73,10 +83,10 @@ public class CryptoUtil {
         }
     }
 
-    public static KeyWithChain generateSelfSignedPhoneKeys() {
+    public static KeyWithChain<PrivateKey, X509Certificate> generateSelfSignedPhoneKeys() {
         KeyPair keypair = generatePhoneSelfKeypair();
-        Certificate certificate = selfSignPhoneKeypair(keypair);
-        return new KeyWithChain(keypair.getPrivate(), certificate);
+        X509Certificate certificate = selfSignPhoneKeypair(keypair);
+        return new KeyWithChain<>(keypair.getPrivate(), new X509Certificate[] {certificate});
     }
 
     public static byte[][] encodeCertChain(Certificate... certChain) throws CertificateEncodingException {
@@ -120,6 +130,63 @@ public class CryptoUtil {
             Log.wtf(TAG, "failed to load stored private key", t);
             throw t;
         }
+    }
+
+    public static KeyWithChain<PrivateKey, X509Certificate> parseX509CertificatePKCS8KeyBundleFromPemFile(Context context, InputStream is) throws FileImportException {
+        PemParser pemParser;
+        try {
+            Log.i(TAG, "parsing PEM bundle");
+            pemParser = new PemParser(is);
+            pemParser.parse();
+        } catch (PemParseException e) {
+            throw new FileImportException(context, R.string.file_import_error_invalid_pem, e);
+        } catch (Throwable t) {
+            throw new FileImportException(context, R.string.file_import_error_io_error, t);
+        }
+
+        List<byte[]> privateKeyBlocks = new ArrayList<>(1);
+        List<byte[]> certificateBlocks = new ArrayList<>(2);
+
+        privateKeyBlocks.addAll(pemParser.getBlocks(PemParser.PEM_TAG_RSA_PRIVATE_KEY));
+        privateKeyBlocks.addAll(pemParser.getBlocks(PemParser.PEM_TAG_PRIVATE_KEY));
+        certificateBlocks.addAll(pemParser.getBlocks(PemParser.PEM_TAG_CERTIFICATE));
+        certificateBlocks.addAll(pemParser.getBlocks(PemParser.PEM_TAG_X509_CERTIFICATE));
+        certificateBlocks.addAll(pemParser.getBlocks(PemParser.PEM_TAG_X_509_CERTIFICATE));
+
+        Log.i(TAG, "found " + privateKeyBlocks.size() + " private key(s)");
+        Log.i(TAG, "found " + certificateBlocks.size() + " certificate(s)");
+
+        if (privateKeyBlocks.isEmpty())
+            throw new FileImportException(context, R.string.file_import_error_bundle_missing_key);
+        if (certificateBlocks.isEmpty())
+            throw new FileImportException(context, R.string.file_import_error_bundle_missing_certificate);
+        if (privateKeyBlocks.size() > 1)
+            throw new FileImportException(context, R.string.file_import_error_bundle_multiple_keys);
+
+        PrivateKey privateKey;
+        X509Certificate[] certChain = new X509Certificate[certificateBlocks.size()];
+        try {
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X509");
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+            Log.i(TAG, "parsing private key");
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBlocks.get(0));
+            privateKey = keyFactory.generatePrivate(keySpec);
+
+            Log.i(TAG, "parsing certificates");
+            for (int i = 0; i < certificateBlocks.size(); i++) {
+                certChain[i] = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(certificateBlocks.get(i)));
+            }
+
+        } catch (CertificateException e) {
+            throw new FileImportException(context, R.string.file_import_error_invalid_cert, e);
+        } catch (InvalidKeySpecException e) {
+            throw new FileImportException(context, R.string.file_import_error_invalid_key, e);
+        } catch (Throwable t) {
+            throw new FileImportException(context, R.string.file_import_error_unexpected, t);
+        }
+
+        return new KeyWithChain<>(privateKey, certChain);
     }
 
 }

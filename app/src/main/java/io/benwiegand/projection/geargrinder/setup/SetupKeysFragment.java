@@ -26,7 +26,5 @@ public class SetupKeysFragment extends SetupFragment {
 
         learnMoreButton.setOnClickListener(v ->
                 openLink(requireActivity(), CERTIFICATES_AND_KEYS_INFO_LINK));
-
-        // TODO: import bundle
     }
 }

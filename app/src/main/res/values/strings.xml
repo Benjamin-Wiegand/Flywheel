@@ -303,7 +303,7 @@
     <string name="setup_keys_title">Certificates and Keys</string>
     <string name="setup_keys_body_1">Official Android Auto headunits usually require Google-endorsed certificates and keys extracted from the Android Auto app.</string>
     <string name="setup_keys_body_2">If you don\'t have keys, you can try using Flywheel\'s self-signed keys.</string>
-    <string name="setup_keys_notice"><![CDATA[You can manage this at any time in Settings > Certificates and Keys]]></string>
+    <string name="setup_keys_notice"><![CDATA[You can import keys from Settings > Certificates and Keys]]></string>
     <string name="setup_finish_title">Thanks!</string>
     <string name="setup_finish_body_1">Thank you for taking the time to try Flywheel!</string>
     <string name="setup_finish_body_2">Please don\'t hesitate to report any bugs or issues so they can be addressed.</string>

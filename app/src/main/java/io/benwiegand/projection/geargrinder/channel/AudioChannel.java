@@ -166,7 +166,7 @@ public class AudioChannel extends AVChannel<AudioPreset> {
                 // when no audio is playing, no audio packets are sent
                 // but some trailing empty buffers must be sent to avoid the receiver indefinitely repeating the last 40 ms or so of audio
                 if (result.silent) {
-                    if (silenceBuffers > TRAILING_SILENCE_BUFFERS) {
+                    if (silenceBuffers > TRAILING_SILENCE_BUFFERS || !started) {
                         if (started) sendStopIndication();
                         started = false;
                         continue;

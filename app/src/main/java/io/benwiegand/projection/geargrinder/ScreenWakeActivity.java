@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -22,6 +23,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import java.util.Random;
 
 public class ScreenWakeActivity extends AppCompatActivity {
+    private static final String TAG = ScreenWakeActivity.class.getSimpleName();
 
     public static final String INTENT_ACTION_FINISH = "io.benwiegand.projection.geargrinder.ScreenWakeActivity.FINISH";
 
@@ -32,9 +34,12 @@ public class ScreenWakeActivity extends AppCompatActivity {
 
     private final Random random = new Random();
 
+    private boolean previouslyShowing = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_screen_wake);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -77,9 +82,17 @@ public class ScreenWakeActivity extends AppCompatActivity {
     }
 
     private void onIntent(Intent intent) {
+        Log.d(TAG, "got intent: " + intent);
         if (intent == null) return;
-        if (!INTENT_ACTION_FINISH.equals(intent.getAction())) return;
-        finish();
+        if (INTENT_ACTION_FINISH.equals(intent.getAction())) {
+            Log.i(TAG, "finish intent");
+            finish();
+            return;
+        }
+
+        Log.i(TAG, "launch intent, previouslyShowing=" + previouslyShowing);
+        if (previouslyShowing) finish();
+        previouslyShowing = true;
     }
 
     private void moveInfoSection() {

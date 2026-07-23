@@ -1,9 +1,5 @@
 package io.benwiegand.projection.geargrinder.setup;
 
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.ISSUE_TRACKER_LINK;
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.LICENSE_LINK;
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.SOURCE_CODE_LINK;
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.WIKI_LINK;
 import static io.benwiegand.projection.geargrinder.util.ActivityUtil.openLink;
 
 import android.os.Bundle;
@@ -30,15 +26,15 @@ public class SetupWelcomeFragment extends SetupFragment {
         View issueTrackerButton = view.findViewById(R.id.issue_tracker_button);
 
         sourceCodeButton.setOnClickListener(v ->
-                openLink(requireActivity(), SOURCE_CODE_LINK));
+                openLink(requireActivity(), R.string.source_code_link));
 
         wikiButton.setOnClickListener(v ->
-                openLink(requireActivity(), WIKI_LINK));
+                openLink(requireActivity(), R.string.wiki_link));
 
         licenseButton.setOnClickListener(v ->
-                openLink(requireActivity(), LICENSE_LINK));
+                openLink(requireActivity(), R.string.license_link));
 
         issueTrackerButton.setOnClickListener(v ->
-                openLink(requireActivity(), ISSUE_TRACKER_LINK));
+                openLink(requireActivity(), R.string.issue_tracker_link));
     }
 }

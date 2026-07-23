@@ -1,6 +1,5 @@
 package io.benwiegand.projection.geargrinder.setup;
 
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.CERTIFICATES_AND_KEYS_INFO_LINK;
 import static io.benwiegand.projection.geargrinder.util.ActivityUtil.openLink;
 
 import android.os.Bundle;
@@ -25,6 +24,6 @@ public class SetupKeysFragment extends SetupFragment {
         Button learnMoreButton = view.findViewById(R.id.learn_more_button);
 
         learnMoreButton.setOnClickListener(v ->
-                openLink(requireActivity(), CERTIFICATES_AND_KEYS_INFO_LINK));
+                openLink(requireActivity(), R.string.certificates_and_keys_info_link));
     }
 }

@@ -1,6 +1,5 @@
 package io.benwiegand.projection.geargrinder.permission;
 
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.SHIZUKU_DOWNLOAD_LINK;
 import static io.benwiegand.projection.geargrinder.util.ActivityUtil.openLink;
 import static io.benwiegand.projection.geargrinder.util.ActivityUtil.tryLaunchIntents;
 
@@ -154,7 +153,7 @@ public class PermissionRequirements {
                             activity.startActivity(shizukuLaunchIntent));
                 } else {
                     errorDialog.setPositiveButton(R.string.download_shizuku_button, (d, i) ->
-                            openLink(activity, SHIZUKU_DOWNLOAD_LINK));
+                            openLink(activity, R.string.shizuku_download_link));
                 }
 
                 if (Shizuku.isPreV11()) {

@@ -5,16 +5,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.StringRes;
+
 public class ActivityUtil {
     private static final String TAG = ActivityUtil.class.getSimpleName();
-
-    public static final String SOURCE_CODE_LINK = "https://github.com/Benjamin-Wiegand/Flywheel";
-    public static final String WIKI_LINK = "https://github.com/Benjamin-Wiegand/Flywheel/wiki";
-    public static final String LICENSE_LINK = "https://github.com/Benjamin-Wiegand/Flywheel/blob/master/LICENSE";
-    public static final String ISSUE_TRACKER_LINK = "https://github.com/Benjamin-Wiegand/Flywheel/issues";
-    public static final String CERTIFICATES_AND_KEYS_INFO_LINK = "https://github.com/Benjamin-Wiegand/Flywheel/wiki/Certificates-and-Keys";
-
-    public static final String SHIZUKU_DOWNLOAD_LINK = "https://github.com/RikkaApps/Shizuku/releases/latest";
 
     public static void tryLaunchIntents(Activity activity, Intent... intents) {
         for (Intent intent : intents) {
@@ -33,5 +27,9 @@ public class ActivityUtil {
 
     public static void openLink(Activity activity, String uri) {
         activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(uri)));
+    }
+
+    public static void openLink(Activity activity, @StringRes int uriRes) {
+        openLink(activity, activity.getString(uriRes));
     }
 }

@@ -322,5 +322,12 @@
     <string name="links_header">links</string>
     <string name="about_button">About</string>
 
+    <string name="source_code_link" translatable="false">https://github.com/Benjamin-Wiegand/Flywheel</string>
+    <string name="wiki_link" translatable="false">https://github.com/Benjamin-Wiegand/Flywheel/wiki</string>
+    <string name="license_link" translatable="false">https://github.com/Benjamin-Wiegand/Flywheel/blob/master/LICENSE</string>
+    <string name="issue_tracker_link" translatable="false">https://github.com/Benjamin-Wiegand/Flywheel/issues</string>
+    <string name="certificates_and_keys_info_link" translatable="false">https://github.com/Benjamin-Wiegand/Flywheel/wiki/Certificates-and-Keys</string>
+
+    <string name="shizuku_download_link" translatable="false">https://github.com/RikkaApps/Shizuku/releases/latest</string>
 
 </resources>

@@ -1,9 +1,5 @@
 package io.benwiegand.projection.geargrinder;
 
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.ISSUE_TRACKER_LINK;
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.LICENSE_LINK;
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.SOURCE_CODE_LINK;
-import static io.benwiegand.projection.geargrinder.util.ActivityUtil.WIKI_LINK;
 import static io.benwiegand.projection.geargrinder.util.ActivityUtil.openLink;
 
 import android.os.Bundle;
@@ -39,16 +35,16 @@ public class AboutActivity extends AppCompatActivity {
         View issueTrackerButton = findViewById(R.id.issue_tracker_button);
 
         sourceCodeButton.setOnClickListener(v ->
-                openLink(this, SOURCE_CODE_LINK));
+                openLink(this, R.string.source_code_link));
 
         wikiButton.setOnClickListener(v ->
-                openLink(this, WIKI_LINK));
+                openLink(this, R.string.wiki_link));
 
         licenseButton.setOnClickListener(v ->
-                openLink(this, LICENSE_LINK));
+                openLink(this, R.string.license_link));
 
         issueTrackerButton.setOnClickListener(v ->
-                openLink(this, ISSUE_TRACKER_LINK));
+                openLink(this, R.string.issue_tracker_link));
     }
 
     @Override

@@ -215,6 +215,13 @@
     <string name="connection_error_ssl_handshake">SSL handshake failed</string>
     <string name="connection_error_failed_to_parse_service_discovery">failed to parse service discovery response</string>
 
+    <string name="auth_error_title">Authentication error</string>
+    <string name="auth_error_message_format" formatted="true">headunit error code: %d (%s)</string>
+    <string name="auth_error_general" formatted="true">general failure</string>
+    <string name="auth_error_cert_not_valid_yet" formatted="true">certificate not valid yet</string>
+    <string name="auth_error_cert_not_valid_anymore" formatted="true">certificate is expired</string>
+    <string name="auth_error_unknown" formatted="true">unknown</string>
+
     <string name="projection_error_title">Projection error</string>
     <string name="projection_error_privd_launch_failure">failed to launch privileged daemon</string>
     <string name="projection_error_privd_disconnected">lost connection to privileged daemon</string>

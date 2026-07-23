@@ -12,7 +12,7 @@ public class UserFriendlyException extends Exception {
     private final String friendlyTitle;
     private final String friendlyMessage;
 
-    private static String extractExceptionMessage(Context appContext, @StringRes int message) {
+    protected static String extractExceptionMessage(Context appContext, @StringRes int message) {
         // make the actual exception message english, despite allowing it to be translated for the UI
         return LocaleUtil.getDeveloperContext(appContext)
                 .getString(message);
@@ -40,6 +40,12 @@ public class UserFriendlyException extends Exception {
         super(extractExceptionMessage(c, message), cause);
         friendlyTitle = c.getString(title);
         friendlyMessage = c.getString(message);
+    }
+
+    protected UserFriendlyException(String devMessage, String friendlyTitle, String friendlyMessage, Throwable cause) {
+        super(devMessage, cause);
+        this.friendlyTitle = friendlyTitle;
+        this.friendlyMessage = friendlyMessage;
     }
 
     @Nullable

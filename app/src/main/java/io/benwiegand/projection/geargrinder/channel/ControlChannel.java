@@ -14,6 +14,7 @@ import javax.net.ssl.SSLException;
 
 import io.benwiegand.projection.geargrinder.ConnectionService;
 import io.benwiegand.projection.geargrinder.R;
+import io.benwiegand.projection.geargrinder.exception.AuthFailureException;
 import io.benwiegand.projection.geargrinder.exception.ConnectionError;
 import io.benwiegand.projection.geargrinder.exception.ProjectionException;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
@@ -24,6 +25,7 @@ import io.benwiegand.projection.geargrinder.message.MessageBroker;
 import io.benwiegand.projection.geargrinder.callback.MessageListener;
 import io.benwiegand.projection.geargrinder.projection.ProjectionService;
 import io.benwiegand.projection.geargrinder.proto.data.readable.AudioFocusResponse;
+import io.benwiegand.projection.geargrinder.proto.data.readable.AuthCompleteResponse;
 import io.benwiegand.projection.geargrinder.proto.data.readable.PingRequest;
 import io.benwiegand.projection.geargrinder.proto.data.readable.av.AudioChannelMeta;
 import io.benwiegand.projection.geargrinder.proto.data.readable.ChannelMeta;
@@ -303,11 +305,18 @@ public class ControlChannel implements MessageListener, ProjectionService.Listen
             }
 
             case CMD_AUTH_COMPLETE -> {
-                Log.i(TAG, "auth complete: " + hexDump(buffer, payloadOffset, payloadLength));
+                AuthCompleteResponse authCompleteResponse = AuthCompleteResponse.parse(buffer, payloadOffset + COMMAND_ID_LENGTH, payloadLength - COMMAND_ID_LENGTH);
+                Log.i(TAG, "auth complete: " + authCompleteResponse);
 
                 if (tlsService.needsHandshake()) {
                     Log.wtf(TAG, "auth complete before handshake completed?");
                     throw new AssertionError("received auth complete before SSL handshake");
+                }
+
+                if (authCompleteResponse != null && authCompleteResponse.status() != 0) {
+                    Log.e(TAG, "auth failed with code: " + authCompleteResponse.status());
+                    mb.connectionErrorFatal(new AuthFailureException(context, authCompleteResponse.status()));
+                    return;
                 }
 
                 Log.i(TAG, "sending service discovery request");

@@ -2,6 +2,8 @@ package io.benwiegand.projection.geargrinder;
 
 import static androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 
+import static io.benwiegand.projection.geargrinder.util.UiUtil.dpToPx;
+
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,11 +32,20 @@ public class ScreenWakeActivity extends AppCompatActivity {
     // moves the info section for burn-in reduction
     private static final long MOVE_INFO_SECTION_INTERVAL = 60000;
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
+    private static final long MAX_DOUBLE_TAP_DELAY = 500;
+    private static final float MAX_DOUBLE_TAP_GROUPING_DISTANCE_DP = 48;
 
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
 
+    private float maxDoubleTapGroupingDistance;
+
     private boolean previouslyShowing = false;
+    private Object doubleTapResetToken = new Object();
+    private int tapCounter = 0;
+
+    private float downX = 0;
+    private float downY = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,6 +82,8 @@ public class ScreenWakeActivity extends AppCompatActivity {
                 moveInfoSection();
             }
         });
+
+        maxDoubleTapGroupingDistance = dpToPx(this, MAX_DOUBLE_TAP_GROUPING_DISTANCE_DP);
 
         onIntent(getIntent());
     }
@@ -117,15 +130,64 @@ public class ScreenWakeActivity extends AppCompatActivity {
         }
     }
 
+    private void startDoubleTapResetDelay() {
+        Object token = new Object();
+        doubleTapResetToken = token;
+        handler.postDelayed(() -> {
+            if (doubleTapResetToken != token) return;
+            tapCounter = 0;
+        }, MAX_DOUBLE_TAP_DELAY);
+    }
+
+    public boolean onMotionEvent(MotionEvent event) {
+        // don't count multi-touch
+        if (event.getPointerCount() > 1) {
+            tapCounter = 0;
+            return false;
+        }
+
+        // limit double tap grouping to a normal ui button size
+        if (tapCounter > 0) {
+            float diffX = Math.abs(downX - event.getX());
+            float diffY = Math.abs(downY - event.getY());
+            if (diffX > maxDoubleTapGroupingDistance || diffY > maxDoubleTapGroupingDistance) {
+                tapCounter = 0;
+                return false;
+            }
+        }
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN -> {
+                if (tapCounter == 0) {
+                    downX = event.getX();
+                    downY = event.getY();
+                    tapCounter = 1;
+                    startDoubleTapResetDelay();
+                    return true;
+                } else if (tapCounter == 1) {
+                    tapCounter = 2;
+                    return true;
+                }
+            }
+            case MotionEvent.ACTION_UP -> {
+                if (tapCounter == 2) {
+                    Log.i(TAG, "double tap");
+                    finish();
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        finish();
-        return super.onTouchEvent(event);
+        return onMotionEvent(event);
     }
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        finish();
-        return super.onGenericMotionEvent(event);
+        return onMotionEvent(event);
     }
 }

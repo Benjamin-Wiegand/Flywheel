@@ -109,7 +109,8 @@ public class AudioChannel extends AVChannel<AudioPreset> {
     @Override
     protected void avLoop(Supplier<Boolean> runCondition) {
         Log.i(TAG, "audio loop start");
-        int silence = 0;
+        int silenceBuffers = 0;
+        boolean started = false;
         AudioCaptureResult result = new AudioCaptureResult();
 
         // find working preset
@@ -141,8 +142,6 @@ public class AudioChannel extends AVChannel<AudioPreset> {
         }
 
         try {
-            sendStartIndication(new AVStartIndication(0, avPreset.index()));
-
             while (runCondition.get()) {
                 if (!waitForAck(AV_ACK_TIMEOUT)) continue;
 
@@ -167,10 +166,17 @@ public class AudioChannel extends AVChannel<AudioPreset> {
                 // when no audio is playing, no audio packets are sent
                 // but some trailing empty buffers must be sent to avoid the receiver indefinitely repeating the last 40 ms or so of audio
                 if (result.silent) {
-                    if (silence > TRAILING_SILENCE_BUFFERS) continue;
-                    silence++;
+                    if (silenceBuffers > TRAILING_SILENCE_BUFFERS) {
+                        if (started) sendStopIndication();
+                        started = false;
+                        continue;
+                    }
+                    silenceBuffers++;
                 } else {
-                    silence = 0;
+                    if (!started)
+                        sendStartIndication(new AVStartIndication(0, avPreset.index()));
+                    started = true;
+                    silenceBuffers = 0;
                 }
 
                 writeUInt16(AV_CMD_MEDIA_WITH_TIMESTAMP, buffer, 0);
@@ -182,7 +188,7 @@ public class AudioChannel extends AVChannel<AudioPreset> {
             Log.e(TAG, "interrupted", e);
         } finally {
             Log.d(TAG, "audio loop death");
-            sendStopIndication();
+            if (started) sendStopIndication();
             audioCapture.destroy();
         }
     }

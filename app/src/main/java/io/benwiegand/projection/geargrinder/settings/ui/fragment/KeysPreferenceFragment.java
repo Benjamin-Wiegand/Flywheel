@@ -27,6 +27,7 @@ import io.benwiegand.projection.geargrinder.crypto.CryptoManager;
 import io.benwiegand.projection.geargrinder.crypto.KeyWithChain;
 import io.benwiegand.projection.geargrinder.exception.FileImportException;
 import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
+import io.benwiegand.projection.geargrinder.settings.ui.preference.LinkPreference;
 import io.benwiegand.projection.geargrinder.settings.ui.preference.PemCertificateKeyBundleImportPreference;
 import io.benwiegand.projection.geargrinder.settings.ui.summary.X509CertificateChainSummaryProvider;
 
@@ -125,13 +126,15 @@ public class KeysPreferenceFragment extends PreferenceFragmentCompat {
 
     @Override
     public void onDisplayPreferenceDialog(@NonNull Preference preference) {
-        if (preference instanceof PemCertificateKeyBundleImportPreference fileImportPreference) {
-            filePickerCallback = uri -> onImportPemBundle(fileImportPreference, uri);
-            filePickerLauncher.launch(fileImportPreference.getAcceptedMimeTypes());
-            return;
+        switch (preference) {
+            case PemCertificateKeyBundleImportPreference fileImportPreference -> {
+                filePickerCallback = uri -> onImportPemBundle(fileImportPreference, uri);
+                filePickerLauncher.launch(fileImportPreference.getAcceptedMimeTypes());
+            }
+            case LinkPreference linkPreference -> linkPreference.open(requireActivity());
+            default -> super.onDisplayPreferenceDialog(preference);
         }
 
-        super.onDisplayPreferenceDialog(preference);
     }
 
 }

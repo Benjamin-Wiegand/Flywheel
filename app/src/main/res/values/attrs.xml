@@ -6,6 +6,10 @@
         <attr name="acceptedMimeTypes" format="string" />   <!-- comma separated -->
     </declare-styleable>
 
+    <declare-styleable name="LinkPreference">
+        <attr name="link" format="string" />
+    </declare-styleable>
+
     <declare-styleable name="PrivilegeLevelOptionView">
         <attr name="icon" format="reference" />
         <attr name="text" format="string" />

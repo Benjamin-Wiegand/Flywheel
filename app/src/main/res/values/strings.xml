@@ -315,8 +315,6 @@
     <string name="learn_more_link_button">learn more</string>
     <string name="root_superuser_mode">root/Superuser</string>
     <string name="adb_shizuku_mode">adb/Shizuku</string>
-    <string name="use_self_signed_key">Use self-signed certificate and key</string>
-    <string name="import_pem_bundle">Import PEM bundle…</string>
     <string name="certificates_and_keys_help_link_pref_name">Learn more / How to obtain</string>
     <string name="certificates_and_keys_help_link_pref_summary">Learn about certificates and keys</string>
 

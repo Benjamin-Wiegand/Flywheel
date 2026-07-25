@@ -164,21 +164,6 @@
         </service>
 
         <service
-            android:name=".AccessibilityInputService"
-            android:exported="false"
-            android:label="@string/app_name"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            tools:ignore="AccessibilityPolicy">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_meta" />
-        </service>
-
-        <service
             android:name=".PackageService"
             android:exported="false"
             />

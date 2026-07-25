@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import io.benwiegand.projection.geargrinder.AccessibilityInputService;
 import io.benwiegand.projection.geargrinder.ConnectionService;
 import io.benwiegand.projection.geargrinder.IShizukuUserService;
 import io.benwiegand.projection.geargrinder.LogService;
@@ -25,7 +24,6 @@ import rikka.shizuku.Shizuku;
 public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
     private static final String PACKAGE_NAME = "io.benwiegand.projection.geargrinder";
 
-    private static final ComponentName ACCESSIBILITY_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, AccessibilityInputService.class.getName());
     private static final ComponentName PROJECTION_ACTIVITY_COMPONENT = new ComponentName(PACKAGE_NAME, ProjectionActivity.class.getName());
     private static final ComponentName PRIVD_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, PrivdService.class.getName());
     private static final ComponentName PACKAGE_SERVICE_COMPONENT = new ComponentName(PACKAGE_NAME, PackageService.class.getName());
@@ -48,7 +46,6 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
     private boolean contextBound = false;
 
     public interface ConnectionListener {
-        default void onAccessibilityServiceConnected(AccessibilityInputService.ServiceBinder binder) {}
         default void onProjectionActivityConnected(ProjectionActivity.ActivityBinder binder) {}
         default void onPrivdServiceConnected(PrivdService.ServiceBinder binder) {}
         default void onPackageServiceConnected(PackageService.ServiceBinder binder) {}
@@ -85,15 +82,6 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
         return Optional.ofNullable(binderMap.get(componentName));
     }
 
-
-    public void bindAccessibilityService() {
-        makeshiftBind(ACCESSIBILITY_SERVICE_COMPONENT);
-    }
-
-    public Optional<AccessibilityInputService.ServiceBinder> getAccessibilityBinder() {
-        return getBinder(ACCESSIBILITY_SERVICE_COMPONENT)
-                .map(b -> (AccessibilityInputService.ServiceBinder) b);
-    }
 
     public void bindProjectionActivity() {
         makeshiftBind(PROJECTION_ACTIVITY_COMPONENT);
@@ -164,9 +152,7 @@ public class GeargrinderServiceConnector extends MakeshiftServiceConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         Log.i(tag, "service connected: " + name.getShortClassName());
         binderMap.put(name, service);
-        if (name.equals(ACCESSIBILITY_SERVICE_COMPONENT)) {
-            listener.onAccessibilityServiceConnected((AccessibilityInputService.ServiceBinder) service);
-        } else if (name.equals(PROJECTION_ACTIVITY_COMPONENT)) {
+        if (name.equals(PROJECTION_ACTIVITY_COMPONENT)) {
             listener.onProjectionActivityConnected((ProjectionActivity.ActivityBinder) service);
         } else if (name.equals(PRIVD_SERVICE_COMPONENT)) {
             listener.onPrivdServiceConnected((PrivdService.ServiceBinder) service);

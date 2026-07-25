@@ -124,7 +124,6 @@ public class ProjectionService implements InputEventConverter.ConvertedInputEven
         inputEventConverter = new InputEventConverter(InputChannelMeta.getDefault(), this, coordinateTranslator, 0, videoPreset.width(), videoPreset.height(), keyguardTracker);
 
         connector = new GeargrinderServiceConnector(TAG, context, this);
-        connector.bindAccessibilityService();
         connector.bindProjectionActivity();
         connector.bindPrivdService(BIND_AUTO_CREATE | BIND_IMPORTANT);
 

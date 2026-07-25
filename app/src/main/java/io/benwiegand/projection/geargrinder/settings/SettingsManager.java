@@ -80,7 +80,7 @@ public class SettingsManager {
     }
 
     public boolean useImportedPhoneKeys() {
-        return getBool(R.string.key_use_imported_phone_keys, R.string.start_projection_when_locked_default);
+        return getBool(R.string.key_use_imported_phone_keys, R.string.use_imported_keys_default);
     }
 
     public byte[][] getX509CertificateChain(String key) {

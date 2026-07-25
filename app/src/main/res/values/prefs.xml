@@ -120,6 +120,9 @@
     <string translatable="false" name="keep_screen_awake_default">true</string>
 
 
+    <string translatable="false" name="use_imported_keys_default">false</string>
+
+
     <string translatable="false" name="allow_virtual_activity_launcher_default">true</string>
 
 

@@ -53,3 +53,8 @@ dependencies {
 }
 
 tasks.preBuild.dependsOn(":privd:createDebugPrivdJar")
+tasks.whenTaskAdded {
+    if (name.contains("ArtProfile")) {
+        enabled = false
+    }
+}

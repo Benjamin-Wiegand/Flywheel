@@ -279,45 +279,39 @@ public class ProjectionTaskManager implements PackageService.PackageServiceListe
      * @param app app
      * @return first task containing the app, or null if none have it
      */
-    public ProjectionTask findTaskContaining(AppRecord app) {
+    public ProjectionTask findTaskContainingApp(AppRecord app) {
         if (!virtualActivities.containsKey(app.launchComponent())) return null;
 
-        for (ProjectionTask task : pinnedTasks) {
-            if (!task.contains(app.launchComponent())) continue;
-            return task;
-        }
-
-        for (ProjectionTask task : openTasks) {
-            if (!task.contains(app.launchComponent())) continue;
-            return task;
+        for (List<ProjectionTask> taskList : taskLists) {
+            for (ProjectionTask task : taskList) {
+                if (!task.contains(app.launchComponent())) continue;
+                return task;
+            }
         }
 
         return null;
     }
 
     /**
-     * similar to {@link ProjectionTaskManager#findTaskContaining(AppRecord)} but only considers tasks with exactly 1 app
+     * similar to {@link ProjectionTaskManager#findTaskContainingApp(AppRecord)} but only considers tasks with exactly 1 app
      */
     public ProjectionTask findTaskForApp(AppRecord app) {
         if (!virtualActivities.containsKey(app.launchComponent())) return null;
 
-        for (ProjectionTask task : pinnedTasks) {
-            if (task.activityCount() != 1) continue;
-            if (!task.contains(app.launchComponent())) continue;
-            return task;
-        }
-
-        for (ProjectionTask task : openTasks) {
-            if (task.activityCount() != 1) continue;
-            if (!task.contains(app.launchComponent())) continue;
-            return task;
+        for (List<ProjectionTask> taskList : taskLists) {
+            for (ProjectionTask task : taskList) {
+                if (task.activityCount() != 1) continue;
+                if (!task.contains(app.launchComponent())) continue;
+                return task;
+            }
         }
 
         return null;
     }
 
     public void dynamicOpen(AppRecord app) {
-        ProjectionTask task = findTaskContaining(app);
+        ProjectionTask task = findTaskForApp(app);
+        if (task == null) task = findTaskContainingApp(app);
         if (task == null) task = createNewTask(app);
         switchToTask(task);
     }

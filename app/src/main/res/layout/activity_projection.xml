@@ -83,6 +83,13 @@
                 android:layout_weight="1"
                 />
 
+            <include
+                android:id="@+id/media_controls"
+                layout="@layout/layout_media_controls_dock_widget"
+                android:visibility="gone"
+                tools:visibility="visible"
+                />
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

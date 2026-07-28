@@ -18,6 +18,7 @@
     <declare-styleable name="Theme">
         <attr name="colorDockForeground" format="color" />
         <attr name="colorDockBackground" format="color" />
+        <attr name="colorDockContainer" format="color" />
 
         <attr name="colorAppModalForeground" format="color" />
         <attr name="colorAppModalBackground" format="color" />

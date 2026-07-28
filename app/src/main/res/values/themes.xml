@@ -2,6 +2,7 @@
     <style name="Base.Theme.Geargrinder" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorDockBackground">@color/black</item>
         <item name="colorDockForeground">@color/white</item>
+        <item name="colorDockContainer">#303030</item>
         <item name="colorDockItemInactive">#666666</item>
         <item name="colorDockItemActive">?attr/colorPrimary</item>
         <item name="colorFocusIndicatorInactive">#333333</item>
@@ -21,6 +22,7 @@
     <style name="Base.ThemeOverlay.Geargrinder.DynamicColors" parent="@style/ThemeOverlay.Material3.DynamicColors.DayNight">
         <item name="colorDockForeground">@color/material_dynamic_neutral_variant99</item>
         <item name="colorDockBackground">@color/material_dynamic_neutral_variant10</item>
+        <item name="colorDockContainer">@color/material_dynamic_neutral20</item>
         <item name="colorDockItemInactive">@color/material_dynamic_neutral40</item>
         <item name="colorDockItemActive">@color/material_dynamic_primary70</item>
         <item name="colorFocusIndicatorInactive">@color/material_dynamic_neutral20</item>

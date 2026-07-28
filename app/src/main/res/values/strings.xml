@@ -72,8 +72,8 @@
     <string name="bluetooth_connect_permission_rationale">Allows Flywheel to connect to your car over Bluetooth, which is needed to start a wireless connection.\n\nThis is permission only needed if you want to connect wirelessly.</string>
     <string name="access_fine_location_permission_title">Fine location</string>
     <string name="access_fine_location_permission_rationale">Allows Flywheel to connect to your car over Bluetooth, which is needed to start a wireless connection. Devices on Android 11 and below categorize Bluetooth access under \"location\" due to privacy concerns. Flywheel does not use this permission to derive your geographic location.\n\nThis permission is only needed if you want to connect wirelessly.</string>
-    <string name="notification_service_permission_title">Notification listening</string>
-    <string name="notification_service_permission_rationale">Allows Flywheel to display and announce notifications through your car.\n\nThis permission is only needed if you want to see notifications on your car display.</string>
+    <string name="notification_service_permission_title">Notification listening + media controls</string>
+    <string name="notification_service_permission_rationale">Allows Flywheel to display and announce notifications and show media controls in the dock.</string>
     <string name="shizuku_permission_title">Shizuku</string>
     <string name="shizuku_permission_rationale">Shizuku is used as an alternative to root, allowing access to system APIs for a better user experience. Currently, it\'s used for embedding apps within Flywheel so they can be shown on your headunit display.</string>
     <string name="root_permission_title">Root</string>

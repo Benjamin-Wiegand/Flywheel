@@ -6,7 +6,9 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,6 +26,7 @@ import io.benwiegand.projection.geargrinder.makeshiftbind.MakeshiftBind;
 import io.benwiegand.projection.geargrinder.callback.MakeshiftBindCallback;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.BatteryIndicator;
+import io.benwiegand.projection.geargrinder.projection.ui.MediaControlsWidget;
 import io.benwiegand.projection.geargrinder.projection.ui.NotificationDisplay;
 import io.benwiegand.projection.geargrinder.projection.ui.PhoneCallDisplay;
 import io.benwiegand.projection.geargrinder.projection.ui.task.ProjectionTask;
@@ -39,6 +42,8 @@ import io.benwiegand.projection.libprivd.IPrivd;
 public class ProjectionActivity extends AppCompatActivity implements MakeshiftBindCallback, IPCConnectionListener, GeargrinderServiceConnector.ConnectionListener, AppDock.Listener, AppLauncherListener, ProjectionTaskManager.Listener {
     private static final String TAG = ProjectionActivity.class.getSimpleName();
 
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
     private final ActivityBinder binder = new ActivityBinder();
     private MakeshiftBind makeshiftBind;
 
@@ -48,6 +53,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
     private AppDrawer appDrawer;
     private BatteryIndicator batteryIndicator;
     private NetworkIndicators networkIndicators;
+    private MediaControlsWidget mediaControlsWidget;
     private NotificationDisplay notificationDisplay;
     private PhoneCallDisplay phoneCallDisplay;
 
@@ -77,23 +83,25 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
                 .setTitle(R.string.keyguard_modal_title)
                 .setMessage(R.string.keyguard_modal_instructions);
 
-        // components
-        taskManager = new ProjectionTaskManager(findViewById(R.id.content_frame), settingsManager);
-        appDock = new AppDock(findViewById(R.id.app_dock), taskManager, this);
-        appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
-        batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
-        networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
-        notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay));
-        phoneCallDisplay = new PhoneCallDisplay(this, findViewById(R.id.popup_incoming_call_overlay));
-
-        taskManager.registerListener(this);
-
         // binds
         connector = new GeargrinderServiceConnector(TAG, this, this);
         connector.bindPrivdService(BIND_AUTO_CREATE | BIND_IMPORTANT);
         connector.bindPackageService(BIND_AUTO_CREATE | BIND_IMPORTANT);
         connector.bindNotificationService();
 
+        // components
+        taskManager = new ProjectionTaskManager(findViewById(R.id.content_frame), settingsManager);
+        appDock = new AppDock(findViewById(R.id.app_dock), taskManager, this);
+        appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
+        batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
+        networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
+        mediaControlsWidget = new MediaControlsWidget(findViewById(R.id.media_controls), handler, taskManager, connector::getPackageBinder);
+        notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay));
+        phoneCallDisplay = new PhoneCallDisplay(this, findViewById(R.id.popup_incoming_call_overlay));
+
+        taskManager.registerListener(this);
+
+        // bind
         makeshiftBind = new MakeshiftBind(this, new ComponentName(this, ProjectionActivity.class), this);
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
@@ -125,6 +133,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         appDrawer.destroy();
         batteryIndicator.destroy();
         networkIndicators.destroy();
+        mediaControlsWidget.destroy();
         notificationDisplay.destroy();
         phoneCallDisplay.destroy();
     }

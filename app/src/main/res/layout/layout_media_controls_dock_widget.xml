@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="48dp"
+    android:backgroundTint="?colorDockContainer"
+    app:cardElevation="2dp"
+    >
+
+    <LinearLayout
+        android:id="@+id/touch_target"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="?selectableItemBackground"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        >
+
+        <FrameLayout
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            >
+
+            <ImageView
+                android:id="@+id/media_art_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/music"
+                android:importantForAccessibility="no"
+                />
+
+            <ProgressBar
+                android:id="@+id/buffering_indicator"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible"
+                />
+
+            <ImageView
+                android:id="@+id/playback_error_indicator"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:src="@drawable/small_x"
+                android:importantForAccessibility="no"
+                />
+
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/skip_prev_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:tint="?colorDockForeground"
+            style="?actionButtonStyle"
+            android:src="@drawable/skip_previous"
+            android:importantForAccessibility="no"
+            />
+
+        <ImageButton
+            android:id="@+id/play_pause_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:tint="?colorDockForeground"
+            style="?actionButtonStyle"
+            android:src="@drawable/play_arrow"
+            android:importantForAccessibility="no"
+            />
+
+        <ImageButton
+            android:id="@+id/skip_next_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:tint="?colorDockForeground"
+            style="?actionButtonStyle"
+            android:src="@drawable/skip_next"
+            android:importantForAccessibility="no"
+            />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

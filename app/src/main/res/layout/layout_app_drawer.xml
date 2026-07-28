@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -8,38 +9,58 @@
     android:focusable="false"
     >
 
-    <ImageButton
-        android:id="@+id/app_drawer_close_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="end"
-        android:contentDescription="@string/close_button"
-        android:src="@drawable/small_x"
-        style="?actionButtonStyle"
-        />
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/app_drawer_categories"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="?attr/tabStyle"
+        android:orientation="horizontal"
         >
 
-        <com.google.android.material.tabs.TabItem
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/app_drawer_categories"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/category_car_apps" />
+            app:tabIndicatorFullWidth="true"
+            style="?attr/tabStyle"
+            android:background="@color/transparent"
+            >
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/category_navigation_and_audio" />
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_car_apps" />
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_navigation_and_audio" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category_all_apps" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <Space
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/category_all_apps" />
-    </com.google.android.material.tabs.TabLayout>
+            android:layout_weight="1"
+            />
+
+        <ImageButton
+            android:id="@+id/app_drawer_close_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/close_button"
+            android:src="@drawable/small_x"
+            style="?actionButtonStyle"
+            />
+    </LinearLayout>
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
 
     <FrameLayout
         android:layout_width="match_parent"

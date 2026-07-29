@@ -112,7 +112,10 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
                 if (appDrawer.close()) return;
 
                 ProjectionTask task = taskManager.getActiveTask();
-                if (task != null && task.injectBackButton()) return;
+                if (task != null) {
+                    if (task.hideSplash()) return;
+                    if (task.injectBackButton()) return;
+                }
 
                 Log.v(TAG, "back button consumed");
             }

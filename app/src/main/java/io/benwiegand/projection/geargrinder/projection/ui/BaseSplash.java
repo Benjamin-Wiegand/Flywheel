@@ -43,8 +43,8 @@ public abstract class BaseSplash {
         show(true);
     }
 
-    public void hide(boolean animate) {
-        if (!visible) return;
+    public boolean hide(boolean animate) {
+        if (!visible) return false;
         rootView.animate()
                 .setStartDelay(0)
                 .setDuration(animate ? SPLASH_ANIMATION_DURATION : 0)
@@ -52,6 +52,7 @@ public abstract class BaseSplash {
                 .withEndAction(() -> rootView.setVisibility(View.GONE))
                 .start();
         visible = false;
+        return true;
     }
 
     public void hide() {

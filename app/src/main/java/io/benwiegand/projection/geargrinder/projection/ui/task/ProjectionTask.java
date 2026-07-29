@@ -81,6 +81,10 @@ public class ProjectionTask {
         splash.toggle();
     }
 
+    public boolean hideSplash() {
+        return splash.hide(true);
+    }
+
     public AlertDialog createAddSplitScreenDialog() {
         List<AppRecord> appRecords = new ArrayList<>();
         taskManager.getOrderedVirtualActivities().stream()

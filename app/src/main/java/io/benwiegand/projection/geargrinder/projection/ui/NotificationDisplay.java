@@ -344,7 +344,7 @@ public class NotificationDisplay implements NotificationService.NotificationList
                 .z(0)
                 .start();
 
-
+        notificationRecycler.scrollToPosition(0);
     }
 
     public boolean closeNotificationDrawer() {

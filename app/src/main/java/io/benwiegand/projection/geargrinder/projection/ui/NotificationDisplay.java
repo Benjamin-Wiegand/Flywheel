@@ -269,13 +269,15 @@ public class NotificationDisplay implements NotificationService.NotificationList
         if (largeIcon != null) {
             largeIconView.setImageIcon(largeIcon);
             largeIconView.setVisibility(View.VISIBLE);
+            smallIconView.setVisibility(View.GONE);
         } else if (smallIcon != null) {
             smallIconView.setImageIcon(smallIcon);
-            smallIconView.setVisibility(View.VISIBLE);
             smallIconView.setBackgroundTintList(new ColorStateList(
                     new int[][] { StateSet.WILD_CARD },
                     new int[] { sbn.getNotification().color }
             ));
+            smallIconView.setVisibility(View.VISIBLE);
+            largeIconView.setVisibility(View.GONE);
         }
 
         if (appName != null) {
@@ -283,6 +285,7 @@ public class NotificationDisplay implements NotificationService.NotificationList
             topText.add(appName);
             if (subText != null) topText.add(subText);
             topLineText.setText(joinTopText(topText));
+            topLineText.setVisibility(View.VISIBLE);
         } else {
             topLineText.setVisibility(View.GONE);
         }

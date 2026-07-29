@@ -111,11 +111,14 @@
     <string name="start_projection_when_locked_pref_name">Allow starting connection while locked</string>
     <string name="projection_resume_grace_period_pref_name">Connection resume grace period</string>
     <string name="start_projection_when_locked_pref_summary">disable this for extra security</string>
+
     <string name="notification_tts_announcement_format" formatted="true">%s: %s</string>
     <string name="notification_tts_announcement_no_content" formatted="true">no speakable content</string>
     <string name="speak_button">speak</string>
     <string name="clear_button">clear</string>
     <string name="notification_top_text_join_format" formatted="true">%s · %s</string>
+    <string name="no_notifications_indicator">no notifications</string>
+
     <string name="pref_category_video">video</string>
     <string name="video_bitrate_mode_pref_name">Video bitrate mode</string>
     <string name="video_bitrate_custom_pref_name">Custom video bitrate</string>

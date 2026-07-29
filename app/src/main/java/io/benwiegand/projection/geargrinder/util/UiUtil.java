@@ -1,5 +1,6 @@
 package io.benwiegand.projection.geargrinder.util;
 
+import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
@@ -28,6 +29,9 @@ import io.benwiegand.projection.geargrinder.exception.UserFriendlyException;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 
 public class UiUtil {
+
+    public static TimeInterpolator EASE_IN = x -> x * x;
+    public static TimeInterpolator EASE_OUT = x -> 1 - (x - 1) * (x - 1);
 
     public static AlertDialog.Builder errorDialog(Context context, UserFriendlyException e) {
         String title = e.getFriendlyTitle();

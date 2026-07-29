@@ -64,6 +64,14 @@
                 android:visibility="gone"
                 />
 
+            <include
+                android:id="@+id/notification_drawer"
+                layout="@layout/layout_notification_drawer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                />
+
         </FrameLayout>
 
         <LinearLayout
@@ -86,15 +94,25 @@
             <include
                 android:id="@+id/media_controls"
                 layout="@layout/layout_media_controls_dock_widget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:visibility="gone"
                 tools:visibility="visible"
+                />
+
+            <include
+                android:id="@+id/notification_indicator"
+                layout="@layout/layout_notification_indicator_dock_widget"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
                 />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
                 android:layout_weight="0"
+                android:layout_marginStart="8dp"
                 android:orientation="vertical"
                 android:gravity="end"
                 >
@@ -134,6 +152,7 @@
                 android:id="@+id/soft_back_button"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_marginStart="8dp"
                 android:src="@drawable/soft_back"
                 android:background="?selectableItemBackgroundBorderless"
                 />

@@ -96,7 +96,7 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
         networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
         mediaControlsWidget = new MediaControlsWidget(findViewById(R.id.media_controls), handler, taskManager, connector::getPackageBinder);
-        notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay));
+        notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay), findViewById(R.id.notification_drawer), findViewById(R.id.notification_indicator));
         phoneCallDisplay = new PhoneCallDisplay(this, findViewById(R.id.popup_incoming_call_overlay));
 
         taskManager.registerListener(this);
@@ -107,8 +107,9 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                if (notificationDisplay.closeNotificationDrawer()) return;
+                if (notificationDisplay.dismissPopupNotification()) return;
                 if (appDrawer.close()) return;
-                if (notificationDisplay.dismissTopNotification()) return;
 
                 ProjectionTask task = taskManager.getActiveTask();
                 if (task != null && task.injectBackButton()) return;
@@ -168,14 +169,16 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
 
     @Override
     public boolean onContentFocus() {
-        if (!appDrawer.isOpen()) return false;
-        appDrawer.close();
-        return true;
+        boolean updated = false;
+        updated |= appDrawer.close();
+        updated |= notificationDisplay.closeNotificationDrawer();
+        return updated;
     }
 
     @Override
     public void onAppDrawerSelected() {
         appDrawer.toggle();
+        notificationDisplay.closeNotificationDrawer();
     }
 
     @Override

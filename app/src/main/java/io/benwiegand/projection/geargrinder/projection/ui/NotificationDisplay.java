@@ -1,9 +1,13 @@
 package io.benwiegand.projection.geargrinder.projection.ui;
 
+import static io.benwiegand.projection.geargrinder.util.UiUtil.EASE_IN;
+import static io.benwiegand.projection.geargrinder.util.UiUtil.EASE_OUT;
+
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Icon;
+import android.icu.text.NumberFormat;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -21,9 +25,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,19 +43,26 @@ import io.benwiegand.projection.geargrinder.pm.AppRecord;
 public class NotificationDisplay implements NotificationService.NotificationListener {
     private static final String TAG = NotificationDisplay.class.getSimpleName();
 
-    private static final String TTS_INTERRUPTION_ID = TAG;
-
     private static final long TTS_ANNOUNCEMENT_PAUSE = 1500;    // milliseconds to pause between queued TTS messages
     private static final long POPUP_NOTIFICATION_ANIMATION_DURATION = 200;
     private static final long POPUP_NOTIFICATION_SHOW_DURATION = 10000;
 
-    private final Deque<View> popupNotificationViews = new LinkedList<>();
+    private static final long NOTIFICATION_DRAWER_ANIMATION_DURATION = 200;
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ViewGroup popupNotificationOverlay;
     private final ViewGroup popupNotificationFrame;
+    private final View notificationDrawer;
+    private final View notificationIndicatorWidget;
     private final Context context;
 
+    private final NotificationDrawerAdapter notificationDrawerAdapter;
+
     private final TextToSpeech tts;
+    private final NumberFormat numberFormat;
+
+    private boolean notificationDrawerOpen = false;
+    private View popupNotificationView = null;
 
     private NotificationService.ServiceBinder notificationServiceBinder = null;
     private PackageService.ServiceBinder packageServiceBinder = null;
@@ -63,12 +76,21 @@ public class NotificationDisplay implements NotificationService.NotificationList
     }
 
 
-    public NotificationDisplay(ViewGroup popupNotificationOverlay) {
+    public NotificationDisplay(ViewGroup popupNotificationOverlay, View notificationDrawer, View notificationIndicatorWidget) {
         this.popupNotificationOverlay = popupNotificationOverlay;
+        this.notificationDrawer = notificationDrawer;
+        this.notificationIndicatorWidget = notificationIndicatorWidget;
         popupNotificationFrame = popupNotificationOverlay.findViewById(R.id.popup_notification_frame);
         context = popupNotificationOverlay.getContext();
 
-        popupNotificationOverlay.setOnClickListener(v -> dismissTopNotification());
+        popupNotificationOverlay.setOnClickListener(v -> dismissPopupNotification());
+        notificationIndicatorWidget.setOnClickListener(v -> toggleNotificationDrawer());
+        notificationDrawer.setOnClickListener(v -> closeNotificationDrawer());
+
+        RecyclerView notificationRecycler = notificationDrawer.findViewById(R.id.notification_recycler);
+        notificationDrawerAdapter = new NotificationDrawerAdapter();
+        notificationRecycler.setAdapter(notificationDrawerAdapter);
+        notificationRecycler.setLayoutManager(new LinearLayoutManager(context));
 
         AudioManager audioManager = context.getSystemService(AudioManager.class);
         AudioFocusRequest ttsAudioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
@@ -94,6 +116,8 @@ public class NotificationDisplay implements NotificationService.NotificationList
                 audioManager.requestAudioFocus(ttsAudioFocusRequest);
             }
         });
+
+        numberFormat = NumberFormat.getNumberInstance();
     }
 
     public void destroy() {
@@ -166,20 +190,33 @@ public class NotificationDisplay implements NotificationService.NotificationList
         speakText(announcementText, interrupt);
     }
 
-    private void animatePopupNotificationOverlay() {
-        boolean show = !popupNotificationViews.isEmpty();
+    private void showPopupNotification(View notificationView) {
+        if (popupNotificationView != null) hidePopupNotification(popupNotificationView);
+        popupNotificationView = notificationView;
         popupNotificationOverlay.animate()
                 .setStartDelay(0)
                 .setDuration(POPUP_NOTIFICATION_ANIMATION_DURATION)
-                .withStartAction(() -> { if (show) popupNotificationOverlay.setVisibility(View.VISIBLE); })
-                .withEndAction(() -> { if (!show) popupNotificationOverlay.setVisibility(View.GONE); })
-                .alpha(show ? 1 : 0)
+                .withStartAction(() -> popupNotificationOverlay.setVisibility(View.VISIBLE))
+                .alpha(1)
                 .start();
+
+        popupNotificationFrame.addView(notificationView);
+        notificationView.animate()
+                .setStartDelay(0)
+                .setDuration(POPUP_NOTIFICATION_ANIMATION_DURATION)
+                .withStartAction(() -> notificationView.setTranslationY(-notificationView.getHeight()))
+                .translationY(0)
+                .withEndAction(() -> handler.postDelayed(() -> hidePopupNotification(notificationView), POPUP_NOTIFICATION_SHOW_DURATION));
     }
 
     private void hidePopupNotification(View notificationView) {
-        if (!popupNotificationViews.remove(notificationView)) return;
-        animatePopupNotificationOverlay();
+        if (notificationView != popupNotificationView) return;
+        popupNotificationOverlay.animate()
+                .setStartDelay(0)
+                .setDuration(POPUP_NOTIFICATION_ANIMATION_DURATION)
+                .withEndAction(() -> popupNotificationOverlay.setVisibility(View.GONE))
+                .alpha(0)
+                .start();
 
         notificationView.animate()
                 .setStartDelay(0)
@@ -189,9 +226,9 @@ public class NotificationDisplay implements NotificationService.NotificationList
                 .start();
     }
 
-    public boolean dismissTopNotification() {
-        if (popupNotificationViews.isEmpty()) return false;
-        hidePopupNotification(popupNotificationViews.peek());
+    public boolean dismissPopupNotification() {
+        if (popupNotificationView == null) return false;
+        hidePopupNotification(popupNotificationView);
         return true;
     }
 
@@ -204,21 +241,12 @@ public class NotificationDisplay implements NotificationService.NotificationList
         return text;
     }
 
-    @Override
-    public void onNotificationPosted(StatusBarNotification sbn) {
-        Bundle extras = sbn.getNotification().extras;
-        int flags = sbn.getNotification().flags;
-
-        if (sbn.getGroupKey() != null && (flags & Notification.FLAG_GROUP_SUMMARY) != 0) return;
-        if ((flags & Notification.FLAG_ONGOING_EVENT) != 0) return;
-        if ((flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) return;
-
-        Log.d(TAG, "displaying notification: " + sbn);
-
+    private void inflateNotification(View notificationView, StatusBarNotification sbn) {
         Optional<AppRecord> appRecordOptional = getPackageServiceBinder()
                 .map(b -> b.getApp(sbn.getPackageName()))
                 .filter(Objects::nonNull);
 
+        Bundle extras = sbn.getNotification().extras;
         CharSequence title = extras.getCharSequence(Notification.EXTRA_TITLE);
         CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
         CharSequence subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT);
@@ -229,7 +257,6 @@ public class NotificationDisplay implements NotificationService.NotificationList
         Icon largeIcon = sbn.getNotification().getLargeIcon();
         Icon smallIcon = sbn.getNotification().getSmallIcon();
 
-        View notificationView = LayoutInflater.from(context).inflate(R.layout.layout_notification_popup, popupNotificationFrame, false);
         ImageView smallIconView = notificationView.findViewById(R.id.notification_small_icon);
         ImageView largeIconView = notificationView.findViewById(R.id.notification_large_icon);
         TextView topLineText = notificationView.findViewById(R.id.notification_top_line_text);
@@ -265,21 +292,147 @@ public class NotificationDisplay implements NotificationService.NotificationList
 
         touchTarget.setOnClickListener(v -> speakNotification(sbn, true));
         speakButton.setOnClickListener(v -> speakNotification(sbn, true));
-        clearButton.setOnClickListener(v -> hidePopupNotification(notificationView));
-
-        popupNotificationFrame.addView(notificationView);
-        popupNotificationViews.addFirst(notificationView);
-        animatePopupNotificationOverlay();
-
-        handler.post(() -> {
-            notificationView.animate()
-                    .setStartDelay(0)
-                    .setDuration(POPUP_NOTIFICATION_ANIMATION_DURATION)
-                    .withStartAction(() -> notificationView.setTranslationY(-notificationView.getHeight()))
-                    .translationY(0)
-                    .withEndAction(() -> handler.postDelayed(() -> hidePopupNotification(notificationView), POPUP_NOTIFICATION_SHOW_DURATION));
+        clearButton.setOnClickListener(v -> {
+            notificationDrawerAdapter.removeNotification(sbn);
+            hidePopupNotification(notificationView);
         });
+    }
+
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        int flags = sbn.getNotification().flags;
+
+        if (sbn.getGroupKey() != null && (flags & Notification.FLAG_GROUP_SUMMARY) != 0) return;
+        if ((flags & Notification.FLAG_ONGOING_EVENT) != 0) return;
+        if ((flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) return;
+
+        Log.d(TAG, "displaying notification: " + sbn);
+
+        View notificationView = LayoutInflater.from(context).inflate(R.layout.layout_notification, popupNotificationFrame, false);
+        inflateNotification(notificationView, sbn);
+
+        notificationDrawerAdapter.addNotification(sbn);
+        if (!notificationDrawerOpen) showPopupNotification(notificationView);
+
+    }
+
+    public void openNotificationDrawer() {
+        if (notificationDrawerOpen) return;
+        notificationDrawerOpen = true;
+
+        notificationDrawer.setVisibility(View.VISIBLE);
+        notificationDrawer.setAlpha(0);
+        notificationDrawer.animate()
+                .setStartDelay(0)
+                .setDuration(NOTIFICATION_DRAWER_ANIMATION_DURATION)
+                .setInterpolator(EASE_OUT)
+                .alpha(1)
+                .start();
+
+        RecyclerView notificationRecycler = notificationDrawer.findViewById(R.id.notification_recycler);
+        notificationRecycler.setTranslationX(notificationRecycler.getWidth());
+        notificationRecycler.setZ(notificationRecycler.getWidth());
+        notificationRecycler.animate()
+                .setStartDelay(0)
+                .setDuration(NOTIFICATION_DRAWER_ANIMATION_DURATION)
+                .setInterpolator(EASE_OUT)
+                .translationX(0)
+                .z(0)
+                .start();
 
 
     }
+
+    public boolean closeNotificationDrawer() {
+        if (!notificationDrawerOpen) return false;
+        notificationDrawerOpen = false;
+
+        notificationDrawer.animate()
+                .setStartDelay(0)
+                .setDuration(NOTIFICATION_DRAWER_ANIMATION_DURATION)
+                .setInterpolator(EASE_IN)
+                .alpha(0)
+                .withEndAction(() -> notificationDrawer.setVisibility(View.GONE))
+                .start();
+
+        RecyclerView notificationRecycler = notificationDrawer.findViewById(R.id.notification_recycler);
+        notificationRecycler.animate()
+                .setStartDelay(0)
+                .setDuration(NOTIFICATION_DRAWER_ANIMATION_DURATION)
+                .setInterpolator(EASE_IN)
+                .translationX(notificationRecycler.getWidth())
+                .start();
+
+        return true;
+    }
+
+    public void toggleNotificationDrawer() {
+        if (notificationDrawerOpen) {
+            closeNotificationDrawer();
+        } else {
+            openNotificationDrawer();
+        }
+    }
+
+    private class NotificationDrawerAdapter extends RecyclerView.Adapter<NotificationViewHolder> {
+
+        private final List<StatusBarNotification> notifications = new ArrayList<>();
+
+        private void updateIndicators() {
+            View noNotificationsIndicator = notificationDrawer.findViewById(R.id.no_notifications_indicator);
+            View bellIndicator = notificationIndicatorWidget.findViewById(R.id.notification_bell_indicator);
+            View counterIndicator = notificationIndicatorWidget.findViewById(R.id.notification_counter_indicator);
+            TextView counterText = notificationIndicatorWidget.findViewById(R.id.notification_counter_text);
+
+            noNotificationsIndicator.setVisibility(notifications.isEmpty() ? View.VISIBLE : View.GONE);
+            bellIndicator.setVisibility(notifications.isEmpty() ? View.VISIBLE : View.GONE);
+            counterIndicator.setVisibility(notifications.isEmpty() ? View.GONE : View.VISIBLE);
+            counterText.setText(numberFormat.format(notifications.size()));
+        }
+
+        public void addNotification(StatusBarNotification sbn) {
+            RecyclerView notificationRecycler = notificationDrawer.findViewById(R.id.notification_recycler);
+            boolean scrolled = notificationRecycler.canScrollVertically(-1);
+
+            notifications.add(0, sbn);
+            notifyItemInserted(0);
+            updateIndicators();
+
+            if (scrolled) return;
+            notificationRecycler.scrollToPosition(0);
+        }
+
+        public void removeNotification(StatusBarNotification sbn) {
+            int index = notifications.indexOf(sbn);
+            if (index == -1) return;
+            notifications.remove(index);
+            notifyItemRemoved(index);
+            updateIndicators();
+        }
+
+        @NonNull
+        @Override
+        public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_notification, parent, false);
+            return new NotificationViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {
+            StatusBarNotification sbn = notifications.get(position);
+            inflateNotification(holder.itemView, sbn);
+        }
+
+        @Override
+        public int getItemCount() {
+            return notifications.size();
+        }
+    }
+
+    private static class NotificationViewHolder extends RecyclerView.ViewHolder {
+        public NotificationViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
 }

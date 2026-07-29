@@ -7,7 +7,7 @@
     android:layout_margin="6dp"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="?attr/selectableItemBackgroundBorderless"
+    android:background="@drawable/selectable_item_background_circular"
     android:clickable="true"
     >
 

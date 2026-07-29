@@ -13,7 +13,7 @@
         android:layout_height="48dp"
         android:contentDescription="@string/app_drawer_button_content_description"
         android:src="@android:drawable/ic_dialog_dialer"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/selectable_item_background_circular"
         app:tint="?attr/colorDockForeground"
         />
 

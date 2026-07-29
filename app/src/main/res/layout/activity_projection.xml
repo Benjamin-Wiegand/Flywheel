@@ -154,7 +154,7 @@
                 android:layout_height="48dp"
                 android:layout_marginStart="8dp"
                 android:src="@drawable/soft_back"
-                android:background="?selectableItemBackgroundBorderless"
+                android:background="@drawable/selectable_item_background_circular"
                 />
 
         </LinearLayout>

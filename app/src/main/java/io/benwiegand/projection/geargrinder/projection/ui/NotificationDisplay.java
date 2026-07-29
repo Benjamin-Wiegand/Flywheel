@@ -211,6 +211,7 @@ public class NotificationDisplay implements NotificationService.NotificationList
 
     private void hidePopupNotification(View notificationView) {
         if (notificationView != popupNotificationView) return;
+        popupNotificationView = null;
         popupNotificationOverlay.animate()
                 .setStartDelay(0)
                 .setDuration(POPUP_NOTIFICATION_ANIMATION_DURATION)

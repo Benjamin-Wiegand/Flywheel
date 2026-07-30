@@ -40,8 +40,8 @@
 
     <ImageView
         android:id="@+id/notification_bell_indicator"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_gravity="center"
         android:src="@drawable/notification_bell"
         app:tint="?colorDockForeground"

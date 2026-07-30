@@ -45,6 +45,7 @@ public class MediaControlsWidget {
     private final Supplier<Optional<PackageService.ServiceBinder>> getPackageBinder;
 
     private final ResourceLoaderThread artLoaderThread;
+    private Object artLoadToken = new Object();
 
     private final ComponentName notificationListenerComponent;
     private final MediaSessionManager mediaSessionManager;
@@ -148,6 +149,8 @@ public class MediaControlsWidget {
         artImageView.setImageResource(R.drawable.music);
         if (metadata == null) return;
 
+        Object token = new Object();
+        artLoadToken = token;
         artLoaderThread.execute(() -> {
             Bitmap bitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (bitmap == null) bitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
@@ -155,6 +158,7 @@ public class MediaControlsWidget {
             return Bitmap.createScaledBitmap(bitmap, imageSize, imageSize, true);
         }, bitmap -> {
             if (bitmap == null) return;
+            if (artLoadToken != token) return;
             artImageView.setImageBitmap(bitmap);
         });
     }

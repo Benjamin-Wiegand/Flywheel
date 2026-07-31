@@ -1,0 +1,6 @@
+- Added media controls in the dock
+- Added notification drawer for missed notifications
+- Made app drawer top bar more slim
+- Added projection ui settings
+- Hide edit task splash with back button
+- Minor visual enhancements

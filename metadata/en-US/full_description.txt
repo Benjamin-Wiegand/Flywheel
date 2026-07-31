@@ -7,6 +7,7 @@ Flywheel is a re-implementation of Android Auto, intended for users of de-google
     <li>Listen to music or other audio through your car speakers</li>
     <li>Split-screen multiple apps</li>
     <li>View time, battery, and network status</li>
+    <li>Control currently playing media</li>
     <li>Read notifications aloud with text-to-speech</li>
 </ul>
 

@@ -164,6 +164,19 @@
     <string name="allow_virtual_activity_launcher_pref_name">Allow virtual activity launcher</string>
     <string name="allow_virtual_activity_launcher_summary">disable this if apps fail to launch</string>
 
+    <string name="projection_ui_pref_screen_button">Projection UI</string>
+    <string name="pref_category_notifications">notifications</string>
+    <string name="popup_notifications_pref_name">Popup notifications</string>
+    <string name="popup_notifications_pref_summary">show new notifications on screen</string>
+    <string name="popup_notification_duration_pref_name">Popup notification duration</string>
+    <string name="notification_drawer_pref_name">Notification drawer</string>
+    <string name="notification_drawer_pref_summary">view and read aloud missed notifications</string>
+    <string name="pref_category_dock">dock</string>
+    <string name="show_media_controls_pref_name">Show media controls</string>
+    <string name="show_media_controls_pref_summary">requires notification listening permission</string>
+    <string name="show_battery_percentage_pref_name">Show battery percentage</string>
+    <string name="show_battery_percentage_pref_summary">show battery percentage text next to icon</string>
+
     <string name="corrupted_item_pref_summary_format" formatted="true">corrupted: %s</string>
     <string name="no_item_pref_summary">none</string>
     <string name="certificate_line_pref_summary_format" formatted="true">%d: %s</string>

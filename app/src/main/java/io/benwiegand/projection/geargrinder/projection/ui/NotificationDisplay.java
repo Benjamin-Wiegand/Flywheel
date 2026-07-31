@@ -39,17 +39,18 @@ import io.benwiegand.projection.geargrinder.NotificationService;
 import io.benwiegand.projection.geargrinder.PackageService;
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
 public class NotificationDisplay implements NotificationService.NotificationListener {
     private static final String TAG = NotificationDisplay.class.getSimpleName();
 
     private static final long TTS_ANNOUNCEMENT_PAUSE = 1500;    // milliseconds to pause between queued TTS messages
     private static final long POPUP_NOTIFICATION_ANIMATION_DURATION = 200;
-    private static final long POPUP_NOTIFICATION_SHOW_DURATION = 10000;
 
     private static final long NOTIFICATION_DRAWER_ANIMATION_DURATION = 200;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final SettingsManager settingsManager;
     private final ViewGroup popupNotificationOverlay;
     private final ViewGroup popupNotificationFrame;
     private final View notificationDrawer;
@@ -76,16 +77,19 @@ public class NotificationDisplay implements NotificationService.NotificationList
     }
 
 
-    public NotificationDisplay(ViewGroup popupNotificationOverlay, View notificationDrawer, View notificationIndicatorWidget) {
+    public NotificationDisplay(ViewGroup popupNotificationOverlay, View notificationDrawer, View notificationIndicatorWidget, SettingsManager settingsManager) {
         this.popupNotificationOverlay = popupNotificationOverlay;
         this.notificationDrawer = notificationDrawer;
         this.notificationIndicatorWidget = notificationIndicatorWidget;
+        this.settingsManager = settingsManager;
         popupNotificationFrame = popupNotificationOverlay.findViewById(R.id.popup_notification_frame);
         context = popupNotificationOverlay.getContext();
 
         popupNotificationOverlay.setOnClickListener(v -> dismissPopupNotification());
         notificationIndicatorWidget.setOnClickListener(v -> toggleNotificationDrawer());
         notificationDrawer.setOnClickListener(v -> closeNotificationDrawer());
+
+        notificationIndicatorWidget.setVisibility(settingsManager.isNotificationDrawerEnabled() ? View.VISIBLE : View.GONE);
 
         RecyclerView notificationRecycler = notificationDrawer.findViewById(R.id.notification_recycler);
         notificationDrawerAdapter = new NotificationDrawerAdapter();
@@ -200,13 +204,15 @@ public class NotificationDisplay implements NotificationService.NotificationList
                 .alpha(1)
                 .start();
 
+        long showDuration = settingsManager.getPopupNotificationDuration() * 1000L;
+
         popupNotificationFrame.addView(notificationView);
         notificationView.animate()
                 .setStartDelay(0)
                 .setDuration(POPUP_NOTIFICATION_ANIMATION_DURATION)
                 .withStartAction(() -> notificationView.setTranslationY(-notificationView.getHeight()))
                 .translationY(0)
-                .withEndAction(() -> handler.postDelayed(() -> hidePopupNotification(notificationView), POPUP_NOTIFICATION_SHOW_DURATION));
+                .withEndAction(() -> handler.postDelayed(() -> hidePopupNotification(notificationView), showDuration));
     }
 
     private void hidePopupNotification(View notificationView) {
@@ -316,7 +322,8 @@ public class NotificationDisplay implements NotificationService.NotificationList
         inflateNotification(notificationView, sbn);
 
         notificationDrawerAdapter.addNotification(sbn);
-        if (!notificationDrawerOpen) showPopupNotification(notificationView);
+        if (!notificationDrawerOpen && settingsManager.isPopupNotificationsEnabled())
+            showPopupNotification(notificationView);
 
     }
 

@@ -93,10 +93,10 @@ public class ProjectionActivity extends AppCompatActivity implements MakeshiftBi
         taskManager = new ProjectionTaskManager(findViewById(R.id.content_frame), settingsManager);
         appDock = new AppDock(findViewById(R.id.app_dock), taskManager, this);
         appDrawer = new AppDrawer(findViewById(R.id.app_drawer), this);
-        batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator));
+        batteryIndicator = new BatteryIndicator(findViewById(R.id.battery_indicator), settingsManager);
         networkIndicators = new NetworkIndicators(findViewById(R.id.network_indicators));
-        mediaControlsWidget = new MediaControlsWidget(findViewById(R.id.media_controls), handler, taskManager, connector::getPackageBinder);
-        notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay), findViewById(R.id.notification_drawer), findViewById(R.id.notification_indicator));
+        mediaControlsWidget = new MediaControlsWidget(findViewById(R.id.media_controls), handler, taskManager, connector::getPackageBinder, settingsManager);
+        notificationDisplay = new NotificationDisplay(findViewById(R.id.popup_notification_overlay), findViewById(R.id.notification_drawer), findViewById(R.id.notification_indicator), settingsManager);
         phoneCallDisplay = new PhoneCallDisplay(this, findViewById(R.id.popup_incoming_call_overlay));
 
         taskManager.registerListener(this);

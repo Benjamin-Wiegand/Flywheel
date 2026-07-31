@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="@string/pref_category_notifications"
+        app:iconSpaceReserved="false"
+        >
+
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
+            app:key="@string/key_popup_notifications"
+            app:iconSpaceReserved="false"
+            app:title="@string/popup_notifications_pref_name"
+            app:defaultValue="@string/popup_notifications_default"
+            app:summary="@string/popup_notifications_pref_summary"
+            />
+
+        <ListPreference
+            app:key="@string/key_popup_notification_duration"
+            app:iconSpaceReserved="false"
+            app:title="@string/popup_notification_duration_pref_name"
+            app:entries="@array/popup_notification_duration_entries"
+            app:entryValues="@array/popup_notification_duration_values"
+            app:defaultValue="@string/popup_notification_duration_default"
+            app:useSimpleSummaryProvider="true"
+            app:dependency="@string/key_popup_notifications"
+            />
+
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
+            app:key="@string/key_notification_drawer"
+            app:iconSpaceReserved="false"
+            app:title="@string/notification_drawer_pref_name"
+            app:defaultValue="@string/notification_drawer_default"
+            app:summary="@string/notification_drawer_pref_summary"
+            />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/pref_category_dock"
+        app:iconSpaceReserved="false"
+        >
+
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
+            app:key="@string/key_show_media_controls"
+            app:iconSpaceReserved="false"
+            app:title="@string/show_media_controls_pref_name"
+            app:defaultValue="@string/show_media_controls_default"
+            app:summary="@string/show_media_controls_pref_summary"
+            />
+
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
+            app:key="@string/key_show_battery_percentage"
+            app:iconSpaceReserved="false"
+            app:title="@string/show_battery_percentage_pref_name"
+            app:defaultValue="@string/show_battery_percentage_default"
+            app:summary="@string/show_battery_percentage_pref_summary"
+            />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.projection.ui.indicator.BatteryIndicatorIcon;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 
 public class BatteryIndicator {
     private static final String TAG = BatteryIndicator.class.getSimpleName();
@@ -77,7 +78,7 @@ public class BatteryIndicator {
         }
     };
 
-    public BatteryIndicator(View rootView) {
+    public BatteryIndicator(View rootView, SettingsManager settingsManager) {
         this.rootView = rootView;
         context = rootView.getContext();
 
@@ -86,6 +87,8 @@ public class BatteryIndicator {
 
         ImageView iconView = rootView.findViewById(R.id.battery_icon);
         iconView.setImageDrawable(batteryIndicatorIcon);
+
+        percentageTextView.setVisibility(settingsManager.isShowBatteryPercentageEnabled() ? View.VISIBLE : View.GONE);
 
         setShowing(false);
         context.registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));

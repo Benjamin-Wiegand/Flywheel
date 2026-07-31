@@ -36,6 +36,7 @@ import io.benwiegand.projection.geargrinder.PackageService;
 import io.benwiegand.projection.geargrinder.R;
 import io.benwiegand.projection.geargrinder.pm.AppRecord;
 import io.benwiegand.projection.geargrinder.projection.ui.task.ProjectionTaskManager;
+import io.benwiegand.projection.geargrinder.settings.SettingsManager;
 import io.benwiegand.projection.geargrinder.thread.ResourceLoaderThread;
 
 public class MediaControlsWidget {
@@ -58,7 +59,7 @@ public class MediaControlsWidget {
 
     private final Deque<SessionWrapper> orderedMediaSessions = new LinkedList<>();
 
-    public MediaControlsWidget(View root, Handler handler, ProjectionTaskManager taskManager, Supplier<Optional<PackageService.ServiceBinder>> getPackageBinder) {
+    public MediaControlsWidget(View root, Handler handler, ProjectionTaskManager taskManager, Supplier<Optional<PackageService.ServiceBinder>> getPackageBinder, SettingsManager settingsManager) {
         context = root.getContext();
         this.root = root;
         this.handler = handler;
@@ -69,6 +70,12 @@ public class MediaControlsWidget {
 
         notificationListenerComponent = new ComponentName(context, NotificationService.class);
         mediaSessionManager = context.getSystemService(MediaSessionManager.class);
+
+        if (!settingsManager.isShowMediaControlsEnabled()) {
+            hide();
+            return;
+        }
+
         try {
             mediaSessionManager.addOnActiveSessionsChangedListener(this::onActiveMediaSessionsChanged, notificationListenerComponent, handler);
             onActiveMediaSessionsChanged(mediaSessionManager.getActiveSessions(notificationListenerComponent));

@@ -79,6 +79,26 @@ public class SettingsManager {
         return getBool(R.string.key_phone_audio_capture, R.string.phone_audio_capture_default);
     }
 
+    public boolean isPopupNotificationsEnabled() {
+        return getBool(R.string.key_popup_notifications, R.string.popup_notifications_default);
+    }
+
+    public int getPopupNotificationDuration() {
+        return castInt(R.string.key_popup_notification_duration, R.string.popup_notification_duration_default);
+    }
+
+    public boolean isNotificationDrawerEnabled() {
+        return getBool(R.string.key_notification_drawer, R.string.notification_drawer_default);
+    }
+
+    public boolean isShowMediaControlsEnabled() {
+        return getBool(R.string.key_show_media_controls, R.string.show_media_controls_default);
+    }
+
+    public boolean isShowBatteryPercentageEnabled() {
+        return getBool(R.string.key_show_battery_percentage, R.string.show_battery_percentage_default);
+    }
+
     public boolean useImportedPhoneKeys() {
         return getBool(R.string.key_use_imported_phone_keys, R.string.use_imported_keys_default);
     }

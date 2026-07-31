@@ -30,6 +30,12 @@
             app:isPreferenceVisible="false"
             />
 
+        <Preference
+            android:title="@string/projection_ui_pref_screen_button"
+            app:iconSpaceReserved="false"
+            android:fragment="io.benwiegand.projection.geargrinder.settings.ui.fragment.ProjectionUiPreferenceFragment"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -35,6 +35,14 @@
         <item>remote submix (requires root or Shizuku)</item>
     </string-array>
 
+    <string-array name="popup_notification_duration_entries">
+        <item>5 seconds</item>
+        <item>10 seconds</item>
+        <item>20 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+    </string-array>
+
 
     <string translatable="false" name="privilege_mode_no_root">no_root</string>
     <string translatable="false" name="privilege_mode_shizuku">shizuku</string>
@@ -126,6 +134,36 @@
     <string translatable="false" name="allow_virtual_activity_launcher_default">true</string>
 
 
+    <string translatable="false" name="popup_notifications_default">true</string>
+
+
+    <string translatable="false" name="popup_notification_duration_5_sec">5</string>
+    <string translatable="false" name="popup_notification_duration_10_sec">10</string>
+    <string translatable="false" name="popup_notification_duration_20_sec">20</string>
+    <string translatable="false" name="popup_notification_duration_30_sec">30</string>
+    <string translatable="false" name="popup_notification_duration_60_sec">60</string>
+    <string translatable="false" name="popup_notification_duration_default">@string/popup_notification_duration_10_sec</string>
+
+    <string-array translatable="false" name="popup_notification_duration_values">
+        <item>@string/popup_notification_duration_5_sec</item>
+        <item>@string/popup_notification_duration_10_sec</item>
+        <item>@string/popup_notification_duration_20_sec</item>
+        <item>@string/popup_notification_duration_30_sec</item>
+        <item>@string/popup_notification_duration_60_sec</item>
+    </string-array>
+
+
+    <string translatable="false" name="notification_drawer_default">true</string>
+
+
+    <string translatable="false" name="show_media_controls_default">true</string>
+
+
+    <string translatable="false" name="show_battery_percentage_default">true</string>
+
+
+    <!-- keys -->
+
     <string translatable="false" name="key_privilege_mode">privilege_mode</string>
     <string translatable="false" name="key_operational_mode">operational_mode</string>
 
@@ -148,6 +186,13 @@
     <string translatable="false" name="key_keep_screen_awake">keep_screen_awake</string>
 
     <string translatable="false" name="key_allow_virtual_activity_launcher">allow_virtual_activity_launcher</string>
+
+    <string translatable="false" name="key_popup_notifications">popup_notifications</string>
+    <string translatable="false" name="key_popup_notification_duration">popup_notification_duration</string>
+    <string translatable="false" name="key_notification_drawer">notification_drawer</string>
+
+    <string translatable="false" name="key_show_media_controls">show_media_controls</string>
+    <string translatable="false" name="key_show_battery_percentage">show_battery_percentage</string>
 
 
     <!-- not in user settings -->

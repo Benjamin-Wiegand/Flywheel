@@ -34,6 +34,14 @@
             app:summary="@string/notification_drawer_pref_summary"
             />
 
+        <io.benwiegand.projection.geargrinder.settings.MaterialSwitchPreference
+            app:key="@string/key_pause_media_during_notification_tts"
+            app:iconSpaceReserved="false"
+            app:title="@string/pause_media_during_notification_tts_pref_name"
+            app:defaultValue="@string/pause_media_during_notification_tts_default"
+            app:summary="@string/pause_media_during_notification_tts_pref_summary"
+            />
+
     </PreferenceCategory>
 
     <PreferenceCategory

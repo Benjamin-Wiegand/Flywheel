@@ -91,6 +91,10 @@ public class SettingsManager {
         return getBool(R.string.key_notification_drawer, R.string.notification_drawer_default);
     }
 
+    public boolean isPauseMediaDuringNotificationTTSEnabled() {
+        return getBool(R.string.key_pause_media_during_notification_tts, R.string.pause_media_during_notification_tts_default);
+    }
+
     public boolean isShowMediaControlsEnabled() {
         return getBool(R.string.key_show_media_controls, R.string.show_media_controls_default);
     }

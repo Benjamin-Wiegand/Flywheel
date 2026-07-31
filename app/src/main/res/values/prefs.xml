@@ -156,6 +156,9 @@
     <string translatable="false" name="notification_drawer_default">true</string>
 
 
+    <string translatable="false" name="pause_media_during_notification_tts_default">true</string>
+
+
     <string translatable="false" name="show_media_controls_default">true</string>
 
 
@@ -190,6 +193,7 @@
     <string translatable="false" name="key_popup_notifications">popup_notifications</string>
     <string translatable="false" name="key_popup_notification_duration">popup_notification_duration</string>
     <string translatable="false" name="key_notification_drawer">notification_drawer</string>
+    <string translatable="false" name="key_pause_media_during_notification_tts">pause_media_during_notification_tts</string>
 
     <string translatable="false" name="key_show_media_controls">show_media_controls</string>
     <string translatable="false" name="key_show_battery_percentage">show_battery_percentage</string>

@@ -97,7 +97,9 @@ public class NotificationDisplay implements NotificationService.NotificationList
         notificationRecycler.setLayoutManager(new LinearLayoutManager(context));
 
         AudioManager audioManager = context.getSystemService(AudioManager.class);
-        AudioFocusRequest ttsAudioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+        int ttsFocusGainType = settingsManager.isPauseMediaDuringNotificationTTSEnabled() ?
+                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE : AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+        AudioFocusRequest ttsAudioFocusRequest = new AudioFocusRequest.Builder(ttsFocusGainType)
                 .build();
 
         tts = new TextToSpeech(context, this::onTTSInit);

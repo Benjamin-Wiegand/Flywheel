@@ -171,6 +171,8 @@
     <string name="popup_notification_duration_pref_name">Popup notification duration</string>
     <string name="notification_drawer_pref_name">Notification drawer</string>
     <string name="notification_drawer_pref_summary">view and read aloud missed notifications</string>
+    <string name="pause_media_during_notification_tts_pref_name">Pause media while reading notifications</string>
+    <string name="pause_media_during_notification_tts_pref_summary">pause instead of ducking when reading notifications aloud</string>
     <string name="pref_category_dock">dock</string>
     <string name="show_media_controls_pref_name">Show media controls</string>
     <string name="show_media_controls_pref_summary">requires notification listening permission</string>

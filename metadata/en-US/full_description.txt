@@ -1,4 +1,4 @@
-Flywheel is a re-implementation of Android Auto, intended for users of de-googled phones, and compatible with some existing Android Auto headunits. Flywheel allows you to connect your phone to your car and enjoy integrations similar to those of Android Auto, without needing the proprietary Android Auto app or any associated Google services.
+Flywheel is a re-implementation of Android Auto, intended for users of de-googled phones, and compatible with some existing Android Auto headunits. Flywheel allows you to connect your phone to your car and enjoy integrations similar to those of Android Auto.
 
 <ul>
     <li>Connect to your existing headunit over USB</li>
@@ -11,5 +11,6 @@ Flywheel is a re-implementation of Android Auto, intended for users of de-google
     <li>Read notifications aloud with text-to-speech</li>
 </ul>
 
-Flywheel currently requires elevated privileges in the form of either root or Shizuku.
+Note: In order to use Flywheel with official/OEM car headunits you usually need to extract keys and certificates from the proprietary Android Auto app. This is not the case for certain FOSS headunit implementations like OpenAuto and Headunit Reloaded.
 
+Flywheel currently also requires elevated privileges in the form of either root or Shizuku.

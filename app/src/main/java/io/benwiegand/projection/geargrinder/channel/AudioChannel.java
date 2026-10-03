@@ -23,7 +23,7 @@ import io.benwiegand.projection.libprivd.audio.AudioCaptureResult;
 public class AudioChannel extends AVChannel<AudioPreset> {
     private static final String TAG = AudioChannel.class.getSimpleName();
 
-    private static final boolean LOG_FRAME_DEBUG = false;
+    private static final boolean LOG_FRAME_DEBUG = true;
 
     private static final int AUDIO_BUFFER_RESERVED = COMMAND_ID_LENGTH + 8; // command + 64-bit timestamp
     private static final int TRAILING_SILENCE_BUFFERS = 2;    // stop sending silence after this many silent buffers
@@ -107,6 +107,12 @@ public class AudioChannel extends AVChannel<AudioPreset> {
     }
 
     @Override
+    protected void onAck() {
+        Log.d(TAG, "audio ack");
+        super.onAck();
+    }
+
+    @Override
     protected void avLoop(Supplier<Boolean> runCondition) {
         Log.i(TAG, "audio loop start");
         int silenceBuffers = 0;
@@ -147,7 +153,9 @@ public class AudioChannel extends AVChannel<AudioPreset> {
 
                 audioCapture.nextBuffer(result, buffer, AUDIO_BUFFER_RESERVED, buffer.length - AUDIO_BUFFER_RESERVED);
                 switch (result.error) {
-                    case NO_ERROR -> { }
+                    case NO_ERROR -> {
+                        if (LOG_FRAME_DEBUG) Log.d(TAG, "no error: " + result.length);
+                    }
                     case TRY_AGAIN -> {
                         // TODO: calculate and wait buffer time
                         if (LOG_FRAME_DEBUG) Log.w(TAG, "try again");

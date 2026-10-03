@@ -172,10 +172,10 @@ public abstract class AVChannel<T> implements MessageListener {
         }
 
         maxOutstandingAcks = response.maxOutstandingAck();
+        Log.w(TAG, "maxOutstandingAcks = " + maxOutstandingAcks);
         if (maxOutstandingAcks > MAX_OUTSTANDING_ACK_LIMIT) {
-            // some headunits return excessive numbers for this which causes latency issues
-            Log.w(TAG, "limiting maxOutstandingAcks from " + maxOutstandingAcks + " to " + MAX_OUTSTANDING_ACK_LIMIT);
-            maxOutstandingAcks = MAX_OUTSTANDING_ACK_LIMIT;
+            // testing removing this
+            Log.w(TAG, "not limiting maxOutstandingAcks!");
         }
 
         updatePresets(response.acceptedPresets());

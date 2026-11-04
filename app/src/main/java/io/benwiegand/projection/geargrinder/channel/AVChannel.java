@@ -7,6 +7,7 @@ import static io.benwiegand.projection.geargrinder.protocol.AAConstants.AV_CMD_S
 import static io.benwiegand.projection.geargrinder.protocol.AAConstants.AV_CMD_START;
 import static io.benwiegand.projection.geargrinder.protocol.AAConstants.AV_CMD_STOP;
 import static io.benwiegand.projection.geargrinder.protocol.AAConstants.AV_CMD_VIDEO_FOCUSED;
+import static io.benwiegand.projection.geargrinder.protocol.AAConstants.AV_CMD_UPDATE_UI_CONFIG_REQUEST;
 import static io.benwiegand.projection.geargrinder.protocol.AAConstants.CMD_CHANNEL_OPEN_REQUEST;
 import static io.benwiegand.projection.geargrinder.protocol.AAConstants.CMD_CHANNEL_OPEN_RESPONSE;
 import static io.benwiegand.projection.geargrinder.util.ByteUtil.hexDump;
@@ -186,6 +187,10 @@ public abstract class AVChannel<T> implements MessageListener {
         assert false;
     }
 
+    protected void onUiConfigRequest(byte[] buffer, int offset, int length) {
+        Log.w(TAG, "UI config request received on non-video AV channel");
+    }
+
     protected abstract void updatePresets(int[] acceptedPresets);
     protected abstract void avLoop(Supplier<Boolean> runCondition);
 
@@ -247,6 +252,10 @@ public abstract class AVChannel<T> implements MessageListener {
                 }
 
                 onVideoFocusIndication(indication);
+            }
+            case AV_CMD_UPDATE_UI_CONFIG_REQUEST -> {
+                onUiConfigRequest(buffer, payloadOffset + COMMAND_ID_LENGTH,
+                        payloadLength - COMMAND_ID_LENGTH);
             }
 
             default -> {

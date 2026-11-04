@@ -36,6 +36,9 @@ public class AAConstants {
     public static final int AV_CMD_VIDEO_FOCUS_REQUEST = 0x8007;
     public static final int AV_CMD_VIDEO_FOCUSED = 0x8008;
 
+    public static final int AV_CMD_UPDATE_UI_CONFIG_REQUEST = 0x8009;
+    public static final int AV_CMD_UPDATE_UI_CONFIG_REPLY = 0x800A;
+
     // input channel messages
     public static final int INPUT_CMD_EVENT = 0x8001;
     public static final int INPUT_CMD_BINDING_REQUEST = 0x8002;

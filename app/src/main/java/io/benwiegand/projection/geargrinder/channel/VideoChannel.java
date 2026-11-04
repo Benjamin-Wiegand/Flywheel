@@ -61,6 +61,21 @@ public class VideoChannel extends AVChannel<VideoPreset> {
     }
 
     @Override
+    protected void onUiConfigRequest(byte[] buffer, int offset, int length) {
+        if (offset < 0 || length < 0 || offset > buffer.length || length > buffer.length - offset) {
+            Log.e(TAG, "malformed UI config update request");
+            return;
+        }
+
+        // Both messages carry UI configuration data in protobuf field 1.
+        // Echo the payload to acknowledge head units that require this reply.
+        // Applying configuration to Flywheel's UI is not implemented yet.
+        byte[] reply = Arrays.copyOfRange(buffer, offset, offset + length);
+        Log.i(TAG, "replying to UI config update (" + reply.length + " bytes)");
+        mb.sendMessage(mediaParams, AV_CMD_UPDATE_UI_CONFIG_REPLY, reply);
+    }
+
+    @Override
     protected void updatePresets(int[] acceptedPresets) {
         // TODO: presets in the metadata can be null
 
